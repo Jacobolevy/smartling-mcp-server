@@ -4,7 +4,7 @@ A complete **Model Context Protocol (MCP)** server for **Smartling** translation
 
 ## ✨ Features
 
-- 🔧 **71 Translation Tools** - Complete Smartling API coverage
+- 🔧 **74 Translation Tools** - Complete Smartling API coverage
 - 🤖 **MCP Compatible** - Works with Claude, Cursor, and other MCP clients  
 - 🚀 **Easy Installation** - Simple setup script
 - 🔒 **Secure** - Your credentials stay local
@@ -48,7 +48,7 @@ export SMARTLING_BASE_URL="https://api.smartling.com"
 # Test the installation
 npm test
 
-# Count available tools (should show 71)
+# Count available tools (should show 74)
 npm run count-tools
 ```
 

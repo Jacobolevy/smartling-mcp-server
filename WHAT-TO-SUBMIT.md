@@ -15,7 +15,7 @@ This package is designed for:
 ### 🔧 Core Server Files
 ```
 bin/
-├── mcp-simple.js           # Main MCP server (71 tools) ⭐
+├── mcp-simple.js           # Main MCP server (74 tools) ⭐
 ├── mcp-server.js           # Basic server (9 tools)
 └── smartling-mcp.js        # CLI wrapper
 

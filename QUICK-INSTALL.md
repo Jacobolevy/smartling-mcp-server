@@ -1,6 +1,6 @@
 # ⚡ Quick Installation - Smartling MCP Server
 
-Get up and running with the Smartling MCP Server in **under 2 minutes** with **all 71 tools**.
+Get up and running with the Smartling MCP Server in **under 2 minutes** with **all 74 tools**.
 
 ## 🚀 Quick Local Install
 
@@ -62,13 +62,13 @@ chmod +x setup.sh
 # Test the server
 npm test
 
-# Count tools (should show 71)
+# Count tools (should show 74)
 npm run count-tools
 ```
 
 ## 🛠️ What You Get
 
-**71 Smartling tools** including:
+**74 Smartling tools** including:
 - String search, tagging, and management
 - File operations (upload/download)
 - Job and workflow management  

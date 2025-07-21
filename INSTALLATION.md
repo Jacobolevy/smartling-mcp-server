@@ -140,10 +140,10 @@ SMARTLING_BASE_URL=https://api.smartling.com
 3. **Count available tools**:
    ```bash
    npm run count-tools
-   # Should show: 71
+   # Should show: 74
    ```
 
-## 🛠️ Available Tools (71 total)
+## 🛠️ Available Tools (74 total)
 
 The server provides complete Smartling API coverage with these tool categories:
 
