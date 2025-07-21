@@ -1,0 +1,14 @@
+{
+    "window.commandCenter": true,
+    "mcp.servers": {
+        "smartling": {
+            "command": "node",
+            "args": ["/Users/jacobol/Downloads/smartling-mcp-server-main/bin/mcp-simple.js"],
+            "env": {
+                "SMARTLING_USER_IDENTIFIER": "vjwwgsqgeogfkqtmntznqhqxaslfwx",
+                "SMARTLING_USER_SECRET": "s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825",
+                "SMARTLING_BASE_URL": "https://api.smartling.com"
+            }
+        }
+    }
+}

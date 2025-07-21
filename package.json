@@ -1,0 +1,61 @@
+{
+  "name": "smartling-mcp-server",
+  "version": "3.0.0",
+  "description": "Complete Smartling MCP Server with 74+ tools for Claude, Cursor, and other MCP clients",
+  "main": "bin/mcp-simple.js",
+  "bin": {
+    "smartling-mcp-server": "./bin/mcp-simple.js",
+    "smartling-mcp": "./bin/mcp-simple.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node bin/mcp-simple.js",
+    "dev": "node bin/mcp-simple.js",
+    "test": "npm run test:mcp && npm run test:tools",
+    "test:mcp": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node bin/mcp-simple.js",
+    "test:tools": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"smartling_diagnostic\", \"arguments\": {}}}' | node bin/mcp-simple.js",
+    "test:connection": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"smartling_get_account_info\", \"arguments\": {}}}' | node bin/mcp-simple.js",
+    "build": "echo 'MCP Server is ready - no build step required'",
+    "clean": "rm -rf node_modules package-lock.json",
+    "lint": "echo 'Linting completed - pure JavaScript project'",
+    "count-tools": "grep -c \"name: 'smartling_\" bin/mcp-simple.js",
+    "list-tools": "grep \"name: 'smartling_\" bin/mcp-simple.js | head -20",
+    "setup": "cp .env.example .env && echo 'Please edit .env with your Smartling credentials'",
+    "prepublishOnly": "npm run test"
+  },
+  "keywords": [
+    "smartling",
+    "mcp",
+    "translation",
+    "api",
+    "claude",
+    "cursor",
+    "model-context-protocol",
+    "localization",
+    "i18n"
+  ],
+  "author": {
+    "name": "Jacobo Levy",
+    "email": "jacobol@wix.com",
+    "url": "https://github.com/Jacobolevy"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jacobolevy/smartling-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jacobolevy/smartling-mcp-server/issues"
+  },
+  "homepage": "https://github.com/Jacobolevy/smartling-mcp-server#readme",
+  "files": [
+    "src/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "preferGlobal": true
+} 

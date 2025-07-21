@@ -1,0 +1,53 @@
+# Development files
+api/
+.env*
+.git/
+.github/
+node_modules/
+test/
+
+# Deployment specific
+vercel.json
+fly.toml
+render.yaml
+railway.json
+Dockerfile
+deploy-vercel.sh
+
+# Documentation
+examples/
+docs/
+*.md
+!README.md
+
+# Config files
+.eslintrc*
+.prettierrc*
+tsconfig.json
+*.log
+*.tmp
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+dist/
+build/
+coverage/
+
+# Backup files
+*~
+*.bak
+*.backup 

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: smartling-mcp-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node api/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SMARTLING_USER_IDENTIFIER
+        value: vjwwgsqgeogfkqtmntznqhqxaslfwx
+      - key: SMARTLING_USER_SECRET
+        value: s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825
+      - key: SMARTLING_BASE_URL
+        value: https://api.smartling.com
+    healthCheckPath: / 
