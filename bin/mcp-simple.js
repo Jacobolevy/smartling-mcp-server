@@ -3575,16 +3575,8 @@ class SmartlingMCPServer {
 
   async handleMessage(message) {
     try {
-      // DEBUG: Log incoming message for troubleshooting
-      process.stderr.write(`DEBUG: Received message: ${message}\n`);
-      
       const parsed = JSON.parse(message);
-      process.stderr.write(`DEBUG: Parsed JSON: ${JSON.stringify(parsed)}\n`);
-      
       const { jsonrpc, id, method, params } = parsed;
-      
-      // DEBUG: Log extracted fields
-      process.stderr.write(`DEBUG: jsonrpc=${jsonrpc}, id=${id}, method=${method}\n`);
 
       if (jsonrpc !== '2.0') {
         this.sendError('Invalid JSON-RPC version', id);
