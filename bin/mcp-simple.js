@@ -3601,10 +3601,28 @@ class SmartlingMCPServer {
         case 'tools/call':
           await this.handleCallTool(id, params);
           break;
+        case 'resources/list':
+          // Claude Desktop expects this method - return empty resources
+          this.send({
+            jsonrpc: '2.0',
+            id: id,
+            result: { resources: [] }
+          });
+          break;
+        case 'prompts/list':
+          // Claude Desktop expects this method - return empty prompts
+          this.send({
+            jsonrpc: '2.0',
+            id: id,
+            result: { prompts: [] }
+          });
+          break;
         default:
           this.sendError(`Unknown method: ${method}`, id);
       }
     } catch (error) {
+      process.stderr.write(`ERROR: Failed to parse message: ${error.message}\n`);
+      process.stderr.write(`ERROR: Raw message was: ${message}\n`);
       this.sendError(`Invalid JSON-RPC message: ${error.message}`);
     }
   }
@@ -3618,11 +3636,28 @@ class SmartlingMCPServer {
 
     rl.on('line', (line) => {
       if (line.trim()) {
-        this.handleMessage(line.trim());
+        try {
+          this.handleMessage(line.trim());
+        } catch (error) {
+          process.stderr.write(`CRITICAL ERROR in handleMessage: ${error.message}\n`);
+          process.stderr.write(`Stack: ${error.stack}\n`);
+        }
       }
     });
 
+    // Add error handlers to prevent crashes
+    process.on('uncaughtException', (error) => {
+      process.stderr.write(`UNCAUGHT EXCEPTION: ${error.message}\n`);
+      process.stderr.write(`Stack: ${error.stack}\n`);
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      process.stderr.write(`UNHANDLED REJECTION: ${reason}\n`);
+      process.stderr.write(`Promise: ${promise}\n`);
+    });
+
     process.stderr.write('Smartling MCP Server started (simplified)\n');
+    process.stderr.write('Server ready for JSON-RPC requests\n');
   }
 }
 
