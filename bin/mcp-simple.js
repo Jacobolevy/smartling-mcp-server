@@ -3605,9 +3605,16 @@ class SmartlingMCPServer {
           this.sendError(`Unknown method: ${method}`, id);
       }
     } catch (error) {
-      process.stderr.write(`ERROR: Failed to parse message: ${error.message}\n`);
-      process.stderr.write(`ERROR: Raw message was: ${message}\n`);
-      this.sendError(`Invalid JSON-RPC message: ${error.message}`);
+      // Try to send error response if we can determine an ID
+      let errorId = null;
+      try {
+        const partialParse = JSON.parse(message);
+        errorId = partialParse.id || null;
+      } catch (e) {
+        // If we can't parse at all, use null ID
+      }
+      
+      this.sendError(`Invalid JSON-RPC message: ${error.message}`, errorId);
     }
   }
 
