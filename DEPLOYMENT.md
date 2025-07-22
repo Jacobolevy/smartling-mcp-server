@@ -1,30 +1,30 @@
 # 🚀 Deployment Guide - Smartling MCP Server
 
-Esta guía te explica cómo hacer que tu servidor MCP de Smartling esté disponible via URL HTTP, sin necesidad de mantener carpetas locales.
+This guide explains how to make your Smartling MCP server available via HTTP URL, without needing to maintain local folders.
 
-## 🌐 **Opción 1: Vercel (Recomendado - Gratis)**
+## 🌐 **Option 1: Vercel (Recommended - Free)**
 
-### Pasos para deployment en Vercel:
+### Steps for Vercel deployment:
 
-1. **Subir a GitHub** (ver sección GitHub más abajo)
+1. **Upload to GitHub** (see GitHub section below)
 
-2. **Conectar con Vercel:**
-   - Ve a https://vercel.com
-   - Conecta tu cuenta de GitHub
-   - Importa el repositorio `smartling-mcp-server`
+2. **Connect with Vercel:**
+   - Go to https://vercel.com
+   - Connect your GitHub account
+   - Import the `smartling-mcp-server` repository
 
-3. **Configurar variables de entorno:**
+3. **Configure environment variables:**
    ```bash
-   SMARTLING_USER_IDENTIFIER=tu_user_identifier
-   SMARTLING_USER_SECRET=tu_user_secret
+   SMARTLING_USER_IDENTIFIER=your_user_identifier
+   SMARTLING_USER_SECRET=your_user_secret
    ```
 
-4. **Deploy automático:** ¡Listo! Tu URL será algo como:
+4. **Automatic deploy:** Ready! Your URL will be something like:
    ```
    https://smartling-mcp-server.vercel.app
    ```
 
-### Uso en Cursor con URL Vercel:
+### Usage in Cursor with Vercel URL:
 ```json
 {
   "mcp.servers": {
@@ -32,7 +32,7 @@ Esta guía te explica cómo hacer que tu servidor MCP de Smartling esté disponi
       "command": "curl",
       "args": [
         "-X", "POST",
-        "https://tu-app.vercel.app/execute/{tool}",
+        "https://your-app.vercel.app/execute/{tool}",
         "-H", "Content-Type: application/json",
         "-d", "{args}"
       ]
@@ -41,87 +41,87 @@ Esta guía te explica cómo hacer que tu servidor MCP de Smartling esté disponi
 }
 ```
 
-## 🚂 **Opción 2: Railway**
+## 🚂 **Option 2: Railway**
 
-1. **Fork el repo en GitHub**
-2. **Conectar con Railway:**
-   - Ve a https://railway.app
-   - Conecta GitHub
+1. **Fork the repo on GitHub**
+2. **Connect with Railway:**
+   - Go to https://railway.app
+   - Connect GitHub
    - Deploy from repo
-3. **Configurar variables:**
+3. **Configure variables:**
    ```bash
-   SMARTLING_USER_IDENTIFIER=tu_id
-   SMARTLING_USER_SECRET=tu_secret
+   SMARTLING_USER_IDENTIFIER=your_id
+   SMARTLING_USER_SECRET=your_secret
    PORT=3000
    ```
 
-## 🐳 **Opción 3: Docker (Cualquier hosting)**
+## 🐳 **Option 3: Docker (Any hosting)**
 
 ```bash
-# Build imagen
+# Build image
 docker build -t smartling-mcp-server .
 
-# Run contenedor
+# Run container
 docker run -p 3000:3000 \
-  -e SMARTLING_USER_IDENTIFIER=tu_id \
-  -e SMARTLING_USER_SECRET=tu_secret \
+  -e SMARTLING_USER_IDENTIFIER=your_id \
+  -e SMARTLING_USER_SECRET=your_secret \
   smartling-mcp-server
 ```
 
-### Deploy a Docker registries:
+### Deploy to Docker registries:
 - **Google Cloud Run**
 - **AWS ECS**
 - **Azure Container Instances**
 - **DigitalOcean Apps**
 
-## 🏠 **Opción 4: Hosting Tradicional**
+## 🏠 **Option 4: Traditional Hosting**
 
-Para cualquier VPS/hosting con Node.js:
+For any VPS/hosting with Node.js:
 
 ```bash
-# En tu servidor
-git clone https://github.com/tu-usuario/smartling-mcp-server.git
+# On your server
+git clone https://github.com/your-user/smartling-mcp-server.git
 cd smartling-mcp-server
 npm install
 npm run build
 
-# Configurar .env
-echo "SMARTLING_USER_IDENTIFIER=tu_id" > .env
-echo "SMARTLING_USER_SECRET=tu_secret" >> .env
+# Configure .env
+echo "SMARTLING_USER_IDENTIFIER=your_id" > .env
+echo "SMARTLING_USER_SECRET=your_secret" >> .env
 
-# Usar PM2 para mantenimiento
+# Use PM2 for maintenance
 npm install -g pm2
 pm2 start dist/http-server.js --name smartling-mcp
 pm2 startup
 pm2 save
 ```
 
-## 📋 **URLs y Endpoints Disponibles**
+## 📋 **Available URLs and Endpoints**
 
-Una vez deployado, tu API tendrá estos endpoints:
+Once deployed, your API will have these endpoints:
 
 ```bash
-# Documentación
-GET https://tu-url.com/
+# Documentation
+GET https://your-url.com/
 
 # Health check
-GET https://tu-url.com/health
+GET https://your-url.com/health
 
-# Lista de herramientas
-GET https://tu-url.com/tools
+# List tools
+GET https://your-url.com/tools
 
-# Ejecutar herramientas
-POST https://tu-url.com/execute/smartling_get_projects
-POST https://tu-url.com/execute/smartling_upload_file
-# ... todas las demás herramientas
+# Execute tools
+POST https://your-url.com/execute/smartling_get_projects
+POST https://your-url.com/execute/smartling_upload_file
+# ... all other tools
 
-# Ejecución en lote
-POST https://tu-url.com/batch
+# Batch execution
+POST https://your-url.com/batch
 ```
 
-## 🔧 **Configurar Cursor con API HTTP**
+## 🔧 **Configure Cursor with HTTP API**
 
-### Opción A: Via HTTP Client Custom
+### Option A: Via Custom HTTP Client
 ```json
 {
   "mcp.servers": {
@@ -129,15 +129,15 @@ POST https://tu-url.com/batch
       "command": "node",
       "args": ["/path/to/http-client.js"],
       "env": {
-        "SMARTLING_API_URL": "https://tu-app.vercel.app"
+        "SMARTLING_API_URL": "https://your-app.vercel.app"
       }
     }
   }
 }
 ```
 
-### Opción B: Wrapper Script
-Crear un script que haga llamadas HTTP:
+### Option B: Wrapper Script
+Create a script that makes HTTP calls:
 
 ```javascript
 // http-wrapper.js
@@ -153,50 +153,50 @@ async function callTool(toolName, args) {
 }
 ```
 
-## 🔄 **Ventajas del Deployment HTTP**
+## 🔄 **Advantages of HTTP Deployment**
 
-### ✅ **Para ti:**
-- ❌ **No necesitas mantener la carpeta local**
-- ❌ **No necesitas que tu ordenador esté encendido**
-- ✅ **Disponible 24/7 desde cualquier lugar**
-- ✅ **Actualizaciones automáticas via GitHub**
-- ✅ **Backups automáticos en la nube**
+### ✅ **For you:**
+- ❌ **No need to maintain local folder**
+- ❌ **No need to keep your computer on**
+- ✅ **Available 24/7 from anywhere**
+- ✅ **Automatic updates via GitHub**
+- ✅ **Automatic cloud backups**
 
-### ✅ **Para otros usuarios:**
-- ❌ **No necesitan instalar nada local**
-- ❌ **No necesitan Node.js**
-- ❌ **No necesitan compilar código**
-- ✅ **Solo configurar la URL en Cursor**
-- ✅ **Siempre la última versión**
+### ✅ **For other users:**
+- ❌ **No need to install anything locally**
+- ❌ **No need for Node.js**
+- ❌ **No need to compile code**
+- ✅ **Just configure the URL in Cursor**
+- ✅ **Always the latest version**
 
-## 🔐 **Seguridad**
+## 🔐 **Security**
 
-### Variables de entorno seguras:
-- ✅ Credenciales nunca en el código
-- ✅ Variables cifradas en plataformas de hosting
-- ✅ HTTPS automático
-- ✅ CORS configurado correctamente
+### Secure environment variables:
+- ✅ Credentials never in code
+- ✅ Encrypted variables on hosting platforms
+- ✅ Automatic HTTPS
+- ✅ CORS properly configured
 
-### Para uso compartido:
+### For shared usage:
 ```bash
-# Cada usuario puede usar SUS credenciales via headers
-POST https://tu-app.com/execute/tool
+# Each user can use THEIR credentials via headers
+POST https://your-app.com/execute/tool
 Headers:
-  X-Smartling-User-ID: su_user_id
-  X-Smartling-Secret: su_secret
+  X-Smartling-User-ID: their_user_id
+  X-Smartling-Secret: their_secret
 ```
 
-## 📊 **Costos**
+## 📊 **Costs**
 
-- **Vercel:** Gratis hasta 100GB bandwidth/mes
-- **Railway:** Gratis $5/mes de crédito
-- **Docker hosting:** Desde $5-10/mes
-- **VPS básico:** Desde $3-5/mes
+- **Vercel:** Free up to 100GB bandwidth/month
+- **Railway:** Free $5/month credit
+- **Docker hosting:** From $5-10/month
+- **Basic VPS:** From $3-5/month
 
-## 🎯 **Recomendación Final**
+## 🎯 **Final Recommendation**
 
-**Para uso personal:** Vercel (gratis, fácil)
-**Para equipos:** Railway o Docker en VPS
-**Para empresas:** Docker en infraestructura propia
+**For personal use:** Vercel (free, easy)
+**For teams:** Railway or Docker on VPS
+**For enterprises:** Docker on own infrastructure
 
-¡Con cualquiera de estas opciones, nunca más necesitarás mantener archivos locales! 🌟 
+With any of these options, you'll never need to maintain local files again! 🌟 
