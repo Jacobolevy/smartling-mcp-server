@@ -1,69 +1,96 @@
-# 🌟 Smartling MCP Server
+# Smartling MCP Server
 
-A complete **Model Context Protocol (MCP)** server for **Smartling** translation services. Works seamlessly with **Claude Desktop**, **Cursor**, and other MCP-compatible clients.
+A comprehensive Model Context Protocol (MCP) server that provides **74 Smartling tools** for translation management in Claude Desktop, Cursor, and other MCP-compatible applications.
 
-## ✨ Features
+## 🚀 Quick Installation
 
-- 🔧 **74 Translation Tools** - Complete Smartling API coverage
-- 🤖 **MCP Compatible** - Works with Claude, Cursor, and other MCP clients  
-- 🚀 **Easy Installation** - Simple setup script
-- 🔒 **Secure** - Your credentials stay local
-- 🌍 **No Dependencies** - Pure Node.js implementation
-- ⚡ **Fast Setup** - Ready in under 2 minutes
+### Option 1: Auto-Installer (Recommended)
 
-## 📦 Installation
-
+**macOS/Linux:**
 ```bash
-# Download the project
-git clone https://github.com/Jacobolevy/smartling-mcp-server.git
-cd smartling-mcp-server
-
-# Quick setup
-chmod +x setup.sh
-./setup.sh
+cd smartling-mcp-server-main
+./install-mcp.sh
 ```
 
-## 🚀 Quick Start
-
-### 1. Get Your Smartling Credentials
-
-1. Log in to [Smartling Dashboard](https://dashboard.smartling.com)
-2. Go to **Account Settings** → **API**
-3. Copy your **User Identifier** and **User Secret**
-
-### 2. Set Environment Variables
-
-```bash
-# Required credentials
-export SMARTLING_USER_IDENTIFIER="your_user_identifier_here"
-export SMARTLING_USER_SECRET="your_user_secret_here"
-
-# Optional: Custom API base URL (defaults to https://api.smartling.com)
-export SMARTLING_BASE_URL="https://api.smartling.com"
+**Windows:**
+```cmd
+cd smartling-mcp-server-main
+install-mcp.bat
 ```
 
-### 3. Test Installation
+The auto-installer automatically:
+- ✅ Detects your installation directory
+- ✅ Configures Cursor and Claude Desktop
+- ✅ Installs dependencies
+- ✅ Creates config files with correct paths
+
+### Option 2: One-Command Installation
 
 ```bash
-# Test the installation
-npm test
-
-# Count available tools (should show 74)
-npm run count-tools
+curl -L https://github.com/Jacobolevy/smartling-mcp-server/archive/main.zip -o smartling-mcp.zip && \
+unzip smartling-mcp.zip && \
+cd smartling-mcp-server-main && \
+./install-mcp.sh
 ```
 
-### 4. Configure Your MCP Client
+### After Installation
 
-Add to your MCP client configuration:
+1. **Add your Smartling credentials** to the generated config files
+2. **Restart** Claude Desktop or Cursor
+3. **Verify**: Ask "How many Smartling tools do you have?" → Should show **74 tools**
 
-#### For Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+## 🔑 Smartling Credentials
+
+Get your credentials from [Smartling Dashboard → Settings → API](https://dashboard.smartling.com/settings/api):
+- **User Identifier**: Your API user identifier
+- **User Secret**: Your API secret key
+
+## 📋 What's Included
+
+### 74 Comprehensive Smartling Tools:
+
+**Core Functions (20 tools)**
+- Project management (list, details, create)
+- File operations (upload, download, status, delete)
+- String management (search, translate, tag)
+- Locale management
+
+**Translation Workflows (15 tools)**
+- Job management (create, authorize, close)
+- Translation status tracking
+- Workflow management
+- Vendor assignment
+
+**Quality & Analysis (12 tools)**
+- Quality checks and reporting
+- Translation statistics
+- Progress tracking
+- Analytics
+
+**Advanced Features (15 tools)**
+- Glossary management
+- Context and visual context
+- Webhook configuration
+- Batch operations
+
+**Management & Admin (12 tools)**
+- User and people management
+- Reports and estimates
+- Issue tracking
+- Diagnostic tools
+
+## 🔧 Manual Configuration
+
+If you prefer manual setup, see [INSTALLATION.md](INSTALLATION.md) for detailed instructions.
+
+**Example Configuration:**
 
 ```json
 {
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["/full/path/to/smartling-mcp-server-main/bin/mcp-simple.js"],
+      "args": ["/path/to/smartling-mcp-server/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "your_user_identifier",
         "SMARTLING_USER_SECRET": "your_user_secret",
@@ -74,154 +101,54 @@ Add to your MCP client configuration:
 }
 ```
 
-#### For Cursor (`~/.cursor/mcp.json`):
+## ✅ Verification
 
-```json
-{
-  "mcpServers": {
-    "smartling": {
-      "command": "node",
-      "args": ["/full/path/to/smartling-mcp-server-main/bin/mcp-simple.js"],
-      "env": {
-        "SMARTLING_USER_IDENTIFIER": "your_user_identifier",
-        "SMARTLING_USER_SECRET": "your_user_secret",
-        "SMARTLING_BASE_URL": "https://api.smartling.com"
-      }
-    }
-  }
-}
-```
-
-## 🛠 Available Tools
-
-### 📁 Project Management
-- `smartling_list_projects` - List all projects
-- `smartling_get_project_details` - Get project information
-- `smartling_create_project` - Create new project
-
-### 📄 File Operations  
-- `smartling_upload_file` - Upload source files
-- `smartling_download_file` - Download translated files
-- `smartling_list_files` - List project files
-- `smartling_get_file_status` - Check file translation status
-- `smartling_delete_file` - Remove files
-
-### 💼 Job Management
-- `smartling_create_job` - Create translation jobs
-- `smartling_list_jobs` - List all jobs
-- `smartling_get_job_details` - Get job information
-- `smartling_update_job` - Modify existing jobs
-- `smartling_cancel_job` - Cancel jobs
-
-### 🏷 String Management
-- `smartling_get_strings` - Retrieve translatable strings
-- `smartling_update_string` - Modify string translations
-
-### 🔖 Tagging
-- `smartling_add_tags` - Tag strings and files
-- `smartling_remove_tags` - Remove tags
-- `smartling_list_tags` - List available tags
-
-### ✅ Quality Assurance
-- `smartling_run_quality_check` - Run QA checks
-- `smartling_get_quality_report` - Get QA reports
-
-### 📚 Glossary
-- `smartling_create_glossary` - Create glossaries
-- `smartling_list_glossaries` - List glossaries
-- `smartling_update_glossary` - Modify glossaries
-
-### 🔔 Webhooks
-- `smartling_create_webhook` - Set up webhooks
-- `smartling_list_webhooks` - List webhooks
-- `smartling_delete_webhook` - Remove webhooks
-
-## 🔧 CLI Options
+Test your installation:
 
 ```bash
-smartling-mcp-server [options]
+# Test server directly
+npm run test:mcp
 
-Options:
-  --help, -h     Show help message
-  --version, -v  Show version information  
-  --config       Show configuration status
-  --port PORT    Set custom port (default: 3000)
+# Count tools (should show 74)
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | node bin/mcp-simple.js | grep -o '"name":"[^"]*"' | wc -l
 ```
-
-## 🌐 API Endpoints
-
-When running, the server provides:
-
-- `GET /health` - Health check endpoint
-- `GET /tools` - List all available MCP tools
-- `POST /execute/{tool_name}` - Execute specific tools
-
-## 🔒 Security
-
-- **Local execution** - Your credentials never leave your machine
-- **HTTPS support** - Secure API communications
-- **Environment variables** - Credentials stored securely
-- **No data persistence** - No local data storage
 
 ## 🐛 Troubleshooting
 
-### Check Configuration
-```bash
-smartling-mcp-server --config
-```
+| Issue | Solution |
+|-------|----------|
+| "0 tools enabled" | Use auto-installer to fix paths |
+| "Could not attach to MCP server" | Check Node.js installation and run `npm install` |
+| "Invalid credentials" | Verify credentials at [Smartling API Settings](https://dashboard.smartling.com/settings/api) |
+| Still having issues? | Run auto-installer again or restart your computer |
 
-### Common Issues
+## 📚 Documentation
 
-**Authentication Error:**
-```bash
-# Verify your credentials are set
-echo $SMARTLING_USER_IDENTIFIER
-echo $SMARTLING_USER_SECRET
-```
+- **[Installation Guide](INSTALLATION.md)** - Complete setup instructions
+- **[Usage Examples](examples/usage-examples.md)** - How to use the tools
+- **[Contributing Guide](CONTRIBUTING.md)** - Development instructions
 
-**Port Already in Use:**
-```bash
-# Use a different port
-smartling-mcp-server --port 8080
-```
+## 🆕 Latest Updates
 
-**Permission Denied:**
-```bash
-# Install with proper permissions
-sudo npm install -g smartling-mcp-server
-```
+- **✅ Auto-installer scripts** for universal compatibility
+- **✅ 74 tools** (up from 9 in basic version)
+- **✅ Universal path detection** works on any system
+- **✅ Full Claude Desktop and Cursor support**
+- **✅ Robust error handling** and crash protection
 
-## 📖 Examples
+## 🔒 Security
 
-### Using with Claude Desktop
+- Keep your Smartling API credentials secure
+- Don't commit credentials to version control
+- Use environment variables in production
+- Regularly rotate your API keys
 
-Once configured, you can ask Claude:
+## 📞 Support
 
-> "List all my Smartling projects"
-
-> "Upload this file to project ABC123 for translation"
-
-> "Check the status of job XYZ"
-
-### Using with Cursor
-
-Configure the MCP server in Cursor to get translation assistance directly in your editor.
-
-## 🔗 Links
-
-- **GitHub Repository**: https://github.com/Jacobolevy/smartling-mcp-server
-- **Issues & Support**: https://github.com/Jacobolevy/smartling-mcp-server/issues
-- **Smartling API Docs**: https://help.smartling.com/hc/en-us/articles/360008030994
-- **MCP Specification**: https://modelcontextprotocol.io/
+- **Issues**: [GitHub Issues](https://github.com/Jacobolevy/smartling-mcp-server/issues)
+- **Documentation**: See `INSTALLATION.md` for detailed setup
+- **API Reference**: [Smartling API Documentation](https://developers.smartling.com/)
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions welcome! Please read our contributing guidelines and submit pull requests.
-
----
-
-**Made with ❤️ for the translation community**
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
