@@ -1267,13 +1267,15 @@ class SmartlingMCPServer {
     console.log(JSON.stringify(response));
   }
 
-  sendError(message, id = null) {
+  sendError(message, id) {
+    // Always send a valid id (string or number)
+    if (id === null || id === undefined) id = "unknown";
     const error = {
       jsonrpc: '2.0',
       id,
       error: {
-        code: -1,
-        message
+        code: -32000,
+        message: String(message)
       }
     };
     console.log(JSON.stringify(error));
@@ -3574,9 +3576,11 @@ class SmartlingMCPServer {
   }
 
   async handleMessage(message) {
+    let id = "unknown";
     try {
       const parsed = JSON.parse(message);
-      const { jsonrpc, id, method, params } = parsed;
+      id = parsed.id !== undefined && parsed.id !== null ? parsed.id : "unknown";
+      const { jsonrpc, method, params } = parsed;
 
       if (jsonrpc !== '2.0') {
         this.sendError('Invalid JSON-RPC version', id);
@@ -3594,27 +3598,23 @@ class SmartlingMCPServer {
           await this.handleCallTool(id, params);
           break;
         case 'resources/list':
-          // Claude Desktop expects this method - return empty resources
           this.sendResponse(id, { resources: [] });
           break;
         case 'prompts/list':
-          // Claude Desktop expects this method - return empty prompts
           this.sendResponse(id, { prompts: [] });
           break;
         default:
           this.sendError(`Unknown method: ${method}`, id);
       }
     } catch (error) {
-      // Try to send error response if we can determine an ID
-      let errorId = null;
+      // Try to extract id from the message, fallback to "unknown"
       try {
-        const partialParse = JSON.parse(message);
-        errorId = partialParse.id || null;
-      } catch (e) {
-        // If we can't parse at all, use null ID
-      }
-      
-      this.sendError(`Invalid JSON-RPC message: ${error.message}`, errorId);
+        const partial = JSON.parse(message);
+        if (partial && partial.id !== undefined && partial.id !== null) {
+          id = partial.id;
+        }
+      } catch (e) {}
+      this.sendError(`Invalid JSON-RPC message: ${error.message}`, id);
     }
   }
 
