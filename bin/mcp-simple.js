@@ -3603,19 +3603,11 @@ class SmartlingMCPServer {
           break;
         case 'resources/list':
           // Claude Desktop expects this method - return empty resources
-          this.send({
-            jsonrpc: '2.0',
-            id: id,
-            result: { resources: [] }
-          });
+          this.sendResponse(id, { resources: [] });
           break;
         case 'prompts/list':
           // Claude Desktop expects this method - return empty prompts
-          this.send({
-            jsonrpc: '2.0',
-            id: id,
-            result: { prompts: [] }
-          });
+          this.sendResponse(id, { prompts: [] });
           break;
         default:
           this.sendError(`Unknown method: ${method}`, id);
