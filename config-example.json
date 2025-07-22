@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "smartling": {
+      "command": "node",
+      "args": ["REPLACE_WITH_YOUR_PATH/smartling-mcp-server/bin/mcp-simple.js"],
+      "env": {
+        "SMARTLING_USER_IDENTIFIER": "REPLACE_WITH_YOUR_USER_IDENTIFIER",
+        "SMARTLING_USER_SECRET": "REPLACE_WITH_YOUR_USER_SECRET",
+        "SMARTLING_BASE_URL": "https://api.smartling.com"
+      }
+    }
+  }
+} 
