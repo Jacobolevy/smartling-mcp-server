@@ -80,7 +80,7 @@ cat > "$CLAUDE_CONFIG" << EOF
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["$INSTALL_DIR/bin/mcp-simple.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-batch-optimized.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_ID",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -103,7 +103,7 @@ const path = process.argv[2];
 // Smartling config to add/update
 const smartlingConfig = {
   "command": "node",
-  "args": [process.argv[3] + "/bin/mcp-simple.js"],
+        "args": [process.argv[3] + "/bin/mcp-batch-optimized.js"],
   "env": {
     "SMARTLING_USER_IDENTIFIER": process.argv[4],
     "SMARTLING_USER_SECRET": process.argv[5],

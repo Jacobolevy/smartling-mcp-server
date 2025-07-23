@@ -9,7 +9,7 @@
 const https = require('https');
 const readline = require('readline');
 
-const TIMEOUT_MS = 8000; // 8 seconds max per request
+const TIMEOUT_MS = 60000; // 60 seconds max per request (for batch operations)
 const SMARTLING_SERVER_URL = 'https://smartling-mcp.onrender.com';
 
 class RobustSmartlingMCPServer {
