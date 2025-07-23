@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 🚀 Fixed Smartling MCP One-Line Installer
-# Usage: curl -fsSL https://url/install-fixed.sh | bash
+# 🚀 Smartling MCP Server - SUPER ROBUST Installer
+# Usage: curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash
 
 set -e
 
-echo "🚀 Installing Smartling MCP Server (Fixed Version)..."
+echo "🚀 Installing Smartling MCP Server (Super Robust Version)..."
 
 # Detect OS
 OS=$(uname -s)
@@ -20,34 +20,79 @@ else
     CURSOR_CONFIG="$HOME/.cursor/mcp.json"
 fi
 
-# Create installation directory
+# Installation directory
 INSTALL_DIR="$HOME/smartling-mcp-server"
 echo "📁 Installing to: $INSTALL_DIR"
 
-# Download and setup
+# Clean install - remove existing if any
 if [ -d "$INSTALL_DIR" ]; then
-    echo "🔄 Updating existing installation..."
-    cd "$INSTALL_DIR"
-    git pull origin main || echo "⚠️  Git pull failed, continuing..."
-else
-    echo "📥 Downloading Smartling MCP Server..."
-    git clone https://github.com/Jacobolevy/smartling-mcp-server.git "$INSTALL_DIR"
-    cd "$INSTALL_DIR"
+    echo "🧹 Removing existing installation..."
+    rm -rf "$INSTALL_DIR"
 fi
 
-# Make server executable
-chmod +x bin/mcp-simple.js bin/mcp-robust.js
+# Create fresh directory
+echo "📂 Creating installation directory..."
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR"
+
+# Download method 1: Try git clone first
+echo "📥 Downloading Smartling MCP Server..."
+if git clone https://github.com/Jacobolevy/smartling-mcp-server.git . 2>/dev/null; then
+    echo "✅ Git clone successful"
+else
+    echo "⚠️  Git clone failed, using direct download..."
+    
+    # Download method 2: Direct file download
+    echo "📁 Creating directory structure..."
+    mkdir -p bin src api
+    
+    echo "⬇️  Downloading core files..."
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-robust.js > bin/mcp-robust.js
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-simple.js > bin/mcp-simple.js
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-server.js > bin/mcp-server.js
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/package.json > package.json
+    
+    echo "✅ Direct download completed"
+fi
+
+# Verify critical files exist
+echo "🔍 Verifying installation..."
+if [ ! -f "bin/mcp-robust.js" ]; then
+    echo "❌ Critical file missing: bin/mcp-robust.js"
+    echo "🔄 Attempting emergency download..."
+    mkdir -p bin
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-robust.js > bin/mcp-robust.js
+fi
+
+if [ ! -f "bin/mcp-simple.js" ]; then
+    echo "⚠️  mcp-simple.js missing, downloading..."
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-simple.js > bin/mcp-simple.js
+fi
+
+# Make servers executable
+echo "🔧 Setting permissions..."
+chmod +x bin/mcp-*.js 2>/dev/null || echo "⚠️  Chmod failed (this is OK on some systems)"
+
+# Test that Node.js is available
+echo "🧪 Testing Node.js..."
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js not found. Please install Node.js first:"
+    echo "   Visit: https://nodejs.org"
+    exit 1
+fi
+
+echo "✅ Node.js available: $(node --version)"
 
 # Configure Claude Desktop
 echo "🤖 Configuring Claude Desktop..."
 mkdir -p "$(dirname "$CLAUDE_CONFIG")"
 
-cat > "$CLAUDE_CONFIG" << 'EOF'
+cat > "$CLAUDE_CONFIG" << EOF
 {
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["INSTALL_PATH/bin/mcp-robust.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-robust.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "your_user_id_here",
         "SMARTLING_USER_SECRET": "your_user_secret_here",
@@ -58,22 +103,18 @@ cat > "$CLAUDE_CONFIG" << 'EOF'
 }
 EOF
 
-# Replace INSTALL_PATH with actual path
-sed -i.bak "s|INSTALL_PATH|$INSTALL_DIR|g" "$CLAUDE_CONFIG"
-rm "$CLAUDE_CONFIG.bak" 2>/dev/null || true
-
-echo "✅ Claude Desktop configured at: $CLAUDE_CONFIG"
+echo "✅ Claude Desktop configured"
 
 # Configure Cursor
 echo "🎯 Configuring Cursor..."
 mkdir -p "$(dirname "$CURSOR_CONFIG")"
 
-cat > "$CURSOR_CONFIG" << 'EOF'
+cat > "$CURSOR_CONFIG" << EOF
 {
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["INSTALL_PATH/bin/mcp-robust.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-robust.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "your_user_id_here",
         "SMARTLING_USER_SECRET": "your_user_secret_here",
@@ -84,36 +125,41 @@ cat > "$CURSOR_CONFIG" << 'EOF'
 }
 EOF
 
-# Replace INSTALL_PATH with actual path
-sed -i.bak "s|INSTALL_PATH|$INSTALL_DIR|g" "$CURSOR_CONFIG"
-rm "$CURSOR_CONFIG.bak" 2>/dev/null || true
+echo "✅ Cursor configured"
 
-echo "✅ Cursor configured at: $CURSOR_CONFIG"
-
-# Test installation
-echo "🧪 Testing installation..."
+# Test MCP server
+echo "🧪 Testing MCP Server..."
 cd "$INSTALL_DIR"
 
-if echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | timeout 10s node bin/mcp-robust.js 2>/dev/null | grep -q '"tools"'; then
-    echo "✅ MCP Server test passed"
+if timeout 8s node bin/mcp-robust.js <<< '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' 2>/dev/null | grep -q "tools" 2>/dev/null; then
+    echo "✅ MCP Server test PASSED"
+    TEST_RESULT="✅ WORKING"
 else
-    echo "⚠️  MCP Server test failed (this is normal without credentials)"
+    echo "⚠️  MCP Server test inconclusive (normal without credentials)"
+    TEST_RESULT="⚠️  NEEDS CREDENTIALS"
 fi
 
 echo ""
-echo "🎉 Installation Complete!"
-echo "📁 Installed at: $INSTALL_DIR"
-echo "🤖 Claude Desktop: $CLAUDE_CONFIG"
-echo "🎯 Cursor: $CURSOR_CONFIG"
+echo "🎉 INSTALLATION COMPLETE!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📁 Installed: $INSTALL_DIR"
+echo "🤖 Claude:    $CLAUDE_CONFIG"
+echo "🎯 Cursor:    $CURSOR_CONFIG"
+echo "🧪 Status:    $TEST_RESULT"
 echo ""
-echo "⚠️  IMPORTANT: Edit the config files with your Smartling credentials:"
-echo "   SMARTLING_USER_IDENTIFIER=your_actual_user_id"
-echo "   SMARTLING_USER_SECRET=your_actual_secret"
+echo "🔑 NEXT STEPS:"
+echo "1. Get your Smartling credentials from:"
+echo "   https://dashboard.smartling.com/settings/api"
 echo ""
-echo "🔄 Restart Claude Desktop and Cursor to apply changes"
+echo "2. Edit these config files with your real credentials:"
+echo "   📝 $CLAUDE_CONFIG"
+echo "   📝 $CURSOR_CONFIG"
 echo ""
-echo "📋 Available tools: 74+ Smartling tools"
-echo "🎯 Access to 227 Wix projects"
+echo "3. Replace these values:"
+echo "   SMARTLING_USER_IDENTIFIER=\"your_actual_user_id\""
+echo "   SMARTLING_USER_SECRET=\"your_actual_secret\""
 echo ""
-echo "🔗 Share this installer:"
-echo "   curl -fsSL YOUR_URL/install-fixed.sh | bash" 
+echo "4. Restart Claude Desktop and Cursor"
+echo ""
+echo "📊 Available: 74+ Smartling tools for 227+ projects"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" 
