@@ -228,10 +228,8 @@ class SmartlingHTTPSStreamingServer {
       const { toolName } = req.params;
       const args = req.body;
       
-      // Detect streaming format - default to SSE for Wix Chat compatibility
-      const acceptHeader = req.headers.accept || '';
-      const format = req.query.format || 
-                     (acceptHeader.includes('application/json') ? 'json' : 'sse');
+      // Force SSE format by default - only use JSON if explicitly requested
+      const format = req.query.format === 'json' ? 'json' : 'sse';
       
       // Use appropriate streaming response based on format
       const stream = format === 'json' 
@@ -305,10 +303,8 @@ class SmartlingHTTPSStreamingServer {
     this.app.post('/stream-batch', async (req: Request, res: Response) => {
       const { operations } = req.body;
       
-      // Detect streaming format
-      const acceptHeader = req.headers.accept || '';
-      const format = req.query.format || 
-                     (acceptHeader.includes('application/json') ? 'json' : 'sse');
+      // Force SSE format by default - only use JSON if explicitly requested
+      const format = req.query.format === 'json' ? 'json' : 'sse';
       
       const stream = format === 'json'
         ? this.createLegacyStreamingResponse(res)
@@ -484,9 +480,9 @@ class SmartlingHTTPSStreamingServer {
             compatibility: 'Legacy clients'
           },
           usage: {
-            sse: 'POST /stream/:toolName',
-            json: 'POST /stream/:toolName?format=json',
-            auto_detect: 'Based on Accept: application/json header'
+            sse: 'POST /stream/:toolName (default format)',
+            json: 'POST /stream/:toolName?format=json (legacy)',
+            force_sse: 'SSE is always used unless ?format=json is specified'
           }
         },
         availableTools: this.allTools.length,
