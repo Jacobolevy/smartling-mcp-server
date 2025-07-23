@@ -67,6 +67,10 @@ fi
 # Make servers executable
 chmod +x bin/mcp-*.js 2>/dev/null || true
 
+# Install dependencies
+echo "📦 Installing dependencies..."
+npm install
+
 # Configure Claude Desktop with PROVIDED CREDENTIALS
 echo "🤖 Configuring Claude Desktop with PROVIDED CREDENTIALS..."
 mkdir -p "$(dirname "$CLAUDE_CONFIG")"
@@ -76,7 +80,7 @@ cat > "$CLAUDE_CONFIG" << EOF
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["$INSTALL_DIR/bin/mcp-robust.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_ID",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -96,7 +100,7 @@ cat > "$CURSOR_CONFIG" << EOF
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["$INSTALL_DIR/bin/mcp-robust.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_ID",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
