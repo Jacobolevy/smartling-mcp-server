@@ -1,62 +1,62 @@
-# 🏢 Smartling HTTP Server - Deployment Interno
+# 🏢 Smartling HTTP Server - Internal Deployment
 
-**Solución para evitar errores de proxy corporativo**
+**Solution to avoid corporate proxy errors**
 
-## ❌ Problema que resuelve:
+## ❌ Problem this solves:
 - `Connection Error: Failed to connect via proxy`
-- Firewalls corporativos que bloquean conexiones externas
-- Políticas de proxy que impiden acceso a Render.com
+- Corporate firewalls that block external connections
+- Proxy policies that prevent access to Render.com
 
-## ✅ Solución:
-Deployar el servidor HTTP de Smartling **dentro de tu infraestructura corporativa**
+## ✅ Solution:
+Deploy the Smartling HTTP server **within your corporate infrastructure**
 
 ---
 
-## 🚀 Deployment Rápido
+## 🚀 Quick Deployment
 
-### Prerequisitos:
-- Docker instalado
-- Credenciales de Smartling
-- Acceso a servidor interno de la empresa
+### Prerequisites:
+- Docker installed
+- Smartling credentials
+- Access to internal company server
 
-### Paso 1: Configurar credenciales
+### Step 1: Configure credentials
 ```bash
-# Configurar variables de entorno
-export SMARTLING_USER_ID="tu-user-id"
-export SMARTLING_SECRET="tu-secret"
-export SMARTLING_PROJECT_ID="tu-project-id"
+# Configure environment variables
+export SMARTLING_USER_ID="your-user-id"
+export SMARTLING_SECRET="your-secret"
+export SMARTLING_PROJECT_ID="your-project-id"
 ```
 
-### Paso 2: Deploy automático
+### Step 2: Automatic deployment
 ```bash
-# Ejecutar script de deployment
+# Execute deployment script
 ./deploy-internal.sh
 ```
 
-### Paso 3: Verificar funcionamiento
+### Step 3: Verify functionality
 ```bash
 # Health check
 curl http://localhost:3000/health
 
-# Ver herramientas disponibles
+# View available tools
 curl http://localhost:3000/tools
 ```
 
 ---
 
-## 🎯 Usar en tu Chat Interno
+## 🎯 Use in your Internal Chat
 
-### URL interna:
+### Internal URL:
 ```
-http://TU-SERVIDOR-INTERNO:3000
+http://YOUR-INTERNAL-SERVER:3000
 ```
 
-### Ejemplos de uso:
+### Usage examples:
 
 #### JavaScript:
 ```javascript
-// Cambiar URL externa por interna
-const SMARTLING_URL = 'http://servidor-interno:3000';
+// Change external URL to internal
+const SMARTLING_URL = 'http://internal-server:3000';
 
 async function callSmartling(toolName, args = {}) {
   const response = await fetch(`${SMARTLING_URL}/call/${toolName}`, {
@@ -67,14 +67,14 @@ async function callSmartling(toolName, args = {}) {
   return await response.json();
 }
 
-// Sin problemas de proxy ✅
+// No proxy issues ✅
 const projects = await callSmartling('smartling_get_projects');
 ```
 
 #### Python:
 ```python
-# Sin configuración de proxy necesaria
-SMARTLING_URL = 'http://servidor-interno:3000'
+# No proxy configuration needed
+SMARTLING_URL = 'http://internal-server:3000'
 
 def call_smartling(tool_name, args={}):
     response = requests.post(
@@ -83,13 +83,13 @@ def call_smartling(tool_name, args={}):
     )
     return response.json()
 
-# Funciona sin proxy ✅
+# Works without proxy ✅
 projects = call_smartling('smartling_get_projects')
 ```
 
 ---
 
-## 🐳 Deployment Avanzado
+## 🐳 Advanced Deployment
 
 ### Docker Compose:
 ```yaml
@@ -146,72 +146,72 @@ spec:
 
 ---
 
-## 🔧 Configuración Avanzada
+## 🔧 Advanced Configuration
 
-### Variables de entorno:
+### Environment variables:
 ```bash
-SMARTLING_USER_ID=tu-user-id          # Requerido
-SMARTLING_SECRET=tu-secret            # Requerido  
-SMARTLING_PROJECT_ID=tu-project-id    # Opcional
-PORT=3000                             # Puerto del servidor
-NODE_ENV=production                   # Entorno
+SMARTLING_USER_ID=your-user-id          # Required
+SMARTLING_SECRET=your-secret            # Required  
+SMARTLING_PROJECT_ID=your-project-id    # Optional
+PORT=3000                               # Server port
+NODE_ENV=production                     # Environment
 ```
 
-### Red interna:
+### Internal network:
 ```bash
-# Para acceso desde otros servidores internos
+# For access from other internal servers
 docker run -d \
   --name smartling-http \
-  --network=empresa-network \
+  --network=company-network \
   -p 3000:3000 \
   smartling-http-internal
 ```
 
 ---
 
-## 📊 Monitoreo
+## 📊 Monitoring
 
-### Logs en tiempo real:
+### Real-time logs:
 ```bash
 docker logs -f smartling-http-server
 ```
 
-### Métricas:
+### Metrics:
 ```bash
-# Health check automático
+# Automatic health check
 curl http://localhost:3000/health
 
-# Estado de herramientas
+# Tool status
 curl http://localhost:3000/tools | jq '.total_tools'
 ```
 
 ---
 
-## 🆘 Soporte
+## 🆘 Support
 
-### Problemas comunes:
+### Common issues:
 
-#### 1. Container no inicia:
+#### 1. Container doesn't start:
 ```bash
-# Verificar logs
+# Check logs
 docker logs smartling-http-server
 
-# Verificar variables de entorno
+# Check environment variables
 docker exec smartling-http-server env | grep SMARTLING
 ```
 
-#### 2. No responde en puerto:
+#### 2. Doesn't respond on port:
 ```bash
-# Verificar puerto
+# Check port
 docker port smartling-http-server
 
-# Verificar proceso
+# Check process
 docker exec smartling-http-server ps aux
 ```
 
-#### 3. Errores de conexión Smartling:
+#### 3. Smartling connection errors:
 ```bash
-# Verificar credenciales
+# Check credentials
 curl -X POST http://localhost:3000/call/smartling_get_account_info \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -219,19 +219,19 @@ curl -X POST http://localhost:3000/call/smartling_get_account_info \
 
 ---
 
-## ✅ Ventajas del Deployment Interno:
+## ✅ Advantages of Internal Deployment:
 
-- 🚫 **Sin errores de proxy**
-- 🔒 **Datos dentro de la red corporativa**
-- ⚡ **Latencia mínima**
-- 🛡️ **Control total de seguridad**
-- 📈 **Escalabilidad interna**
+- 🚫 **No proxy errors**
+- 🔒 **Data within corporate network**
+- ⚡ **Minimal latency**
+- 🛡️ **Total security control**
+- 📈 **Internal scalability**
 
 ---
 
-## 📞 Contacto:
+## 📞 Contact:
 
-**Para soporte técnico:**
-- Verificar logs del container
-- Revisar configuración de red
-- Validar credenciales de Smartling 
+**For technical support:**
+- Check container logs
+- Review network configuration
+- Validate Smartling credentials 

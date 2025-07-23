@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: smartling-mcp-streaming
+    env: node
+    plan: free
+    buildCommand: "npm install express cors dotenv eventsource"
+    startCommand: "node scripts/start-https-streaming.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SMARTLING_USER_IDENTIFIER
+        value: your_user_identifier_here
+      - key: SMARTLING_USER_SECRET
+        value: your_user_secret_here
+      - key: SMARTLING_BASE_URL
+        value: https://api.smartling.com
+      - key: SSL_GENERATE
+        value: false
+    healthCheckPath: "/health" 
