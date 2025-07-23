@@ -4,11 +4,13 @@ require('dotenv').config({ quiet: true });
 /**
  * 🌟 Smartling MCP Server - Simplified & Compatible
  * Minimal MCP server for Claude Desktop & Cursor
+ * Now with HTTP MCP endpoints support
  */
 
 const readline = require('readline');
 const https = require('https');
 const { URL } = require('url');
+const express = require('express');
 
 // === SMARTLING CLIENT ===
 class SmartlingClient {
@@ -3652,6 +3654,49 @@ class SmartlingMCPServer {
   }
 }
 
-// Start the server
+// === EXPRESS HTTP SERVER FOR MCP ENDPOINTS ===
+const app = express();
+app.use(express.json());
+
+// MCP manifest endpoint
+app.get('/mcp/manifest', (req, res) => {
+  res.json({
+    id: "smartling",
+    name: "Smartling MCP",
+    description: "Access Smartling projects and keys via Smartling API",
+    context_types: ["translation_key"],
+    params_schema: {
+      type: "object",
+      properties: {
+        account_id: { type: "string" },
+        secret: { type: "string" }
+      },
+      required: ["account_id", "secret"]
+    }
+  });
+});
+
+// MCP context resolver endpoint
+app.post('/mcp/context', (req, res) => {
+  const { context_items } = req.body;
+
+  const resolved = context_items.map(item => ({
+    name: item.name,
+    description: `🔤 Context for ${item.name} from Smartling`,
+    url: `https://dashboard.smartling.com/projects` // o construir con item.name si quieres
+  }));
+
+  res.json({ items: resolved });
+});
+
+// Start HTTP server for MCP endpoints
+const PORT = process.env.PORT || 3000;
+const httpServer = app.listen(PORT, () => {
+  console.log(`🌐 Smartling MCP HTTP server running on port ${PORT}`);
+  console.log(`📋 MCP Manifest: http://localhost:${PORT}/mcp/manifest`);
+  console.log(`🔧 MCP Context: http://localhost:${PORT}/mcp/context`);
+});
+
+// Start the MCP server
 const server = new SmartlingMCPServer();
 server.start(); 
