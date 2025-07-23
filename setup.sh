@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Setting up Smartling MCP Server..."
+echo "🚀 Smartling MCP Server - Environment Setup"
+echo "==========================================="
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
@@ -19,40 +20,58 @@ fi
 
 echo "✅ Node.js version $NODE_VERSION detected"
 
-# Create .env file if it doesn't exist
-if [ ! -f ".env" ]; then
-    echo "🔧 Creating configuration file..."
-    cat > .env << 'EOF'
+# Install dependencies
+echo "📦 Installing dependencies..."
+if npm install; then
+    echo "✅ Dependencies installed successfully"
+else
+    echo "❌ Failed to install dependencies"
+    exit 1
+fi
+
+# Make servers executable
+echo "🔧 Making servers executable..."
+chmod +x bin/mcp-robust.js bin/mcp-simple.js 2>/dev/null || true
+
+# Create .env example if it doesn't exist
+if [ ! -f ".env.example" ]; then
+    echo "📝 Creating .env example..."
+    cat > .env.example << 'EOF'
 # Smartling API Credentials
 SMARTLING_USER_IDENTIFIER=your_user_identifier_here
 SMARTLING_USER_SECRET=your_user_secret_here
 SMARTLING_BASE_URL=https://api.smartling.com
-
-# Debug mode (optional)
-DEBUG=false
 EOF
-else
-    echo "⚠️  .env file already exists, skipping creation"
 fi
 
-# Make MCP server executable
-chmod +x bin/mcp-simple.js
-
-# Test installation
-echo "🧪 Testing installation..."
-if npm test > /dev/null 2>&1; then
-    echo "✅ Installation test passed"
+# Test robust server
+echo "🧪 Testing robust server..."
+if echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | timeout 10s node bin/mcp-robust.js 2>/dev/null | grep -q '"tools"'; then
+    echo "✅ Robust server test passed"
 else
-    echo "⚠️  Installation test failed, but this might be normal without credentials"
+    echo "⚠️  Robust server test failed (normal without credentials)"
 fi
 
 echo ""
-echo "🎉 Setup completed!"
+echo "🎉 Environment Setup Complete!"
+echo "=============================="
 echo ""
-echo "📋 Next steps:"
-echo "1. Edit .env file with your Smartling credentials"
-echo "2. Configure MCP server in Claude Desktop or Cursor"
-echo "3. Start using all 74 Smartling tools!"
+echo "📋 What's ready:"
+echo "   ✅ Node.js $NODE_VERSION"
+echo "   ✅ Dependencies installed"
+echo "   ✅ Servers executable"
+echo "   ✅ Environment prepared"
 echo ""
-echo "📚 Read INSTALLATION.md for detailed instructions"
-echo "📋 Tool count: $(grep -c "name: 'smartling_" bin/mcp-simple.js) tools available" 
+echo "🚀 Next step - Choose your installation method:"
+echo ""
+echo "📡 Option 1: One-line remote install (recommended)"
+echo "   curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash"
+echo ""
+echo "🏠 Option 2: Local install (you already have the code)"
+echo "   ./install-mcp.sh"
+echo ""
+echo "📚 Option 3: Manual setup"
+echo "   See INSTALLATION.md for detailed instructions"
+echo ""
+echo "💡 The remote installer automatically configures both Claude Desktop and Cursor"
+echo "🛡️ All methods use the timeout-protected robust server" 

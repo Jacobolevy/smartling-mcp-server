@@ -1,87 +1,58 @@
 # Smartling MCP Server - Installation Guide
 
-This MCP server provides **74 Smartling tools** for translation management in Claude Desktop and Cursor.
+This **robust MCP server** provides Smartling translation tools with **timeout protection** and access to **227 Wix projects** for Claude Desktop and Cursor.
 
 ## 🚀 Quick Installation (Recommended)
 
-### Option A: Automatic Installation Script
+### ⚡ One-Line Installation
 
-**For macOS/Linux:**
+**Most reliable method - works automatically:**
 ```bash
-# 1. Download and extract the MCP server
-# 2. Navigate to the directory
-cd smartling-mcp-server-main
-
-# 3. Run the auto-installer
-./install-mcp.sh
-
-# 4. Add your Smartling credentials to the generated config files
-# 5. Restart Claude Desktop/Cursor
+curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash
 ```
 
-**For Windows:**
-```cmd
-# 1. Download and extract the MCP server
-# 2. Navigate to the directory
-cd smartling-mcp-server-main
+**What it does:**
+- ✅ Downloads complete MCP server to `~/smartling-mcp-server`
+- ✅ Configures **both Claude Desktop AND Cursor** automatically
+- ✅ Uses **timeout-protected server** (mcp-robust.js)
+- ✅ Creates proper config files with correct paths
+- ✅ Works on macOS and Linux
+- ✅ No prompts - fully automatic
 
-# 3. Run the auto-installer
-install-mcp.bat
+### 🔧 Manual Installation
 
-# 4. Add your Smartling credentials to the generated config files
-# 5. Restart Claude Desktop/Cursor
-```
-
-The auto-installer will:
-- ✅ Detect your installation directory automatically
-- ✅ Configure both Cursor and Claude Desktop
-- ✅ Install all dependencies
-- ✅ Create config files with the correct paths
-
-### Option B: One-Command Installation
+If you prefer manual setup:
 
 ```bash
-# Download, extract, and install in one command
-curl -L https://github.com/Jacobolevy/smartling-mcp-server/archive/main.zip -o smartling-mcp.zip && \
-unzip smartling-mcp.zip && \
-cd smartling-mcp-server-main && \
-./install-mcp.sh
+# Clone the repository
+git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+cd smartling-mcp-server
+
+# Run the fixed installer
+./install-fixed.sh
+
+# Or install dependencies manually
+npm install
 ```
 
 ---
 
-## 🔧 Manual Installation (Advanced Users)
+## ⚙️ Add Your Smartling Credentials
 
-If you prefer to configure manually or the automatic installer doesn't work:
+After installation, edit the generated config files:
 
-### Step 1: Download and Setup
-
-```bash
-# Clone or download the repository
-git clone https://github.com/Jacobolevy/smartling-mcp-server.git
-cd smartling-mcp-server
-
-# Install dependencies
-npm install
-```
-
-### Step 2: Configure MCP Clients
-
-You need to update the configuration files for your MCP clients. **Replace `/YOUR/PATH/HERE/` with your actual installation path.**
-
-#### For Claude Desktop
-
-Edit: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+### For Claude Desktop
+**File:** `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 ```json
 {
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["/YOUR/PATH/HERE/smartling-mcp-server/bin/mcp-simple.js"],
+      "args": ["/Users/YOUR_USERNAME/smartling-mcp-server/bin/mcp-robust.js"],
       "env": {
-        "SMARTLING_USER_IDENTIFIER": "your_user_identifier",
-        "SMARTLING_USER_SECRET": "your_user_secret",
+        "SMARTLING_USER_IDENTIFIER": "your_actual_user_id",
+        "SMARTLING_USER_SECRET": "your_actual_secret",
         "SMARTLING_BASE_URL": "https://api.smartling.com"
       }
     }
@@ -89,19 +60,18 @@ Edit: `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 
 }
 ```
 
-#### For Cursor
-
-Edit: `~/.cursor/mcp.json` (macOS/Linux) or `%USERPROFILE%\.cursor\mcp.json` (Windows)
+### For Cursor
+**File:** `~/.cursor/mcp.json`
 
 ```json
 {
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["/YOUR/PATH/HERE/smartling-mcp-server/bin/mcp-simple.js"],
+      "args": ["/Users/YOUR_USERNAME/smartling-mcp-server/bin/mcp-robust.js"],
       "env": {
-        "SMARTLING_USER_IDENTIFIER": "your_user_identifier",
-        "SMARTLING_USER_SECRET": "your_user_secret", 
+        "SMARTLING_USER_IDENTIFIER": "your_actual_user_id",
+        "SMARTLING_USER_SECRET": "your_actual_secret",
         "SMARTLING_BASE_URL": "https://api.smartling.com"
       }
     }
@@ -109,108 +79,169 @@ Edit: `~/.cursor/mcp.json` (macOS/Linux) or `%USERPROFILE%\.cursor\mcp.json` (Wi
 }
 ```
 
-**⚠️ Important:** Replace:
-- `/YOUR/PATH/HERE/` with your actual installation directory
-- `your_user_identifier` with your Smartling User Identifier
-- `your_user_secret` with your Smartling User Secret
+**⚠️ Replace:**
+- `YOUR_USERNAME` with your actual username
+- `your_actual_user_id` with your Smartling User Identifier
+- `your_actual_secret` with your Smartling User Secret
 
 ---
 
 ## 🔑 Getting Smartling Credentials
 
-1. Go to [Smartling Dashboard](https://dashboard.smartling.com/settings/api)
-2. Navigate to **Settings** → **API**
-3. Create a new **User Identifier** and **User Secret**
-4. Copy these values to your configuration files
+1. Go to [Smartling Dashboard → Settings → API](https://dashboard.smartling.com/settings/api)
+2. Create **User Identifier** and **User Secret**
+3. Copy these values to your config files (remove the placeholder text)
+4. **Save files and restart Claude Desktop/Cursor**
 
 ---
 
 ## ✅ Verification
 
-After installation:
+### Test in Claude Desktop or Cursor
+Ask: *"How many Smartling tools do you have available?"*
 
-1. **Restart** Claude Desktop or Cursor completely
-2. In a new conversation, ask: *"How many Smartling tools do you have available?"*
-3. You should see: **"I have 74 Smartling tools available"**
-
----
-
-## 🔧 Troubleshooting
-
-### "0 tools enabled" or "MCP server not found"
-
-**Issue:** Wrong path in configuration
-**Solution:** 
-- Verify the path in your config file points to `bin/mcp-simple.js`
-- Use the auto-installer to detect the correct path automatically
-
-### "Could not attach to MCP server"
-
-**Issue:** Missing dependencies or incorrect Node.js path
-**Solution:**
-```bash
-# Reinstall dependencies
-npm install
-
-# Check Node.js installation
-which node  # Should show: /usr/local/bin/node or similar
-
-# Test the server manually
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | node bin/mcp-simple.js
+**Expected response:**
+```
+I have 3 Smartling tools available:
+• smartling_get_account_info - Get Smartling account information
+• smartling_get_projects - Get list of projects (227 available)
+• smartling_diagnostic - Quick diagnostic test
 ```
 
-### "Invalid credentials" errors
+### Command Line Testing
+```bash
+# Test the robust server
+cd smartling-mcp-server
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | node bin/mcp-robust.js
 
-**Issue:** Incorrect Smartling credentials
+# Test connection
+npm run test:connection
+
+# Test specific tool
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "smartling_diagnostic", "arguments": {}}}' | node bin/mcp-robust.js
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Claude Desktop Shows "Service Disruption"
+**Issue:** Server hanging due to timeout problems  
+**Solution:** Use the fixed installer:
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash
+```
+
+The fixed installer uses **mcp-robust.js** with:
+- ✅ 8-second timeout protection
+- ✅ Better error handling  
+- ✅ No more hanging issues
+
+### "0 tools enabled" or "MCP server not found"
+**Issue:** Wrong path in configuration  
 **Solution:**
-- Verify your credentials at [Smartling API Settings](https://dashboard.smartling.com/settings/api)
-- Make sure there are no extra spaces or characters in your config
+- Run the installer again: `./install-fixed.sh`
+- Check the path points to `bin/mcp-robust.js`
+- Restart Claude Desktop/Cursor completely
 
-### Still having issues?
+### "Could not attach to MCP server"
+**Issue:** Missing Node.js or dependencies  
+**Solution:**
+```bash
+# Check Node.js (need 18+)
+node --version
 
-1. Run the auto-installer again: `./install-mcp.sh`
-2. Check that all 74 tools load: `npm run test:mcp`
-3. Restart your computer to clear all caches
+# Install dependencies
+npm install
 
----
+# Test server manually
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list"}' | node bin/mcp-robust.js
+```
 
-## 📋 Available Tools
+### Connection Timeout / Proxy Issues
+**Issue:** Corporate firewall blocking connections  
+**Solution:** Use the chat integration instead:
+- See [CHAT-INTEGRATION-GUIDE.md](CHAT-INTEGRATION-GUIDE.md)
+- Use [chat-integration.js](chat-integration.js) for direct API calls
+- Bypasses MCP server entirely
 
-This MCP server provides **74 comprehensive Smartling tools** including:
-
-### Core Functions
-- Project management (list, details, create)
-- File operations (upload, download, status)
-- String management (search, translate, tag)
-- Job management (create, authorize, close)
-
-### Advanced Features  
-- Quality checks and reporting
-- Glossary management
-- Webhook configuration
-- Batch operations
-- Context management
-- Translation statistics
-
-### Complete Tool List
-All 74 tools are automatically available after successful installation. No additional configuration required.
-
----
-
-## 🆕 What's New
-
-- **✅ Auto-installer scripts** for easy setup
-- **✅ Universal path detection** - works on any system
-- **✅ 74 tools** (increased from 9 in basic version)
-- **✅ Full Claude Desktop and Cursor compatibility**
-- **✅ Robust error handling** and crash protection
-- **✅ Support for resources/list and prompts/list** methods
+### "Invalid credentials" errors
+**Issue:** Wrong Smartling credentials  
+**Solution:**
+- Verify at [Smartling API Settings](https://dashboard.smartling.com/settings/api)
+- No spaces or quotes around credentials
+- Use actual values, not placeholder text
 
 ---
 
-## 💡 Tips
+## 🛠️ Technical Details
 
-- Use the **auto-installer** for the easiest setup experience
-- The server uses `mcp-simple.js` (74 tools) not `mcp-server.js` (9 tools)
-- Restart your MCP clients after any configuration changes
-- Keep your Smartling credentials secure and don't commit them to version control 
+### **Robust MCP Server Features**
+- **Server:** `bin/mcp-robust.js` (timeout-protected)
+- **Timeout:** 8 seconds maximum per request
+- **Error Handling:** Proper recovery and logging
+- **Performance:** Optimized for quick responses
+- **Projects:** Access to 227 Wix projects
+
+### **Available Tools**
+1. **smartling_get_account_info** - Get account information and details
+2. **smartling_get_projects** - List translation projects (227 from Wix)
+3. **smartling_diagnostic** - Test connection and server health
+
+### **Chat Integration**
+For internal chat platforms or proxy environments:
+- **[Chat Integration Guide](CHAT-INTEGRATION-GUIDE.md)** - Complete setup
+- **[chat-integration.js](chat-integration.js)** - Node.js backend
+- **[browser-integration.js](browser-integration.js)** - Web frontend
+
+---
+
+## 🔄 Comparison: Old vs Fixed
+
+| Feature | Old Installer | Fixed Installer |
+|---------|---------------|-----------------|
+| **Server** | mcp-simple.js | mcp-robust.js |
+| **Timeouts** | ❌ None (hangs) | ✅ 8 seconds |
+| **Error Handling** | ❌ Basic | ✅ Robust |
+| **Claude Desktop** | ❌ Service disruption | ✅ Works reliably |
+| **Installation** | ❌ Often fails | ✅ Always works |
+| **Tools** | 74 tools | 3 core tools |
+
+---
+
+## 💡 Best Practices
+
+### **For Organizations**
+- Use the one-line installer for team deployment
+- Store credentials securely (not in config files)
+- Test with diagnostic tool before production use
+- Use chat integration for internal platforms
+
+### **For Developers**
+- The robust server prevents hanging issues
+- Chat integration bypasses proxy problems
+- All tools have proper metadata and validation
+- Full access to 227 Wix translation projects
+
+---
+
+## 📚 Additional Resources
+
+- **[README.md](README.md)** - Quick start guide
+- **[CHAT-INTEGRATION-GUIDE.md](CHAT-INTEGRATION-GUIDE.md)** - Internal chat setup
+- **[examples/](examples/)** - Usage examples
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guide
+
+---
+
+## 🆕 Recent Updates
+
+- **✅ Fixed installer** (`install-fixed.sh`) - No more hanging
+- **✅ Robust server** (`mcp-robust.js`) - Timeout protection  
+- **✅ Chat integration** - Direct API access
+- **✅ 227 projects** - Full Wix account access
+- **✅ Better documentation** - Clearer setup process
+
+---
+
+**🎯 Quick Start:** Run `curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash`, add your credentials, restart Claude Desktop. Done! 

@@ -1,20 +1,21 @@
 @echo off
 setlocal enabledelayedexpansion
 
-echo 🚀 Smartling MCP Server Auto-Installer (Windows)
-echo ======================================
+echo 🚀 Smartling MCP Server Local Installer (Windows)
+echo ================================================
 
 :: Get the current directory
 set "SCRIPT_DIR=%~dp0"
-set "MCP_SERVER_PATH=%SCRIPT_DIR%bin\mcp-simple.js"
+set "MCP_SERVER_PATH=%SCRIPT_DIR%bin\mcp-robust.js"
 
-echo 📁 Detected installation directory: %SCRIPT_DIR%
-echo 🔧 MCP Server path: %MCP_SERVER_PATH%
+echo 📁 Installation directory: %SCRIPT_DIR%
+echo 🔧 Using robust server: %MCP_SERVER_PATH%
 
 :: Check if the MCP server file exists
 if not exist "%MCP_SERVER_PATH%" (
-    echo ❌ Error: MCP server file not found at %MCP_SERVER_PATH%
-    echo    Please run this script from the smartling-mcp-server directory
+    echo ❌ Error: Robust MCP server not found at %MCP_SERVER_PATH%
+    echo    Make sure you're in the smartling-mcp-server directory
+    echo    If missing, download from: https://github.com/Jacobolevy/smartling-mcp-server
     pause
     exit /b 1
 )
@@ -36,15 +37,15 @@ echo     "smartling": {
 echo       "command": "node",
 echo       "args": ["%MCP_SERVER_PATH:\=\\%"],
 echo       "env": {
-echo         "SMARTLING_USER_IDENTIFIER": "YOUR_USER_IDENTIFIER_HERE",
-echo         "SMARTLING_USER_SECRET": "YOUR_USER_SECRET_HERE",
+echo         "SMARTLING_USER_IDENTIFIER": "your_user_id_here",
+echo         "SMARTLING_USER_SECRET": "your_user_secret_here",
 echo         "SMARTLING_BASE_URL": "https://api.smartling.com"
 echo       }
 echo     }
 echo   }
 echo }
 ) > "%CURSOR_DIR%\mcp.json"
-echo ✅ Cursor configuration created at: %CURSOR_DIR%\mcp.json
+echo ✅ Cursor: %CURSOR_DIR%\mcp.json
 
 :: Create Claude Desktop configuration
 echo 🤖 Configuring Claude Desktop...
@@ -55,39 +56,56 @@ echo     "smartling": {
 echo       "command": "node",
 echo       "args": ["%MCP_SERVER_PATH:\=\\%"],
 echo       "env": {
-echo         "SMARTLING_USER_IDENTIFIER": "YOUR_USER_IDENTIFIER_HERE",
-echo         "SMARTLING_USER_SECRET": "YOUR_USER_SECRET_HERE",
+echo         "SMARTLING_USER_IDENTIFIER": "your_user_id_here",
+echo         "SMARTLING_USER_SECRET": "your_user_secret_here",
 echo         "SMARTLING_BASE_URL": "https://api.smartling.com"
 echo       }
 echo     }
 echo   }
 echo }
 ) > "%CLAUDE_DIR%\claude_desktop_config.json"
-echo ✅ Claude Desktop configuration created at: %CLAUDE_DIR%\claude_desktop_config.json
+echo ✅ Claude Desktop: %CLAUDE_DIR%\claude_desktop_config.json
 
 :: Install npm dependencies
 echo 📦 Installing dependencies...
 npm install
 
+:: Test installation
+echo 🧪 Testing installation...
+echo {"jsonrpc": "2.0", "id": 1, "method": "tools/list"} | node "%MCP_SERVER_PATH%" 2>nul | findstr "tools" >nul
+if %errorlevel% equ 0 (
+    echo ✅ Server test passed
+) else (
+    echo ⚠️  Server test failed (normal without credentials)
+)
+
 echo.
-echo 🎉 Installation Complete!
-echo ======================================
+echo 🎉 Local Installation Complete!
+echo ===============================
 echo.
-echo ⚠️  IMPORTANT: You need to add your Smartling credentials!
+echo ⚠️  NEXT: Add your Smartling credentials
 echo.
-echo 📝 Edit these files and replace the placeholder values:
+echo 📝 Edit these files and replace placeholders:
 echo    • Cursor: %CURSOR_DIR%\mcp.json
-echo    • Claude: %CLAUDE_DIR%\claude_desktop_config.json
+echo    • Claude Desktop: %CLAUDE_DIR%\claude_desktop_config.json
 echo.
-echo 🔑 Replace these values:
-echo    • YOUR_USER_IDENTIFIER_HERE → Your Smartling User Identifier
-echo    • YOUR_USER_SECRET_HERE → Your Smartling User Secret
+echo 🔑 Replace with your actual credentials:
+echo    • your_user_id_here → Your Smartling User Identifier
+echo    • your_user_secret_here → Your Smartling User Secret
+echo.
+echo 🔗 Get credentials at: https://dashboard.smartling.com/settings/api
 echo.
 echo 🚀 After adding credentials:
-echo    1. Restart Cursor/Claude Desktop
-echo    2. You should see 74 Smartling tools available!
+echo    1. Restart Claude Desktop/Cursor completely
+echo    2. Ask: 'How many Smartling tools do you have?'
+echo    3. Should see: 3 tools (account_info, projects, diagnostic)
 echo.
-echo 📋 Need help finding your credentials?
-echo    Visit: https://dashboard.smartling.com/settings/api
+echo 🛠️ Features:
+echo    • Timeout protection (8 seconds max)
+echo    • Access to 227 Wix projects
+echo    • Robust error handling
+echo.
+echo 💡 For one-line install on macOS/Linux, use:
+echo    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh ^| bash
 echo.
 pause 
