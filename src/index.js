@@ -1235,10 +1235,10 @@ process.on('SIGINT', () => {
   });
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`🚀 Smartling MCP Server running on http://127.0.0.1:${PORT}`);
-  console.log(`📋 Health check: http://127.0.0.1:${PORT}/health`);
-  console.log(`🔗 Tools list: http://127.0.0.1:${PORT}/tools`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Smartling MCP Server running on http://0.0.0.0:${PORT}`);
+  console.log(`📋 Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`🔗 Tools list: http://0.0.0.0:${PORT}/tools`);
   console.log(`🔧 Configuration: ${!!process.env.SMARTLING_USER_IDENTIFIER && !!process.env.SMARTLING_USER_SECRET ? '✅ Ready' : '❌ Missing credentials'}`);
   console.log(`💡 Need help? Run: smartling-mcp-server --help`);
 });
