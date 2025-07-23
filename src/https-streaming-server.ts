@@ -79,7 +79,61 @@ class SmartlingHTTPSStreamingServer {
   }
 
   private createStreamingResponse(res: Response): StreamingResponse {
-    // Set headers for streaming
+    // Set headers for Server-Sent Events (SSE)
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
+    
+    return {
+      writeChunk: (data: any) => {
+        const eventData = {
+          type: 'data',
+          timestamp: new Date().toISOString(),
+          data: data
+        };
+        
+        // Write in SSE format: data: {...}\n\n
+        res.write(`data: ${JSON.stringify(eventData)}\n\n`);
+      },
+      
+      end: (finalData?: any) => {
+        if (finalData) {
+          const finalEvent = {
+            type: 'final',
+            timestamp: new Date().toISOString(),
+            data: finalData
+          };
+          
+          res.write(`data: ${JSON.stringify(finalEvent)}\n\n`);
+        }
+        
+        // Send completion event
+        res.write(`data: ${JSON.stringify({
+          type: 'completed',
+          timestamp: new Date().toISOString()
+        })}\n\n`);
+        
+        res.end();
+      },
+      
+      error: (error: string) => {
+        const errorEvent = {
+          type: 'error',
+          timestamp: new Date().toISOString(),
+          error: error
+        };
+        
+        res.write(`data: ${JSON.stringify(errorEvent)}\n\n`);
+        res.end();
+      }
+    };
+  }
+
+  // Create legacy JSON streaming response for backward compatibility
+  private createLegacyStreamingResponse(res: Response): StreamingResponse {
+    // Set headers for chunked JSON (legacy format)
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Transfer-Encoding', 'chunked');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -169,14 +223,32 @@ class SmartlingHTTPSStreamingServer {
       });
     });
 
-    // Streaming execute tool
+    // Streaming execute tool with SSE support
     this.app.post('/stream/:toolName', async (req: Request, res: Response) => {
       const { toolName } = req.params;
       const args = req.body;
-      const stream = this.createStreamingResponse(res);
+      
+      // Detect streaming format - default to SSE for Wix Chat compatibility
+      const acceptHeader = req.headers.accept || '';
+      const format = req.query.format || 
+                     (acceptHeader.includes('application/json') ? 'json' : 'sse');
+      
+      // Use appropriate streaming response based on format
+      const stream = format === 'json' 
+        ? this.createLegacyStreamingResponse(res)
+        : this.createStreamingResponse(res);
 
       try {
-        // Send initial status
+        // Send initial connection event
+        stream.writeChunk({
+          status: 'connected',
+          server: 'smartling-https-streaming',
+          tool: toolName,
+          format: format,
+          timestamp: new Date().toISOString()
+        });
+
+        // Send tool started event
         stream.writeChunk({
           status: 'started',
           tool: toolName,
@@ -190,7 +262,8 @@ class SmartlingHTTPSStreamingServer {
         stream.end({
           status: 'completed',
           tool: toolName,
-          result: result
+          result: result,
+          success: true
         });
 
       } catch (error) {
@@ -228,10 +301,18 @@ class SmartlingHTTPSStreamingServer {
       }
     });
 
-    // Streaming batch execute
+    // Streaming batch execute with SSE support
     this.app.post('/stream-batch', async (req: Request, res: Response) => {
       const { operations } = req.body;
-      const stream = this.createStreamingResponse(res);
+      
+      // Detect streaming format
+      const acceptHeader = req.headers.accept || '';
+      const format = req.query.format || 
+                     (acceptHeader.includes('application/json') ? 'json' : 'sse');
+      
+      const stream = format === 'json'
+        ? this.createLegacyStreamingResponse(res)
+        : this.createStreamingResponse(res);
       
       if (!Array.isArray(operations)) {
         stream.error('operations must be an array');
@@ -241,7 +322,8 @@ class SmartlingHTTPSStreamingServer {
       try {
         stream.writeChunk({
           status: 'batch_started',
-          total_operations: operations.length
+          total_operations: operations.length,
+          format: format
         });
 
         const results = [];
@@ -253,6 +335,7 @@ class SmartlingHTTPSStreamingServer {
             stream.writeChunk({
               status: 'operation_started',
               operation_index: i + 1,
+              total_operations: operations.length,
               tool: operation.tool
             });
 
@@ -368,26 +451,51 @@ class SmartlingHTTPSStreamingServer {
       res.json({
         name: 'Smartling MCP HTTPS Streaming Server',
         version: '3.0.0',
-        description: 'HTTPS API with Streaming Support for Smartling Translation Management',
+        description: 'HTTPS API with Server-Sent Events (SSE) Support for Smartling Translation Management',
         features: [
           'HTTPS/TLS encryption',
-          'Real-time streaming responses',
-          'Server-Sent Events (SSE)',
-          'Chunked transfer encoding',
-          'Progressive tool execution'
+          'Server-Sent Events (SSE) streaming',
+          'Legacy JSON chunked streaming',
+          'Real-time progress updates',
+          'Wix Chat compatibility',
+          'Format auto-detection'
         ],
         endpoints: {
           'GET /health': 'Server health check with HTTPS/streaming status',
           'GET /tools': 'List available tools',
           'POST /execute/:toolName': 'Execute a specific tool (standard)',
-          'POST /stream/:toolName': 'Execute a specific tool with streaming',
+          'POST /stream/:toolName': 'Execute tool with SSE streaming (default) or JSON chunked (?format=json)',
           'POST /batch': 'Execute multiple tools in batch (standard)',
           'POST /stream-batch': 'Execute multiple tools with streaming progress',
-          'GET /events': 'Server-Sent Events for real-time updates',
+          'GET /events': 'Server-Sent Events for real-time server updates',
           'GET /': 'This documentation'
+        },
+        streaming: {
+          default_format: 'sse',
+          supported_formats: ['sse', 'json'],
+          sse_info: {
+            content_type: 'text/event-stream',
+            format: 'data: {...}\\n\\n',
+            compatibility: 'Wix Chat, EventSource API'
+          },
+          json_info: {
+            content_type: 'application/json',
+            format: 'Chunked JSON array',
+            compatibility: 'Legacy clients'
+          },
+          usage: {
+            sse: 'POST /stream/:toolName',
+            json: 'POST /stream/:toolName?format=json',
+            auto_detect: 'Based on Accept: application/json header'
+          }
         },
         availableTools: this.allTools.length,
         documentation: 'https://github.com/jacobolevy/smartling-mcp-server',
+        wix_chat: {
+          endpoint: '/stream/:toolName',
+          format: 'SSE (Server-Sent Events)',
+          url_example: 'https://your-server.com/stream/smartling_get_projects'
+        },
         security: {
           https: true,
           cors: true,
