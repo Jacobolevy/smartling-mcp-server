@@ -94,7 +94,7 @@ Features:
 - Complete MCP server for Smartling API
 - 27+ tools for translation management
 - HTTP server for cloud deployment
-- Support for Vercel, Railway, Docker
+- Support for Railway, Docker
 - Comprehensive documentation
 - Automated deployment workflows"
 fi
@@ -139,17 +139,17 @@ echo ""
 echo "🎯 PRÓXIMOS PASOS:"
 echo ""
 echo "1. 📁 Repositorio GitHub: Listo"
-echo "2. 🌐 Deploy a Vercel:"
-echo "   - Ve a https://vercel.com"
+echo "2. 🌐 Deploy to Railway:"
+echo "   - Ve a https://railway.app"
 echo "   - Conecta GitHub"
 echo "   - Importa tu repositorio"
 echo "   - Configura variables de entorno"
 echo ""
-echo "3. 🔧 Variables de entorno en Vercel:"
+echo "3. 🔧 Variables de entorno en Railway:"
 echo "   SMARTLING_USER_IDENTIFIER=tu_user_identifier"
 echo "   SMARTLING_USER_SECRET=tu_user_secret"
 echo ""
-echo "4. 🚀 URL final: https://smartling-mcp-server.vercel.app"
+echo "4. 🚀 URL final: https://smartling-mcp-server.railway.app"
 echo ""
 echo "📚 Ver DEPLOYMENT.md para opciones avanzadas"
 echo ""

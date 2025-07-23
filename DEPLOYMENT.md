@@ -2,46 +2,7 @@
 
 This guide explains how to make your Smartling MCP server available via HTTP URL, without needing to maintain local folders.
 
-## 🌐 **Option 1: Vercel (Recommended - Free)**
-
-### Steps for Vercel deployment:
-
-1. **Upload to GitHub** (see GitHub section below)
-
-2. **Connect with Vercel:**
-   - Go to https://vercel.com
-   - Connect your GitHub account
-   - Import the `smartling-mcp-server` repository
-
-3. **Configure environment variables:**
-   ```bash
-   SMARTLING_USER_IDENTIFIER=your_user_identifier
-   SMARTLING_USER_SECRET=your_user_secret
-   ```
-
-4. **Automatic deploy:** Ready! Your URL will be something like:
-   ```
-   https://smartling-mcp-server.vercel.app
-   ```
-
-### Usage in Cursor with Vercel URL:
-```json
-{
-  "mcp.servers": {
-    "smartling": {
-      "command": "curl",
-      "args": [
-        "-X", "POST",
-        "https://your-app.vercel.app/execute/{tool}",
-        "-H", "Content-Type: application/json",
-        "-d", "{args}"
-      ]
-    }
-  }
-}
-```
-
-## 🚂 **Option 2: Railway**
+## 🚂 **Option 1: Railway**
 
 1. **Fork the repo on GitHub**
 2. **Connect with Railway:**
@@ -55,7 +16,7 @@ This guide explains how to make your Smartling MCP server available via HTTP URL
    PORT=3000
    ```
 
-## 🐳 **Option 3: Docker (Any hosting)**
+## 🐳 **Option 2: Docker (Any hosting)**
 
 ```bash
 # Build image
@@ -74,7 +35,7 @@ docker run -p 3000:3000 \
 - **Azure Container Instances**
 - **DigitalOcean Apps**
 
-## 🏠 **Option 4: Traditional Hosting**
+## 🏠 **Option 3: Traditional Hosting**
 
 For any VPS/hosting with Node.js:
 
@@ -129,7 +90,7 @@ POST https://your-url.com/batch
       "command": "node",
       "args": ["/path/to/http-client.js"],
       "env": {
-        "SMARTLING_API_URL": "https://your-app.vercel.app"
+        "SMARTLING_API_URL": "https://your-app.railway.app"
       }
     }
   }
@@ -188,15 +149,14 @@ Headers:
 
 ## 📊 **Costs**
 
-- **Vercel:** Free up to 100GB bandwidth/month
 - **Railway:** Free $5/month credit
 - **Docker hosting:** From $5-10/month
 - **Basic VPS:** From $3-5/month
 
 ## 🎯 **Final Recommendation**
 
-**For personal use:** Vercel (free, easy)
-**For teams:** Railway or Docker on VPS
+**For personal use:** Railway (easy, free tier)
+**For teams:** Docker on VPS
 **For enterprises:** Docker on own infrastructure
 
 With any of these options, you'll never need to maintain local files again! 🌟 

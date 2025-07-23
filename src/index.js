@@ -6,10 +6,10 @@ const { URL } = require('url');
 // Helper functions for cross-platform responses (Express + Native HTTP)
 const sendJSON = (res, status, data) => {
   if (typeof res.status === 'function') {
-    // Express.js style (Vercel)
+    // Express.js style
     res.status(status).json(data);
   } else {
-    // Native Node.js HTTP style (Local server)
+    // Native Node.js HTTP style
     res.writeHead(status, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(data));
   }
@@ -17,10 +17,10 @@ const sendJSON = (res, status, data) => {
 
 const sendText = (res, status, text = '') => {
   if (typeof res.status === 'function') {
-    // Express.js style (Vercel)
+    // Express.js style
     res.status(status).end(text);
   } else {
-    // Native Node.js HTTP style (Local server)
+    // Native Node.js HTTP style
     res.writeHead(status, { 'Content-Type': 'text/plain' });
     res.end(text);
   }
