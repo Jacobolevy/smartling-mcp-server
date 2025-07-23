@@ -3683,18 +3683,65 @@ app.post('/mcp/context', (req, res) => {
   const resolved = context_items.map(item => ({
     name: item.name,
     description: `🔤 Context for ${item.name} from Smartling`,
-    url: `https://dashboard.smartling.com/projects` // o construir con item.name si quieres
+    url: `https://smartling-mcp.onrender.com/execute/smartling_get_string_info?key=${encodeURIComponent(item.name)}`
   }));
 
   res.json({ items: resolved });
 });
 
+// Proxy endpoint to Render backend
+app.post('/execute/:toolName', (req, res) => {
+  const { toolName } = req.params;
+  const toolArgs = req.body;
+  
+  const postData = JSON.stringify(toolArgs);
+  const options = {
+    hostname: 'smartling-mcp.onrender.com',
+    port: 443,
+    path: `/execute/${toolName}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData),
+      'User-Agent': 'Smartling-MCP-Proxy/3.0.0'
+    }
+  };
+
+  const proxyReq = https.request(options, (proxyRes) => {
+    let data = '';
+    proxyRes.on('data', chunk => data += chunk);
+    proxyRes.on('end', () => {
+      try {
+        const result = JSON.parse(data);
+        res.json(result);
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          error: `Parse error: ${error.message}`
+        });
+      }
+    });
+  });
+
+  proxyReq.on('error', (error) => {
+    res.status(500).json({
+      success: false,
+      error: `Proxy error: ${error.message}`
+    });
+  });
+
+  proxyReq.write(postData);
+  proxyReq.end();
+});
+
 // Start HTTP server for MCP endpoints
 const PORT = process.env.PORT || 3000;
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 const httpServer = app.listen(PORT, () => {
   console.log(`🌐 Smartling MCP HTTP server running on port ${PORT}`);
-  console.log(`📋 MCP Manifest: http://localhost:${PORT}/mcp/manifest`);
-  console.log(`🔧 MCP Context: http://localhost:${PORT}/mcp/context`);
+  console.log(`📋 MCP Manifest: ${RENDER_URL}/mcp/manifest`);
+  console.log(`🔧 MCP Context: ${RENDER_URL}/mcp/context`);
+  console.log(`🚀 Backend API: https://smartling-mcp.onrender.com`);
 });
 
 // Start the MCP server
