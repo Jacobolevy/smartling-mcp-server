@@ -60,6 +60,7 @@ else
     mkdir -p bin src api
     curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-robust.js > bin/mcp-robust.js
     curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-simple.js > bin/mcp-simple.js
+    curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/bin/mcp-batch-optimized.js > bin/mcp-batch-optimized.js
     curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/package.json > package.json
     echo "✅ Direct download completed"
 fi
@@ -80,7 +81,7 @@ cat > "$CLAUDE_CONFIG" << EOF
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["$INSTALL_DIR/bin/mcp-simple.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-batch-optimized.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_ID",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -100,7 +101,7 @@ cat > "$CURSOR_CONFIG" << EOF
   "mcpServers": {
     "smartling": {
       "command": "node",
-      "args": ["$INSTALL_DIR/bin/mcp-simple.js"],
+      "args": ["$INSTALL_DIR/bin/mcp-batch-optimized.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_ID",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -112,9 +113,11 @@ cat > "$CURSOR_CONFIG" << EOF
 EOF
 
 echo ""
-echo "🎉 INSTALLATION COMPLETE WITH AUTO-CREDENTIALS!"
+echo "🎉 INSTALLATION COMPLETE WITH BATCH-OPTIMIZED SERVER!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🔑 Credentials: AUTOMATICALLY CONFIGURED ✅"
+echo "🚀 Server: BATCH-OPTIMIZED (no crashes on large projects) ✅"
+echo "⏱️  Timeouts: 30s single ops, 5min batch ops ✅"
 echo "🔄 RESTART Claude Desktop and Cursor to use Smartling tools"
 echo "📊 Available: 74+ Smartling tools for 227+ projects"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" 
