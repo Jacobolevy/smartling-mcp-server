@@ -1,0 +1,28 @@
+{
+  "name": "smartling-http-server",
+  "version": "1.0.0",
+  "description": "Simple HTTP server for internal chat platforms to access Smartling",
+  "main": "server-http-simple.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server-http-simple.js",
+    "dev": "node --inspect server-http-simple.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "smartling",
+    "translation",
+    "http",
+    "api",
+    "chat",
+    "internal"
+  ],
+  "author": "Smartling HTTP Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 
