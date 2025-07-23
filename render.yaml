@@ -3,8 +3,8 @@ services:
     name: smartling-mcp-streaming-fixed
     env: node
     plan: free
-    buildCommand: "npm install express cors dotenv eventsource"
-    startCommand: "node scripts/start-https-streaming.js"
+    buildCommand: "npm install express cors dotenv eventsource axios"
+    startCommand: "node scripts/start-https-streaming-real.js"
     envVars:
       - key: NODE_ENV
         value: production
@@ -18,4 +18,6 @@ services:
         value: https://api.smartling.com
       - key: SSL_GENERATE
         value: false
+      - key: SMARTLING_ACCOUNT_ID
+        value: b0f6a896
     healthCheckPath: "/health" 
