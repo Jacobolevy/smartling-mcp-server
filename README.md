@@ -4,18 +4,38 @@ A **robust Model Context Protocol (MCP) server** that provides Smartling transla
 
 ## 🚀 Quick Installation
 
-### ⚡ One-Line Installation (Recommended)
+### ⚡ Robust Installer with 74+ Tools (Recommended)
 
+**English:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-fixed.sh | bash
+cd ~/Downloads/smartling-mcp-server-main && ./install-robust-smartling-en.sh "vjwwgsqgeogfkqtmntznqhqxaslfwx" "s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825"
 ```
 
-**What it does:**
-- ✅ Downloads and installs complete MCP server
-- ✅ Configures **both Claude Desktop AND Cursor**
-- ✅ Uses **timeout-protected server** (no hanging)
-- ✅ Works on macOS and Linux
-- ✅ Fully automatic (no prompts)
+**Español:**
+```bash
+cd ~/Downloads/smartling-mcp-server-main && ./install-robust-smartling.sh "vjwwgsqgeogfkqtmntznqhqxaslfwx" "s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825"
+```
+
+### 🔧 Remote Installation (curl)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-robust-smartling-en.sh | bash -s "vjwwgsqgeogfkqtmntznqhqxaslfwx" "s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825"
+```
+
+### 📖 Installation Guides
+
+- 🇺🇸 **[English Installation Guide](QUICK-INSTALL-ROBUST-EN.md)**
+- 🇪🇸 **[Guía en Español](QUICK-INSTALL-ROBUST.md)**
+
+**What the robust installer does:**
+- ✅ **Preserves existing MCPs** - Doesn't overwrite your current configurations
+- ✅ **74+ Smartling tools** - Complete professional feature set
+- ✅ **Handles large operations** - No crashes with massive requests
+- ✅ **Configures both Claude Desktop AND Cursor**
+- ✅ **Automatic backups** - Creates timestamped config backups
+- ✅ **Replaces previous versions** - Smart upgrade from old installations
+- ✅ **Works on macOS and Linux**
+- ✅ **Two modes**: Automatic (with credentials) or Interactive
 
 ### 🔧 Manual Installation
 
