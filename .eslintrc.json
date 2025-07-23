@@ -1,0 +1,31 @@
+{
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "extends": [
+    "eslint:recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "prefer-const": "warn",
+    "no-var": "error",
+    "no-undef": "error",
+    "semi": ["warn", "always"],
+    "quotes": ["warn", "single", { "allowTemplateLiterals": true }],
+    "indent": ["warn", 2],
+    "comma-trailing": "off",
+    "no-trailing-spaces": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "coverage/",
+    "*.min.js"
+  ]
+} 
