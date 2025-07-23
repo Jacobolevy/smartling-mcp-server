@@ -13,16 +13,22 @@
   "scripts": {
     "start": "node bin/mcp-simple.js",
     "dev": "node bin/mcp-simple.js",
+    "start:http": "node src/http-server.ts",
+    "start:streaming": "node scripts/start-https-streaming.js",
+    "start:https": "SSL_GENERATE=true node scripts/start-https-streaming.js",
+    "dev:streaming": "SSL_GENERATE=true nodemon scripts/start-https-streaming.js",
     "test": "npm run test:mcp && npm run test:tools",
     "test:mcp": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node bin/mcp-simple.js",
     "test:tools": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"smartling_diagnostic\", \"arguments\": {}}}' | node bin/mcp-simple.js",
     "test:connection": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"smartling_get_account_info\", \"arguments\": {}}}' | node bin/mcp-simple.js",
+    "test:streaming": "curl -X POST http://localhost:3000/stream/test -H 'Content-Type: application/json' -d '{}'",
     "build": "echo 'MCP Server is ready - no build step required'",
     "clean": "rm -rf node_modules package-lock.json",
     "lint": "echo 'Linting completed - pure JavaScript project'",
     "count-tools": "grep -c \"name: 'smartling_\" bin/mcp-simple.js",
     "list-tools": "grep \"name: 'smartling_\" bin/mcp-simple.js | head -20",
     "setup": "cp .env.example .env && echo 'Please edit .env with your Smartling credentials'",
+    "deploy": "npm run start:streaming",
     "prepublishOnly": "npm run test"
   },
   "keywords": [
@@ -57,7 +63,15 @@
     "LICENSE"
   ],
   "dependencies": {
-    "dotenv": "^17.2.0"
+    "dotenv": "^17.2.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.0.0"
   },
   "preferGlobal": true
 }
