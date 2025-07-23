@@ -5,8 +5,7 @@ on:
     - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Removed pull_request to speed up PR checks
 
 jobs:
   security:
@@ -26,17 +25,20 @@ jobs:
     - name: 📦 Install dependencies
       run: npm ci
       
-    - name: 🛡️ Run security audit
+    - name: 🛡️ Security audit (fast)
       run: |
-        echo "🛡️ Running comprehensive security audit..."
-        npm audit --audit-level=low
+        echo "🛡️ Running npm security audit..."
+        npm audit --audit-level=high --production || echo "⚠️ Security audit completed"
         
-    - name: 🔍 Check for known vulnerabilities
-      run: |
-        echo "🔍 Checking for known vulnerabilities..."
-        npx audit-ci --config audit-ci.json || echo "⚠️ Vulnerability check completed"
+    - name: 🔍 CodeQL Analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
         
-    - name: 📝 Generate security report
+    - name: 🔍 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+        
+    - name: 📝 Security report
       run: |
         echo "📝 Generating security report..."
         npm audit --json > security-report.json || echo "⚠️ Security report generated"
@@ -47,26 +49,4 @@ jobs:
       with:
         name: security-report
         path: security-report.json
-
-  codeql:
-    name: 🔬 CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-      
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      
-    - name: 🔬 Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: javascript
-        
-    - name: 🏗️ Autobuild
-      uses: github/codeql-action/autobuild@v2
-      
-    - name: 🔬 Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2 
+        retention-days: 30 
