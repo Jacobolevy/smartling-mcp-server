@@ -3689,6 +3689,31 @@ app.post('/mcp/context', (req, res) => {
   res.json({ items: resolved });
 });
 
+// SSE endpoint for Wix Chat integration
+app.get('/sse', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Send initial connection event
+  res.write('event: connected\n');
+  res.write('data: {"status": "connected", "server": "smartling-mcp", "tools": 74}\n\n');
+
+  // Keep connection alive
+  const heartbeat = setInterval(() => {
+    res.write('event: heartbeat\n');
+    res.write('data: {"timestamp": "' + new Date().toISOString() + '"}\n\n');
+  }, 30000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+  });
+});
+
 // Proxy endpoint to Render backend
 app.post('/execute/:toolName', (req, res) => {
   const { toolName } = req.params;
@@ -3736,11 +3761,12 @@ app.post('/execute/:toolName', (req, res) => {
 
 // Start HTTP server for MCP endpoints
 const PORT = process.env.PORT || 3000;
-const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `https://smartling-mcp.onrender.com`;
 const httpServer = app.listen(PORT, () => {
   console.log(`🌐 Smartling MCP HTTP server running on port ${PORT}`);
   console.log(`📋 MCP Manifest: ${RENDER_URL}/mcp/manifest`);
   console.log(`🔧 MCP Context: ${RENDER_URL}/mcp/context`);
+  console.log(`🔗 SSE for Wix Chat: ${RENDER_URL}/sse`);
   console.log(`🚀 Backend API: https://smartling-mcp.onrender.com`);
 });
 
