@@ -16,7 +16,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_URL="https://github.com/jacobol/smartling-mcp-server.git"  # Update with your actual repo URL
+REPO_URL="https://github.com/Jacobolevy/smartling-mcp-server.git"
 REPO_NAME="smartling-mcp-server"
 INSTALL_DIR="$HOME/smartling-mcp-ultra"
 SMARTLING_USER_IDENTIFIER=""
