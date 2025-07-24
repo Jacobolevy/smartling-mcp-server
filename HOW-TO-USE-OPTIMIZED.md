@@ -34,7 +34,7 @@ Done! Only 3 commands vs the 20+ you had before.
 
 **Single command:**
 ```bash
-./install-optimized.sh "vjwwgsqgeogfkqtmntznqhqxaslfwx" "s16jebo9eafog6ugv1me6paojuIL^38pkd2kv1ltr8e9pa5vj9on825"
+./install-optimized.sh "vjwwgsqgeogfkqtmntznqhqxaslfwx" "s16jebo9eafog6ugv1mtoe6paojuIL^38pkd2kv1ltr8e9pa5vj9on825"
 ```
 
 **What it does automatically:**
