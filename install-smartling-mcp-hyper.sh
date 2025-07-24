@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 🚀 SMARTLING MCP HYPER - ULTIMATE AUTONOMOUS INSTALLER
-# Includes ALL advanced optimizations: Request Deduplication, Bloom Filter, Memory Management, Circuit Breaker
-# Version: 3.0.0 - Maximum Performance
+# 🌐 SMARTLING MCP COMPLETE - FULL API ACCESS INSTALLER
+# Direct mapping of ALL Smartling API endpoints as individual tools
+# Version: 4.0.0 - Complete API Coverage
 
 set -e
 
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # Configuration
 REPO_URL="https://github.com/Jacobolevy/smartling-mcp-server.git"
 REPO_NAME="smartling-mcp-server"
-INSTALL_DIR="$HOME/smartling-mcp-hyper"
+INSTALL_DIR="$HOME/smartling-mcp-complete"
 SMARTLING_USER_IDENTIFIER=""
 SMARTLING_USER_SECRET=""
 
@@ -26,23 +26,23 @@ SMARTLING_USER_SECRET=""
 show_banner() {
     echo ""
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║              🚀 SMARTLING MCP HYPER - ULTIMATE INSTALLER v3.0               ║${NC}"
-    echo -e "${PURPLE}║                     ALL Advanced Optimizations Included                     ║${NC}"
-    echo -e "${PURPLE}║                        Performance Level: EXTREME                           ║${NC}"
+    echo -e "${PURPLE}║               🌐 SMARTLING MCP COMPLETE - API ACCESS v4.0                   ║${NC}"
+    echo -e "${PURPLE}║                      ALL Smartling APIs as Individual Tools                 ║${NC}"
+    echo -e "${PURPLE}║                           Coverage Level: COMPLETE                          ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}🎯 COMPLETELY AUTONOMOUS: Zero manual intervention required!${NC}"
-    echo -e "${CYAN}⚡ Advanced Features: Request Deduplication, Bloom Filter + Trie Search${NC}"
-    echo -e "${CYAN}🧠 Memory Management: Smart GC, Leak Detection, Pool Management${NC}"
-    echo -e "${CYAN}🛡️ Circuit Breaker: Health Scoring, Failure Pattern Analysis${NC}"
-    echo -e "${CYAN}📊 Real-time Analytics: Performance Monitoring, Predictive Analysis${NC}"
+    echo -e "${CYAN}🌐 Full API Access: ALL Smartling endpoints as individual tools${NC}"
+    echo -e "${CYAN}🔧 Direct Mapping: No abstractions, no consolidations${NC}"
+    echo -e "${CYAN}🛠️ API Diagnostics: Health checks, error handling, workarounds${NC}"
+    echo -e "${CYAN}📊 30+ Tools: Complete coverage of Smartling API surface${NC}"
     echo ""
     echo -e "${YELLOW}📋 What this installer does:${NC}"
-    echo -e "${CYAN}   1. 📂 Clones the hyper-optimized repository${NC}"
+    echo -e "${CYAN}   1. 📂 Clones the complete API repository${NC}"
     echo -e "${CYAN}   2. 🔧 Installs all dependencies automatically${NC}"
     echo -e "${CYAN}   3. ⚙️  Auto-configures Claude Desktop AND Cursor IDE${NC}"
-    echo -e "${CYAN}   4. 🧪 Tests hyper-optimized system functionality${NC}"
-    echo -e "${CYAN}   5. 🚀 Delivers 200-300% faster performance${NC}"
+    echo -e "${CYAN}   4. 🧪 Tests complete API system functionality${NC}"
+    echo -e "${CYAN}   5. 🌐 Delivers full Smartling API access${NC}"
     echo ""
 }
 
@@ -135,17 +135,10 @@ clone_repository() {
 
 # Verify repository contents
 verify_repository() {
-    echo -e "${BLUE}🔍 Verifying hyper-optimized repository contents...${NC}"
+    echo -e "${BLUE}🔍 Verifying complete API repository contents...${NC}"
     
     local required_files=(
-        "bin/mcp-hyper-optimized-complete.js"
-        "lib/request-deduplication.js"
-        "lib/hyper-search-engine.js"
-        "lib/advanced-memory-manager.js"
-        "lib/advanced-circuit-breaker.js"
-        "lib/advanced-error-recovery.js"
-        "lib/batch-operations-engine.js"
-        "lib/analytics-dashboard.js"
+        "bin/mcp-complete-api.js"
         "package.json"
     )
     
@@ -165,13 +158,13 @@ verify_repository() {
         exit 1
     fi
     
-    echo -e "${GREEN}✅ All hyper-optimization components verified${NC}"
-    echo -e "${CYAN}💡 Advanced features detected:${NC}"
-    echo -e "${CYAN}   🔄 Request Deduplication Engine${NC}"
-    echo -e "${CYAN}   🔍 Bloom Filter + Trie Search${NC}"
-    echo -e "${CYAN}   🧠 Advanced Memory Manager${NC}"
-    echo -e "${CYAN}   🛡️ Circuit Breaker with Health Scoring${NC}"
-    echo -e "${CYAN}   📊 Real-time Analytics Dashboard${NC}"
+    echo -e "${GREEN}✅ Complete API server components verified${NC}"
+    echo -e "${CYAN}💡 API features detected:${NC}"
+    echo -e "${CYAN}   🌐 30+ Individual API Tools${NC}"
+    echo -e "${CYAN}   🔧 Direct Smartling API Mapping${NC}"
+    echo -e "${CYAN}   🛠️ API Health Diagnostics${NC}"
+    echo -e "${CYAN}   🔍 Error Handling & Workarounds${NC}"
+    echo -e "${CYAN}   📊 Complete Endpoint Coverage${NC}"
 }
 
 # Install dependencies
@@ -216,9 +209,9 @@ configure_applications() {
             const existing = JSON.parse(fs.readFileSync('$CLAUDE_CONFIG_FILE', 'utf8'));
             const mcpConfig = {
                 mcpServers: {
-                    'smartling-hyper': {
+                    'smartling-complete': {
                         command: 'node',
-                        args: ['$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js'],
+                        args: ['$CURRENT_DIR/bin/mcp-complete-api.js'],
                         env: {
                             SMARTLING_USER_IDENTIFIER: '$SMARTLING_USER_IDENTIFIER',
                             SMARTLING_USER_SECRET: '$SMARTLING_USER_SECRET',
@@ -239,9 +232,9 @@ configure_applications() {
             cat > "$CLAUDE_CONFIG_FILE" << EOF
 {
   "mcpServers": {
-    "smartling-hyper": {
+    "smartling-complete": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -257,9 +250,9 @@ EOF
         cat > "$CLAUDE_CONFIG_FILE" << EOF
 {
   "mcpServers": {
-    "smartling-hyper": {
+    "smartling-complete": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -293,9 +286,9 @@ EOF
             const existing = JSON.parse(fs.readFileSync('$CURSOR_CONFIG_FILE', 'utf8'));
             const mcpConfig = {
                 'mcp.servers': {
-                    'smartling-hyper': {
+                    'smartling-complete': {
                         command: 'node',
-                        args: ['$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js'],
+                        args: ['$CURRENT_DIR/bin/mcp-complete-api.js'],
                         env: {
                             SMARTLING_USER_IDENTIFIER: '$SMARTLING_USER_IDENTIFIER',
                             SMARTLING_USER_SECRET: '$SMARTLING_USER_SECRET',
@@ -316,9 +309,9 @@ EOF
             cat > "$CURSOR_CONFIG_FILE" << EOF
 {
   "mcp.servers": {
-    "smartling-hyper": {
+    "smartling-complete": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -334,9 +327,9 @@ EOF
         cat > "$CURSOR_CONFIG_FILE" << EOF
 {
   "mcp.servers": {
-    "smartling-hyper": {
+    "smartling-complete": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-hyper-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -356,11 +349,11 @@ EOF
 
 # Test the installation
 test_installation() {
-    echo -e "${BLUE}🧪 Testing hyper-optimized installation...${NC}"
+    echo -e "${BLUE}🧪 Testing complete API installation...${NC}"
     
     # Test Node.js syntax
     echo -e "${CYAN}🔍 Testing server syntax...${NC}"
-    if node -c bin/mcp-hyper-optimized-complete.js; then
+    if node -c bin/mcp-complete-api.js; then
         echo -e "${GREEN}✅ Server syntax validation passed${NC}"
     else
         echo -e "${RED}❌ Server syntax validation failed${NC}"
@@ -383,7 +376,7 @@ test_installation() {
     # Test MCP server response
     echo -e "${CYAN}🔍 Testing MCP server response...${NC}"
     echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | \
-    timeout 10s node bin/mcp-hyper-optimized-complete.js 2>/dev/null | \
+    timeout 10s node bin/mcp-complete-api.js 2>/dev/null | \
     grep -q '"tools"' && echo -e "${GREEN}✅ MCP server responding${NC}" || echo -e "${YELLOW}⚠️  Tool count verification inconclusive${NC}"
     
     echo -e "${GREEN}✅ Installation test completed${NC}"
@@ -392,32 +385,32 @@ test_installation() {
 # Show completion message
 show_completion() {
     echo ""
-    echo -e "${GREEN}🎉 HYPER-OPTIMIZED INSTALLATION COMPLETED! 🏆${NC}"
+    echo -e "${GREEN}🎉 COMPLETE API INSTALLATION FINISHED! 🏆${NC}"
     echo ""
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║                    🚀 PERFORMANCE LEVEL: EXTREME             ║${NC}"
-    echo -e "${PURPLE}║               200-300% FASTER THAN STANDARD                  ║${NC}"
+    echo -e "${PURPLE}║                    🌐 API COVERAGE: COMPLETE                 ║${NC}"
+    echo -e "${PURPLE}║               FULL ACCESS TO ALL SMARTLING APIS             ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${CYAN}✅ Smartling MCP Hyper installed and configured${NC}"
-    echo -e "${CYAN}✅ Claude Desktop configured with hyper server${NC}"
-    echo -e "${CYAN}✅ Cursor IDE configured with hyper server${NC}"
-    echo -e "${CYAN}✅ 17 enterprise tools with advanced optimizations${NC}"
+    echo -e "${CYAN}✅ Smartling MCP Complete installed and configured${NC}"
+    echo -e "${CYAN}✅ Claude Desktop configured with complete API server${NC}"
+    echo -e "${CYAN}✅ Cursor IDE configured with complete API server${NC}"
+    echo -e "${CYAN}✅ 30+ individual API tools with direct access${NC}"
     echo ""
-    echo -e "${YELLOW}📊 Advanced Features Enabled:${NC}"
-    echo -e "${GREEN}   🔄 Request Deduplication (40-60% less duplicate requests)${NC}"
-    echo -e "${GREEN}   🔍 Bloom Filter + Trie Search (90% faster negative lookups)${NC}"
-    echo -e "${GREEN}   🧠 Smart Memory Management (prevents memory leaks)${NC}"
-    echo -e "${GREEN}   🛡️ Circuit Breaker with Health Scoring (95% better resilience)${NC}"
-    echo -e "${GREEN}   📊 Real-time Analytics Dashboard${NC}"
-    echo -e "${GREEN}   ⚡ Streaming Batch Operations${NC}"
+    echo -e "${YELLOW}📊 API Features Enabled:${NC}"
+    echo -e "${GREEN}   🌐 Complete Smartling API Coverage (30+ tools)${NC}"
+    echo -e "${GREEN}   🔧 Direct API Mapping (no abstractions)${NC}"
+    echo -e "${GREEN}   🛠️ API Health Diagnostics & Error Handling${NC}"
+    echo -e "${GREEN}   🔍 Workarounds for Broken APIs (Files parsing)${NC}"
+    echo -e "${GREEN}   📊 Individual Tools for Each Endpoint${NC}"
+    echo -e "${GREEN}   ⚡ Transparent Access to All Smartling Functions${NC}"
     echo ""
     echo -e "${YELLOW}📋 Next Steps:${NC}"
     echo -e "${CYAN}   1. 🔄 Restart Claude Desktop${NC}"
     echo -e "${CYAN}   2. 🔄 Restart Cursor IDE${NC}"
     echo -e "${CYAN}   3. 🎉 Enjoy ultra-fast Smartling operations!${NC}"
     echo ""
-    echo -e "${PURPLE}💡 Pro Tip: Use 'get_hyper_dashboard' tool to monitor performance${NC}"
+    echo -e "${PURPLE}💡 Pro Tip: Use 'api_health_check' tool to diagnose API issues${NC}"
     echo ""
 }
 
