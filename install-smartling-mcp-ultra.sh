@@ -41,7 +41,7 @@ show_banner() {
     echo -e "${YELLOW}📋 What this installer does:${NC}"
     echo -e "${CYAN}   1. 📂 Clones the ultra-optimized repository${NC}"
     echo -e "${CYAN}   2. 🔧 Installs all dependencies automatically${NC}"
-    echo -e "${CYAN}   3. ⚙️  Configures Claude Desktop and/or Cursor IDE${NC}"
+    echo -e "${CYAN}   3. ⚙️  Auto-configures Claude Desktop AND Cursor IDE${NC}"
     echo -e "${CYAN}   4. 🧪 Tests everything to ensure it works${NC}"
     echo -e "${CYAN}   5. 🚀 Delivers enterprise-grade MCP server${NC}"
     echo ""
@@ -114,39 +114,41 @@ collect_credentials() {
     echo -e "${GREEN}✅ Credentials configured successfully${NC}"
 }
 
-# Select installation targets
-select_installation_targets() {
-    echo -e "${BLUE}🎯 Select Installation Target(s)${NC}"
-    echo ""
-    echo -e "${CYAN}Choose where to install the Smartling MCP server:${NC}"
-    echo ""
-    echo "1. 🤖 Claude Desktop (recommended)"
-    echo "2. 🎯 Cursor IDE" 
-    echo "3. 🚀 Both (maximum compatibility)"
+# Auto-detect and configure installation targets
+auto_detect_installation_targets() {
+    echo -e "${BLUE}🎯 Auto-Detecting Installation Targets${NC}"
     echo ""
     
-    read -p "Choose option (1-3): " choice < /dev/tty
-    echo ""
+    # Initialize
+    INSTALL_FOR_CLAUDE=false
+    INSTALL_FOR_CURSOR=false
     
-    case $choice in
-        1)
-            INSTALL_FOR_CLAUDE=true
-            echo -e "${GREEN}✅ Installing for Claude Desktop${NC}"
-            ;;
-        2)
-            INSTALL_FOR_CURSOR=true
-            echo -e "${GREEN}✅ Installing for Cursor IDE${NC}"
-            ;;
-        3)
-            INSTALL_FOR_CLAUDE=true
-            INSTALL_FOR_CURSOR=true
-            echo -e "${GREEN}✅ Installing for both Claude Desktop and Cursor IDE${NC}"
-            ;;
-        *)
-            echo -e "${YELLOW}⚠️  Invalid choice. Defaulting to Claude Desktop${NC}"
-            INSTALL_FOR_CLAUDE=true
-            ;;
-    esac
+    # Detect Claude Desktop
+    echo -e "${CYAN}🔍 Checking for Claude Desktop...${NC}"
+    if [[ -d "$HOME/.config/claude-desktop" ]] || [[ -d "/Applications/Claude.app" ]] || [[ -d "$HOME/Library/Application Support/Claude" ]]; then
+        INSTALL_FOR_CLAUDE=true
+        echo -e "${GREEN}✅ Claude Desktop detected - Will configure${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Claude Desktop not detected - Will configure anyway (future-ready)${NC}"
+        INSTALL_FOR_CLAUDE=true  # Configure anyway for future use
+    fi
+    
+    # Detect Cursor IDE
+    echo -e "${CYAN}🔍 Checking for Cursor IDE...${NC}"
+    if [[ -d "$HOME/.cursor" ]] || [[ -d "/Applications/Cursor.app" ]] || [[ -d "$HOME/Library/Application Support/Cursor" ]] || command -v cursor >/dev/null 2>&1; then
+        INSTALL_FOR_CURSOR=true
+        echo -e "${GREEN}✅ Cursor IDE detected - Will configure${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Cursor IDE not detected - Will configure anyway (future-ready)${NC}"
+        INSTALL_FOR_CURSOR=true  # Configure anyway for future use
+    fi
+    
+    echo ""
+    echo -e "${PURPLE}🚀 AUTONOMOUS INSTALLATION MODE:${NC}"
+    echo -e "${GREEN}✅ Will configure Claude Desktop (detected or future-ready)${NC}"
+    echo -e "${GREEN}✅ Will configure Cursor IDE (detected or future-ready)${NC}"
+    echo -e "${CYAN}💡 Both configurations will be ready when you install the applications${NC}"
+    echo ""
 }
 
 # Clone the repository
@@ -525,7 +527,7 @@ main() {
     fi
     
     echo ""
-    select_installation_targets
+    auto_detect_installation_targets
     echo ""
     
     check_system_requirements
