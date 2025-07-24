@@ -235,14 +235,14 @@ install_and_setup() {
 {
   "name": "smartling-mcp-server-ultra",
   "version": "2.0.0",
-  "description": "Ultra-optimized Smartling MCP Server with enterprise features",
+      "description": "Complete Smartling MCP Server with full API access",
           "main": "bin/mcp-complete-api.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node bin/mcp-ultra-optimized-complete.js",
-    "test": "echo \"Ultra-optimized server ready\" && exit 0",
+            "start": "node bin/mcp-complete-api.js",
+            "test": "echo \"Complete API server ready\" && exit 0",
     "lint": "echo \"No linting configured\" && exit 0",
-    "count-tools": "echo \"Counting tools...\" && node -e \"const server = require('./bin/mcp-ultra-optimized-complete'); const s = new server.UltraOptimizedMCPServer(); console.log('Tools available:', s.getTools().length);\""
+          "count-tools": "echo \"Counting tools...\" && node -e \"const server = require('./bin/mcp-complete-api'); const s = new server.CompleteMCPServer(); console.log('Tools available:', s.getTools().length);\""
   },
   "dependencies": {
     "dotenv": "^16.0.0"
@@ -309,7 +309,7 @@ configure_ides() {
   "mcpServers": {
     "smartling-ultra": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-ultra-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -367,7 +367,7 @@ EOF
   "mcp.servers": {
     "smartling-ultra": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-ultra-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -384,7 +384,7 @@ EOF
   "mcp.servers": {
     "smartling-ultra": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-ultra-optimized-complete.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -407,7 +407,7 @@ test_installation() {
     
     # Test 1: Syntax validation
     echo -e "${CYAN}🔍 Testing server syntax...${NC}"
-    if node -c bin/mcp-ultra-optimized-complete.js 2>/dev/null; then
+    if node -c bin/mcp-complete-api.js 2>/dev/null; then
         echo -e "${GREEN}✅ Server syntax validation passed${NC}"
     else
         echo -e "${RED}❌ Server syntax validation failed${NC}"
@@ -482,7 +482,7 @@ show_success_message() {
     echo ""
     echo -e "${PURPLE}📍 INSTALLATION DETAILS:${NC}"
     echo -e "${CYAN}   • Location: $INSTALL_DIR${NC}"
-    echo -e "${CYAN}   • Main server: bin/mcp-ultra-optimized-complete.js${NC}"
+    echo -e "${CYAN}   • Main server: bin/mcp-complete-api.js${NC}"
     echo -e "${CYAN}   • Tools available: $TOOL_COUNT enterprise tools${NC}"
     echo ""
     echo -e "${PURPLE}🎯 NEXT STEPS:${NC}"
