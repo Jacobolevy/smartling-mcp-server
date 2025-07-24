@@ -98,9 +98,9 @@ collect_credentials() {
         echo -e "${CYAN}   (You can find these in your Smartling project settings)${NC}"
         echo ""
         
-        read -p "🔑 Smartling User Identifier: " SMARTLING_USER_IDENTIFIER
+        read -p "🔑 Smartling User Identifier: " SMARTLING_USER_IDENTIFIER < /dev/tty
         echo ""
-        read -s -p "🔒 Smartling User Secret: " SMARTLING_USER_SECRET
+        read -s -p "🔒 Smartling User Secret: " SMARTLING_USER_SECRET < /dev/tty
         echo ""
         echo ""
     fi
@@ -125,7 +125,7 @@ select_installation_targets() {
     echo "3. 🚀 Both (maximum compatibility)"
     echo ""
     
-    read -p "Choose option (1-3): " choice
+    read -p "Choose option (1-3): " choice < /dev/tty
     echo ""
     
     case $choice in
