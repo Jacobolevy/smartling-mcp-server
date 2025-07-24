@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 🚀 SMARTLING MCP ULTRA - AUTONOMOUS INSTALLER
-# Clone repo + Enterprise installation in one command
-# Version: 2.0.0 - Completely Autonomous
+# 🌐 SMARTLING MCP ULTRA - COMPLETE API INSTALLER
+# Clone repo + Complete API installation in one command
+# Version: 4.0.0 - Complete API Coverage
 
 set -e
 
@@ -176,7 +176,7 @@ clone_repository() {
         # 3. Copy from current directory if running from within the repo
         
         # For now, let's copy from current directory if we're in the repo
-        if [[ -f "bin/mcp-ultra-optimized-complete.js" ]]; then
+        if [[ -f "bin/mcp-complete-api.js" ]]; then
             echo -e "${CYAN}📋 Copying files from current directory...${NC}"
             cp -r . "$INSTALL_DIR/"
             echo -e "${GREEN}✅ Files copied successfully${NC}"
@@ -198,7 +198,7 @@ verify_repository() {
     echo -e "${BLUE}🔍 Verifying repository contents...${NC}"
     
     local required_files=(
-        "bin/mcp-ultra-optimized-complete.js"
+        "bin/mcp-complete-api.js"
         "lib/advanced-error-recovery.js"
         "lib/batch-operations-engine.js"
         "lib/analytics-dashboard.js"
@@ -236,7 +236,7 @@ install_and_setup() {
   "name": "smartling-mcp-server-ultra",
   "version": "2.0.0",
   "description": "Ultra-optimized Smartling MCP Server with enterprise features",
-  "main": "bin/mcp-ultra-optimized-complete.js",
+          "main": "bin/mcp-complete-api.js",
   "type": "commonjs",
   "scripts": {
     "start": "node bin/mcp-ultra-optimized-complete.js",
