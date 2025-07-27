@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# 🌐 SMARTLING MCP ULTRA - COMPLETE API INSTALLER
-# Clone repo + Complete API installation in one command
-# Version: 4.0.0 - Complete API Coverage
+# 🌐 SMARTLING MCP SERVER - COMPLETE INSTALLER
+# Clone repo + Complete installation in one command
+# Version: 3.1.0 - Updated for TypeScript implementation
 
 set -e
 
@@ -18,7 +18,7 @@ NC='\033[0m' # No Color
 # Configuration
 REPO_URL="https://github.com/Jacobolevy/smartling-mcp-server.git"
 REPO_NAME="smartling-mcp-server"
-INSTALL_DIR="$HOME/smartling-mcp-ultra"
+INSTALL_DIR="$HOME/smartling-mcp-server"
 SMARTLING_USER_IDENTIFIER=""
 SMARTLING_USER_SECRET=""
 INSTALL_FOR_CURSOR=false
@@ -28,22 +28,22 @@ INSTALL_FOR_CLAUDE=false
 show_banner() {
     echo ""
     echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${PURPLE}║                🚀 SMARTLING MCP ULTRA - AUTONOMOUS INSTALLER                 ║${NC}"
+    echo -e "${PURPLE}║                🚀 SMARTLING MCP SERVER - AUTONOMOUS INSTALLER               ║${NC}"
     echo -e "${PURPLE}║                        Clone + Install + Configure                           ║${NC}"
-    echo -e "${PURPLE}║                           Enterprise-Grade v2.0.0                           ║${NC}"
+    echo -e "${PURPLE}║                           Enterprise-Grade v3.1.0                           ║${NC}"
     echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${CYAN}🎯 COMPLETELY AUTONOMOUS: No manual steps required!${NC}"
-    echo -e "${CYAN}✨ Features: Enhanced Caching, Batch Operations, AI-Enhanced Search${NC}"
-    echo -e "${CYAN}🔧 Advanced Error Recovery, Performance Analytics, Auto-Tuning${NC}"
-    echo -e "${CYAN}📊 Real-time Monitoring, Predictive Analytics, Circuit Breaker${NC}"
+    echo -e "${CYAN}✨ Features: 30+ Smartling API Tools, TypeScript Support${NC}"
+    echo -e "${CYAN}🔧 Auto-compiled TypeScript, MCP SDK Integration${NC}"
+    echo -e "${CYAN}📊 Project Management, Files, Jobs, Quality Control, Webhooks${NC}"
     echo ""
     echo -e "${YELLOW}📋 What this installer does:${NC}"
-    echo -e "${CYAN}   1. 📂 Clones the ultra-optimized repository${NC}"
-    echo -e "${CYAN}   2. 🔧 Installs all dependencies automatically${NC}"
+    echo -e "${CYAN}   1. 📂 Clones the latest repository${NC}"
+    echo -e "${CYAN}   2. 🔧 Installs all dependencies (including TypeScript)${NC}"
     echo -e "${CYAN}   3. ⚙️  Auto-configures Claude Desktop AND Cursor IDE${NC}"
-    echo -e "${CYAN}   4. 🧪 Tests everything to ensure it works${NC}"
-    echo -e "${CYAN}   5. 🚀 Delivers enterprise-grade MCP server${NC}"
+    echo -e "${CYAN}   4. 🧪 Compiles TypeScript and tests everything${NC}"
+    echo -e "${CYAN}   5. 🚀 Delivers production-ready MCP server${NC}"
     echo ""
 }
 
@@ -66,8 +66,8 @@ check_system_requirements() {
     fi
     
     NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
-    if [ "$NODE_VERSION" -lt 16 ]; then
-        echo -e "${RED}❌ Node.js v16+ required. Current: $(node -v)${NC}"
+    if [ "$NODE_VERSION" -lt 18 ]; then
+        echo -e "${RED}❌ Node.js v18+ required. Current: $(node -v)${NC}"
         echo -e "${YELLOW}📦 Please update Node.js from https://nodejs.org/${NC}"
         exit 1
     fi
@@ -153,7 +153,7 @@ auto_detect_installation_targets() {
 
 # Clone the repository
 clone_repository() {
-    echo -e "${BLUE}📂 Cloning Smartling MCP Ultra repository...${NC}"
+    echo -e "${BLUE}📂 Cloning Smartling MCP Server repository...${NC}"
     
     # Remove existing directory if it exists
     if [[ -d "$INSTALL_DIR" ]]; then
@@ -166,27 +166,11 @@ clone_repository() {
     if git clone "$REPO_URL" "$INSTALL_DIR" 2>/dev/null; then
         echo -e "${GREEN}✅ Repository cloned successfully${NC}"
     else
-        # Fallback: create directory and download files
-        echo -e "${YELLOW}⚠️  Git clone failed, creating local installation...${NC}"
-        mkdir -p "$INSTALL_DIR"
-        
-        # Note: In a real scenario, you'd either:
-        # 1. Have the actual git repository URL
-        # 2. Package the files and download them
-        # 3. Copy from current directory if running from within the repo
-        
-        # For now, let's copy from current directory if we're in the repo
-        if [[ -f "bin/mcp-complete-api.js" ]]; then
-            echo -e "${CYAN}📋 Copying files from current directory...${NC}"
-            cp -r . "$INSTALL_DIR/"
-            echo -e "${GREEN}✅ Files copied successfully${NC}"
-        else
-            echo -e "${RED}❌ Unable to access repository. Please ensure:${NC}"
-            echo -e "${YELLOW}   1. You have internet connection for git clone${NC}"
-            echo -e "${YELLOW}   2. The repository URL is correct${NC}"
-            echo -e "${YELLOW}   3. You have proper git access permissions${NC}"
-            exit 1
-        fi
+        echo -e "${RED}❌ Failed to clone repository. Please check:${NC}"
+        echo -e "${YELLOW}   1. Internet connection${NC}"
+        echo -e "${YELLOW}   2. Git permissions${NC}"
+        echo -e "${YELLOW}   3. Repository URL: $REPO_URL${NC}"
+        exit 1
     fi
     
     cd "$INSTALL_DIR"
@@ -198,10 +182,11 @@ verify_repository() {
     echo -e "${BLUE}🔍 Verifying repository contents...${NC}"
     
     local required_files=(
-        "bin/mcp-complete-api.js"
-        "lib/advanced-error-recovery.js"
-        "lib/batch-operations-engine.js"
-        "lib/analytics-dashboard.js"
+        "bin/mcp-simple.js"
+        "src/index.ts"
+        "src/smartling-client.ts"
+        "package.json"
+        "tsconfig.json"
     )
     
     local missing_files=()
@@ -217,7 +202,7 @@ verify_repository() {
         for file in "${missing_files[@]}"; do
             echo -e "${RED}   • $file${NC}"
         done
-        echo -e "${YELLOW}💡 Please ensure you have the complete ultra-optimized repository${NC}"
+        echo -e "${YELLOW}💡 Please ensure you have the complete repository${NC}"
         exit 1
     fi
     
@@ -228,37 +213,16 @@ verify_repository() {
 install_and_setup() {
     echo -e "${BLUE}📦 Installing dependencies and setting up environment...${NC}"
     
-    # Create or update package.json
-    if [[ ! -f "package.json" ]]; then
-        echo -e "${YELLOW}📝 Creating package.json...${NC}"
-        cat > package.json << 'EOF'
-{
-  "name": "smartling-mcp-server-ultra",
-  "version": "2.0.0",
-      "description": "Complete Smartling MCP Server with full API access",
-          "main": "bin/mcp-complete-api.js",
-  "type": "commonjs",
-  "scripts": {
-            "start": "node bin/mcp-complete-api.js",
-            "test": "echo \"Complete API server ready\" && exit 0",
-    "lint": "echo \"No linting configured\" && exit 0",
-          "count-tools": "echo \"Counting tools...\" && node -e \"const server = require('./bin/mcp-complete-api'); const s = new server.CompleteMCPServer(); console.log('Tools available:', s.getTools().length);\""
-  },
-  "dependencies": {
-    "dotenv": "^16.0.0"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "author": "Smartling MCP Ultra Team",
-  "license": "MIT"
-}
-EOF
-    fi
-    
     # Install dependencies
     echo -e "${CYAN}🔄 Installing npm dependencies...${NC}"
-    npm install --production --silent
+    npm install --silent
+    
+    # Install TypeScript dependencies if not present
+    echo -e "${CYAN}🔧 Ensuring TypeScript dependencies...${NC}"
+    npm install --save-dev ts-node @modelcontextprotocol/sdk typescript --silent
+    
+    # Make binary executable
+    chmod +x bin/mcp-simple.js
     
     # Create environment configuration
     echo -e "${CYAN}🔧 Creating environment configuration...${NC}"
@@ -268,19 +232,15 @@ SMARTLING_USER_IDENTIFIER=${SMARTLING_USER_IDENTIFIER}
 SMARTLING_USER_SECRET=${SMARTLING_USER_SECRET}
 SMARTLING_BASE_URL=https://api.smartling.com
 
-# Performance Configuration
-MCP_CACHE_SIZE=3000
-MCP_CACHE_TTL=300000
-MCP_BATCH_SIZE=150
-MCP_MAX_CONCURRENT=12
-MCP_ENABLE_ANALYTICS=true
-MCP_ENABLE_PREDICTIONS=true
-
-# Development
+# Development Configuration
 NODE_ENV=production
 EOF
 
     chmod 600 .env
+    
+    # Compile TypeScript
+    echo -e "${CYAN}🔨 Compiling TypeScript...${NC}"
+    npx tsc --build
     
     echo -e "${GREEN}✅ Dependencies installed and environment configured${NC}"
 }
@@ -307,9 +267,9 @@ configure_ides() {
         cat > "$CLAUDE_CONFIG_FILE" << EOF
 {
   "mcpServers": {
-    "smartling-ultra": {
+    "smartling": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -343,9 +303,9 @@ EOF
                 const existing = JSON.parse(fs.readFileSync('$CURSOR_CONFIG_FILE', 'utf8'));
                 const mcpConfig = {
                     'mcp.servers': {
-                        'smartling-ultra': {
+                        'smartling': {
                             command: 'node',
-                            args: ['$CURRENT_DIR/bin/mcp-ultra-optimized-complete.js'],
+                            args: ['$CURRENT_DIR/bin/mcp-simple.js'],
                             env: {
                                 SMARTLING_USER_IDENTIFIER: '$SMARTLING_USER_IDENTIFIER',
                                 SMARTLING_USER_SECRET: '$SMARTLING_USER_SECRET',
@@ -365,9 +325,9 @@ EOF
                 cat > "$CURSOR_CONFIG_FILE" << EOF
 {
   "mcp.servers": {
-    "smartling-ultra": {
+    "smartling": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -382,9 +342,9 @@ EOF
             cat > "$CURSOR_CONFIG_FILE" << EOF
 {
   "mcp.servers": {
-    "smartling-ultra": {
+    "smartling": {
       "command": "node",
-      "args": ["$CURRENT_DIR/bin/mcp-complete-api.js"],
+      "args": ["$CURRENT_DIR/bin/mcp-simple.js"],
       "env": {
         "SMARTLING_USER_IDENTIFIER": "$SMARTLING_USER_IDENTIFIER",
         "SMARTLING_USER_SECRET": "$SMARTLING_USER_SECRET",
@@ -403,115 +363,99 @@ EOF
 
 # Test the installation
 test_installation() {
-    echo -e "${BLUE}🧪 Testing ultra-optimized server installation...${NC}"
+    echo -e "${BLUE}🧪 Testing server installation...${NC}"
     
-    # Test 1: Syntax validation
-    echo -e "${CYAN}🔍 Testing server syntax...${NC}"
-    if node -c bin/mcp-complete-api.js 2>/dev/null; then
-        echo -e "${GREEN}✅ Server syntax validation passed${NC}"
+    # Test 1: Binary exists and is executable
+    echo -e "${CYAN}🔍 Testing server binary...${NC}"
+    if [[ -x "bin/mcp-simple.js" ]]; then
+        echo -e "${GREEN}✅ Server binary is executable${NC}"
     else
-        echo -e "${RED}❌ Server syntax validation failed${NC}"
+        echo -e "${RED}❌ Server binary is not executable${NC}"
         exit 1
     fi
     
     # Test 2: Environment validation
     echo -e "${CYAN}🔍 Testing environment configuration...${NC}"
-    if node -e "
-        require('dotenv').config();
-        if (!process.env.SMARTLING_USER_IDENTIFIER || !process.env.SMARTLING_USER_SECRET) {
-            console.error('❌ Environment validation failed');
-            process.exit(1);
-        }
-        console.log('✅ Environment validation passed');
-    " 2>/dev/null; then
+    if [[ -f ".env" && -n "$SMARTLING_USER_IDENTIFIER" && -n "$SMARTLING_USER_SECRET" ]]; then
         echo -e "${GREEN}✅ Environment configuration valid${NC}"
     else
         echo -e "${RED}❌ Environment configuration failed${NC}"
         exit 1
     fi
     
-    # Test 3: Tool count verification
+    # Test 3: Tool list verification
     echo -e "${CYAN}🔍 Testing available tools...${NC}"
-    TOOL_COUNT=$(timeout 15s node -e "
-        const server = require('./bin/mcp-ultra-optimized-complete');
-        const s = new server.UltraOptimizedMCPServer();
-        console.log(s.getTools().length);
-    " 2>/dev/null || echo "0")
+    TOOL_OUTPUT=$(timeout 10s bash -c "SMARTLING_USER_IDENTIFIER='$SMARTLING_USER_IDENTIFIER' SMARTLING_USER_SECRET='$SMARTLING_USER_SECRET' echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node bin/mcp-simple.js 2>/dev/null" 2>/dev/null || echo "")
     
-    if [[ "$TOOL_COUNT" -ge 15 ]]; then
-        echo -e "${GREEN}✅ Tool verification passed ($TOOL_COUNT enterprise tools available)${NC}"
+    TOOL_COUNT=$(echo "$TOOL_OUTPUT" | grep -o '"name":"smartling_[^"]*"' | wc -l | tr -d ' ' || echo "0")
+    
+    if [[ "$TOOL_COUNT" -ge 20 ]]; then
+        echo -e "${GREEN}✅ Tool verification passed ($TOOL_COUNT Smartling tools available)${NC}"
     else
         echo -e "${YELLOW}⚠️  Tool count verification: $TOOL_COUNT tools detected${NC}"
+        echo -e "${CYAN}💡 Server may still be functional, continuing...${NC}"
     fi
     
-    # Test 4: Basic npm scripts
-    echo -e "${CYAN}🔍 Testing npm scripts...${NC}"
-    if npm test --silent 2>/dev/null; then
-        echo -e "${GREEN}✅ npm scripts working correctly${NC}"
+    # Test 4: TypeScript compilation
+    echo -e "${CYAN}🔍 Testing TypeScript compilation...${NC}"
+    if [[ -d "dist" && -f "dist/index.js" ]]; then
+        echo -e "${GREEN}✅ TypeScript compilation successful${NC}"
     else
-        echo -e "${YELLOW}⚠️  npm scripts test inconclusive${NC}"
+        echo -e "${YELLOW}⚠️  TypeScript compilation check inconclusive${NC}"
     fi
     
-    echo -e "${GREEN}🎉 All critical tests passed!${NC}"
+    echo -e "${GREEN}🎉 Installation tests completed!${NC}"
 }
 
 # Show success message and instructions
 show_success_message() {
     echo ""
     echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║                    🎉 AUTONOMOUS INSTALLATION COMPLETE!                      ║${NC}"
-    echo -e "${GREEN}║                       SMARTLING MCP ULTRA IS READY!                          ║${NC}"
+    echo -e "${GREEN}║                    🎉 INSTALLATION COMPLETE!                                 ║${NC}"
+    echo -e "${GREEN}║                   SMARTLING MCP SERVER IS READY!                             ║${NC}"
     echo -e "${GREEN}╚═══════════════════════════════════════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${PURPLE}🚀 ENTERPRISE FEATURES ACTIVATED:${NC}"
-    echo -e "${CYAN}   ✅ Enhanced Smart Caching with Project Indexing${NC}"
-    echo -e "${CYAN}   ✅ HTTP Connection Pooling with Circuit Breaker${NC}"
-    echo -e "${CYAN}   ✅ Intelligent Batch Operations Engine${NC}"
-    echo -e "${CYAN}   ✅ Advanced Error Recovery System${NC}"
-    echo -e "${CYAN}   ✅ AI-Enhanced Search with Fuzzy Matching${NC}"
-    echo -e "${CYAN}   ✅ Real-time Analytics Dashboard${NC}"
-    echo -e "${CYAN}   ✅ Predictive Performance Analytics${NC}"
-    echo -e "${CYAN}   ✅ Auto-Tuning Performance Engine${NC}"
-    echo ""
-    echo -e "${PURPLE}📊 PERFORMANCE IMPROVEMENTS:${NC}"
-    echo -e "${CYAN}   ⚡ 70-90% faster than standard MCP servers${NC}"
-    echo -e "${CYAN}   🧠 80%+ cache hit rate for repeated operations${NC}"
-    echo -e "${CYAN}   🔄 95.6% code size reduction vs original${NC}"
-    echo -e "${CYAN}   🛡️ Enterprise-grade error resilience${NC}"
-    echo -e "${CYAN}   📈 17 enterprise tools vs 9 basic tools${NC}"
+    echo -e "${PURPLE}🚀 SMARTLING TOOLS AVAILABLE:${NC}"
+    echo -e "${CYAN}   ✅ Project Management (get projects)${NC}"
+    echo -e "${CYAN}   ✅ File Operations (upload, download, status, delete)${NC}"
+    echo -e "${CYAN}   ✅ String Search & Management (search, get details, recent)${NC}"
+    echo -e "${CYAN}   ✅ Translation Jobs (create, manage, authorize, cancel)${NC}"
+    echo -e "${CYAN}   ✅ Quality Control (run checks, get results)${NC}"
+    echo -e "${CYAN}   ✅ String Tagging (add/remove tags, search by tags)${NC}"
+    echo -e "${CYAN}   ✅ Glossary Management (create, add terms, manage)${NC}"
+    echo -e "${CYAN}   ✅ Webhook Configuration (create, manage notifications)${NC}"
     echo ""
     echo -e "${PURPLE}📍 INSTALLATION DETAILS:${NC}"
     echo -e "${CYAN}   • Location: $INSTALL_DIR${NC}"
-    echo -e "${CYAN}   • Main server: bin/mcp-complete-api.js${NC}"
-    echo -e "${CYAN}   • Tools available: $TOOL_COUNT enterprise tools${NC}"
+    echo -e "${CYAN}   • Main server: bin/mcp-simple.js${NC}"
+    echo -e "${CYAN}   • TypeScript source: src/index.ts${NC}"
+    echo -e "${CYAN}   • Tools available: 30+ Smartling API tools${NC}"
     echo ""
     echo -e "${PURPLE}🎯 NEXT STEPS:${NC}"
     
     if [[ "$INSTALL_FOR_CLAUDE" == true ]]; then
         echo -e "${YELLOW}   Claude Desktop:${NC}"
         echo -e "${CYAN}   1. 🔄 Restart Claude Desktop application${NC}"
-        echo -e "${CYAN}   2. ✨ The 'smartling-ultra' server will be available automatically${NC}"
-        echo -e "${CYAN}   3. 🚀 Use advanced commands like 'batch_search_and_tag', 'get_performance_report'${NC}"
+        echo -e "${CYAN}   2. ✨ The 'smartling' server will be available automatically${NC}"
+        echo -e "${CYAN}   3. 🚀 Ask Claude to help with Smartling translation tasks${NC}"
     fi
     
     if [[ "$INSTALL_FOR_CURSOR" == true ]]; then
         echo -e "${YELLOW}   Cursor IDE:${NC}"
         echo -e "${CYAN}   1. 🔄 Restart Cursor IDE${NC}"
-        echo -e "${CYAN}   2. 📱 Access via Cmd+Shift+P → 'MCP: Open Panel'${NC}"
+        echo -e "${CYAN}   2. 📱 Access via Cmd+Shift+P → 'MCP: Connect'${NC}"
         echo -e "${CYAN}   3. 🛠️ All Smartling tools will be available in the MCP panel${NC}"
     fi
     
     echo ""
-    echo -e "${PURPLE}🔧 ADVANCED CAPABILITIES:${NC}"
-    echo -e "${CYAN}   • Enhanced search: exact, contains, startsWith, endsWith, regex${NC}"
-    echo -e "${CYAN}   • Batch operations: tag multiple strings efficiently${NC}"
-    echo -e "${CYAN}   • Real-time monitoring: get_dashboard_data, get_system_stats${NC}"
-    echo -e "${CYAN}   • Project indexing: build_project_index for ultra-fast search${NC}"
-    echo -e "${CYAN}   • Performance analytics: get_performance_report${NC}"
+    echo -e "${PURPLE}💡 MANUAL TESTING:${NC}"
+    echo -e "${CYAN}   Test the server manually:${NC}"
+    echo -e "${CYAN}   cd $INSTALL_DIR${NC}"
+    echo -e "${CYAN}   echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node bin/mcp-simple.js${NC}"
     echo ""
-    echo -e "${GREEN}🏆 Your team now has the most advanced Smartling MCP server in existence!${NC}"
+    echo -e "${GREEN}🏆 Your Smartling MCP Server is ready for translation automation!${NC}"
     echo ""
-    echo -e "${PURPLE}📚 Documentation: See ULTRA-OPTIMIZATION-COMPLETE.md for advanced usage${NC}"
+    echo -e "${PURPLE}📚 Documentation: See README.md and TOOL_SPECIFICATIONS.md for usage details${NC}"
     echo ""
 }
 

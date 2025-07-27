@@ -1,5 +1,5 @@
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { SmartlingClient } from '../smartling-client.js';
+import { SmartlingClient } from '../smartling-client';
 
 export const jobTools: Tool[] = [
   {

@@ -1,6 +1,7 @@
 {
   "name": "smartling-mcp-server",
   "version": "3.0.0",
+  "type": "module",
   "description": "Complete Smartling MCP Server with 74+ tools for Claude, Cursor, and other MCP clients",
   "main": "bin/mcp-simple.js",
   "bin": {
@@ -74,13 +75,15 @@
   "dependencies": {
     "axios": "^1.6.2",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.0",
+    "dotenv": "^17.2.1",
     "express": "^4.21.2"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   },
   "preferGlobal": true

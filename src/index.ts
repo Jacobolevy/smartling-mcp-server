@@ -8,14 +8,14 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import * as dotenv from 'dotenv';
 
-import { SmartlingClient } from './smartling-client.js';
-import { projectTools, handleProjectTools } from './tools/projects.js';
-import { fileTools, handleFileTools } from './tools/files.js';
-import { jobTools, handleJobTools } from './tools/jobs.js';
-import { qualityTools, handleQualityTools } from './tools/quality.js';
-import { taggingTools, handleTaggingTools } from './tools/tagging.js';
-import { glossaryTools, handleGlossaryTools } from './tools/glossary.js';
-import { webhookTools, handleWebhookTools } from './tools/webhooks.js';
+import { SmartlingClient } from './smartling-client';
+import { projectTools, handleProjectTools } from './tools/projects';
+import { fileTools, handleFileTools } from './tools/files';
+import { jobTools, handleJobTools } from './tools/jobs';
+import { qualityTools, handleQualityTools } from './tools/quality';
+import { taggingTools, handleTaggingTools } from './tools/tagging';
+import { glossaryTools, handleGlossaryTools } from './tools/glossary';
+import { webhookTools, handleWebhookTools } from './tools/webhooks';
 
 dotenv.config();
 
