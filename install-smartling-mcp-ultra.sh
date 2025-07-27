@@ -242,6 +242,18 @@ EOF
     echo -e "${CYAN}🔨 Compiling TypeScript...${NC}"
     npx tsc --build
     
+    # Fix ES module imports in compiled files
+    echo -e "${CYAN}🔧 Fixing ES module imports...${NC}"
+    sed -i '' "s|from './smartling-client'|from './smartling-client.js'|g" dist/index.js
+    sed -i '' "s|from './tools/projects'|from './tools/projects.js'|g" dist/index.js
+    sed -i '' "s|from './tools/files'|from './tools/files.js'|g" dist/index.js
+    sed -i '' "s|from './tools/jobs'|from './tools/jobs.js'|g" dist/index.js
+    sed -i '' "s|from './tools/quality'|from './tools/quality.js'|g" dist/index.js
+    sed -i '' "s|from './tools/tagging'|from './tools/tagging.js'|g" dist/index.js
+    sed -i '' "s|from './tools/glossary'|from './tools/glossary.js'|g" dist/index.js
+    sed -i '' "s|from './tools/webhooks'|from './tools/webhooks.js'|g" dist/index.js
+    find dist/tools -name "*.js" -exec sed -i '' "s|from '../smartling-client'|from '../smartling-client.js'|g" {} \;
+    
     echo -e "${GREEN}✅ Dependencies installed and environment configured${NC}"
 }
 
