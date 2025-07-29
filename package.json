@@ -23,10 +23,20 @@
     "start": "node bin.js",
     "dev": "tsx watch src/index.ts",
     "serve": "node dist/http-server.js",
+    "start:streaming": "node dist/streaming-server.js",
+    "start:local": "./scripts/start-streaming-server.sh local",
+    "start:tunnel": "./scripts/start-streaming-server.sh tunnel",
+    "start:ngrok": "./scripts/start-streaming-server.sh tunnel ngrok",
+    "start:cloudflare": "./scripts/start-streaming-server.sh tunnel cloudflare",
+    "start:localtunnel": "./scripts/start-streaming-server.sh tunnel localtunnel",
+    "start:ssl": "./scripts/start-streaming-server.sh ssl",
+    "deploy": "./scripts/start-streaming-server.sh",
+    "deploy:help": "./scripts/start-streaming-server.sh help",
     "test": "vitest",
     "test:run": "vitest run",
     "test:mcp": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node bin.js",
     "test:connection": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/call\", \"params\": {\"name\": \"smartling_get_account_info\", \"arguments\": {}}}' | node bin.js",
+    "test:streaming": "curl -s http://localhost:3000/health | jq",
     "inspector": "npx @modelcontextprotocol/inspector ./bin.js",
     "lint": "echo 'Linting completed'",
     "setup": "cp config-example.env .env && echo 'Please edit .env with your Smartling credentials'"
@@ -61,10 +71,12 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.3",
     "axios": "^1.6.2",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
-    "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -72,6 +84,7 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^22",
+    "@types/uuid": "^10.0.0",
     "tsx": "^4.7.0",
     "typescript": "^5.6.2",
     "vitest": "^2.1.0"

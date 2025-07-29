@@ -98,11 +98,11 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
         const downloadedFile = await client.downloadFile(projectId, fileUri, locale, downloadOptions);
         
         const result = {
-          content: downloadedFile.toString('base64'),
-          encoding: 'base64',
-          size: downloadedFile.length
-        };
-        
+        content: downloadedFile.toString('base64'),
+        encoding: 'base64',
+        size: downloadedFile.length
+      };
+    
         return createToolResponse(result, false, 'smartling-download');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

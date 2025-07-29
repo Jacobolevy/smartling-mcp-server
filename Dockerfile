@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source files
 COPY . .
@@ -30,5 +30,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Start the streaming HTTP server
-CMD ["node", "scripts/start-https-streaming.js"] 
+# Use the correct npm script for streaming server
+CMD ["npm", "run", "start:streaming"] 
