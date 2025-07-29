@@ -2,6 +2,25 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { SmartlingClient } from '../smartling-client.js';
 
+const createToolResponse = (data: any, isError: boolean = false, toolName: string = 'smartling-tool') => {
+  const timestamp = Date.now();
+  return {
+    _meta: {
+      requestId: `${toolName}-${timestamp}`,
+      timing: { timestamp },
+      source: 'smartling-api',
+      version: '3.0.0'
+    },
+    content: [
+      {
+        type: 'text' as const,
+        text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
+      },
+    ],
+    ...(isError && { isError: true }),
+  };
+};
+
 export const addFileTools = (server: McpServer, client: SmartlingClient) => {
   server.tool(
     'smartling_upload_file',
@@ -11,37 +30,36 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
       fileContent: z.string().describe('The file content (base64 encoded)'),
       fileUri: z.string().describe('The unique file URI'),
       fileType: z.string().describe('The file type (json, xml, csv, properties, etc.)'),
-      authorize: z.boolean().optional().default(true).describe('Whether to authorize the content for translation'),
+      authorize: z.boolean().default(true).describe('Whether to authorize the content for translation'),
       localeIdsToAuthorize: z.array(z.string()).optional().describe('Specific locales to authorize for translation'),
     },
     async ({ projectId, fileContent, fileUri, fileType, authorize, localeIdsToAuthorize }) => {
+      const startTime = Date.now();
       try {
         const fileBuffer = Buffer.from(fileContent, 'base64');
-        const options: any = {};
-        
-        if (authorize !== undefined) options.authorize = authorize;
-        if (localeIdsToAuthorize) options.localeIdsToAuthorize = localeIdsToAuthorize.join(',');
+        const options: any = { authorize };
+        if (localeIdsToAuthorize !== undefined) options.localeIdsToAuthorize = localeIdsToAuthorize;
         
         const result = await client.uploadFile(projectId, fileBuffer, fileUri, fileType, options);
+        const responseTime = Date.now() - startTime;
+        
         return {
+          _meta: {
+            requestId: `smartling-upload-${Date.now()}`,
+            timing: { duration: responseTime },
+            source: 'smartling-api',
+            version: '3.0.0'
+          },
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify(result, null, 2),
             },
           ],
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error uploading file: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error uploading file: ${errorMessage}`, true, 'smartling-upload');
       }
     }
   );
@@ -56,25 +74,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
     async ({ projectId, fileUri }) => {
       try {
         const result = await client.getFileStatus(projectId, fileUri);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-file-status');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting file status: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error getting file status: ${errorMessage}`, true, 'smartling-file-status');
       }
     }
   );
@@ -86,15 +89,12 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
       projectId: z.string().describe('The project ID'),
       fileUri: z.string().describe('The file URI'),
       locale: z.string().describe('The target locale to download'),
-      retrievalType: z.enum(['published', 'pending', 'pseudo', 'contextMatchingInstrumented']).optional().default('published').describe('Type of content to retrieve'),
-      includeOriginalStrings: z.boolean().optional().default(false).describe('Include original strings for incomplete translations'),
+      retrievalType: z.enum(['published', 'pending', 'pseudo', 'contextMatchingInstrumented']).default('published').describe('Type of content to retrieve'),
+      includeOriginalStrings: z.boolean().default(false).describe('Include original strings for incomplete translations'),
     },
     async ({ projectId, fileUri, locale, retrievalType, includeOriginalStrings }) => {
       try {
-        const downloadOptions: any = {};
-        if (retrievalType) downloadOptions.retrievalType = retrievalType;
-        if (includeOriginalStrings) downloadOptions.includeOriginalStrings = includeOriginalStrings;
-        
+        const downloadOptions: any = { retrievalType, includeOriginalStrings };
         const downloadedFile = await client.downloadFile(projectId, fileUri, locale, downloadOptions);
         
         const result = {
@@ -103,25 +103,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
           size: downloadedFile.length
         };
         
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-download');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error downloading file: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error downloading file: ${errorMessage}`, true, 'smartling-download');
       }
     }
   );
@@ -137,25 +122,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
       try {
         await client.deleteFile(projectId, fileUri);
         const result = { success: true, message: 'File deleted successfully' };
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-delete-file');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error deleting file: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error deleting file: ${errorMessage}`, true, 'smartling-delete-file');
       }
     }
   );
@@ -180,25 +150,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
         if (limit !== undefined) options.limit = limit;
         
         const result = await client.searchStrings(projectId, searchText, options);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-search-strings');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error searching strings: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error searching strings: ${errorMessage}`, true, 'smartling-search-strings');
       }
     }
   );
@@ -214,25 +169,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
     async ({ projectId, hashcode, localeId }) => {
       try {
         const result = await client.getStringDetails(projectId, hashcode, localeId);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-string-details');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting string details: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error getting string details: ${errorMessage}`, true, 'smartling-string-details');
       }
     }
   );
@@ -253,25 +193,10 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
         if (fileUris !== undefined) options.fileUris = fileUris;
         
         const result = await client.getRecentlyLocalized(projectId, localeId, options);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: JSON.stringify(result, null, 2),
-            },
-          ],
-        };
+        return createToolResponse(result, false, 'smartling-recently-localized');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error getting recently localized strings: ${errorMessage}`,
-            },
-          ],
-          isError: true,
-        };
+        return createToolResponse(`Error getting recently localized: ${errorMessage}`, true, 'smartling-recently-localized');
       }
     }
   );
