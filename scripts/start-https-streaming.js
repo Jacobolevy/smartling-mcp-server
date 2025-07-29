@@ -5,11 +5,19 @@
  * Production server with REAL Smartling API integration
  */
 
-const express = require('express');
-const http = require('http');
-const cors = require('cors');
-const axios = require('axios');
-require('dotenv').config();
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// ES module equivalent of __filename and __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config();
 
 class SmartlingRealAPIServer {
   constructor() {
@@ -422,7 +430,7 @@ class SmartlingRealAPIServer {
 }
 
 // Start server if run directly
-if (require.main === module) {
+if (process.argv[1] === __filename) {
   const server = new SmartlingRealAPIServer();
   const port = parseInt(process.env.PORT || '3000');
 
@@ -442,4 +450,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { SmartlingRealAPIServer }; 
+export { SmartlingRealAPIServer }; 
