@@ -1,18 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
+    "module": "NodeNext", 
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
     "esModuleInterop": true,
-    "allowJs": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "declaration": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "outDir": "dist",
+    "declaration": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["dist", "node_modules", "src/legacy/**/*"]
 }

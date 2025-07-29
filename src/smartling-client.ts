@@ -12,7 +12,7 @@ import {
   TaggedString,
   WebhookConfiguration,
   Glossary
-} from './types/smartling';
+} from './types/smartling.js';
 
 export class SmartlingClient {
   private api: AxiosInstance;
