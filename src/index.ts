@@ -13,11 +13,14 @@ import { addTaggingTools } from './tools/tagging.js';
 import { addGlossaryTools } from './tools/glossary.js';
 import { addWebhookTools } from './tools/webhooks.js';
 
+// Load environment variables silently - suppress all dotenv output
+const originalConsoleLog = console.log;
+console.log = () => {}; // Temporarily suppress console.log
 dotenv.config();
+console.log = originalConsoleLog; // Restore console.log
 
-console.log('--------------------------------');
-console.log('Starting Smartling MCP Server');
-console.log('--------------------------------');
+// MCP servers should not log to stdout/stderr during normal operation
+// console.error('Starting Smartling MCP Server');
 
 // Validate required environment variables
 if (!process.env.SMARTLING_USER_IDENTIFIER || !process.env.SMARTLING_USER_SECRET) {
@@ -52,8 +55,6 @@ addTaggingTools(server, smartlingClient);
 addGlossaryTools(server, smartlingClient);
 addWebhookTools(server, smartlingClient);
 
-console.log('Starting server');
 const transport = new StdioServerTransport();
-console.log('Connecting to transport');
 await server.connect(transport);
-console.log('Server connected');
+// MCP server ready - no logging needed
