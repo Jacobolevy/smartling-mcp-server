@@ -108,4 +108,95 @@ export const addTaggingTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
+
+  server.tool(
+    'smartling_debug_tags_search',
+    'Debug tool for tag searching - provides detailed information about tags and string filtering',
+    {
+      projectId: z.string().describe('The project ID'),
+      tags: z.array(z.string()).describe('Array of tags to search for'),
+      fileUri: z.string().optional().describe('Optional: specific file URI to search in'),
+      debugMode: z.boolean().optional().default(true).describe('Enable detailed debugging information'),
+    },
+    async ({ projectId, tags, fileUri, debugMode = true }) => {
+      try {
+        const debugInfo: any = {
+          searchCriteria: { projectId, tags, fileUri },
+          steps: []
+        };
+
+        // Step 1: Check if we can access the project
+        debugInfo.steps.push('1. Checking project access...');
+        try {
+          const projects = await client.getProjects();
+          const project = projects.find(p => p.projectId === projectId);
+          if (project) {
+            debugInfo.projectFound = true;
+            debugInfo.projectName = project.projectName;
+            debugInfo.steps.push('✅ Project found: ' + project.projectName);
+          } else {
+            debugInfo.projectFound = false;
+            debugInfo.steps.push('❌ Project not found in your accessible projects');
+            debugInfo.availableProjects = projects.map(p => ({ id: p.projectId, name: p.projectName }));
+          }
+        } catch (error) {
+          debugInfo.steps.push('❌ Error accessing projects: ' + (error instanceof Error ? error.message : String(error)));
+        }
+
+        // Step 2: Get available tags
+        debugInfo.steps.push('2. Getting available tags...');
+        try {
+          const availableTags = await client.getAvailableTags(projectId);
+          debugInfo.availableTags = availableTags;
+          debugInfo.steps.push(`✅ Found ${Array.isArray(availableTags) ? availableTags.length : 0} available tags`);
+          
+          // Check if requested tags exist
+          if (Array.isArray(availableTags)) {
+            const matchingTags = tags.filter(tag => availableTags.includes(tag));
+            const missingTags = tags.filter(tag => !availableTags.includes(tag));
+            
+            debugInfo.matchingTags = matchingTags;
+            debugInfo.missingTags = missingTags;
+            
+            if (matchingTags.length > 0) {
+              debugInfo.steps.push(`✅ Found matching tags: ${matchingTags.join(', ')}`);
+            }
+            if (missingTags.length > 0) {
+              debugInfo.steps.push(`⚠️ Missing tags: ${missingTags.join(', ')}`);
+            }
+          }
+        } catch (error) {
+          debugInfo.steps.push('❌ Error getting tags: ' + (error instanceof Error ? error.message : String(error)));
+        }
+
+        // Step 3: Try to get strings with tags
+        debugInfo.steps.push('3. Searching for strings with specified tags...');
+        try {
+          const result = await client.getStringsByTag(projectId, tags, fileUri);
+          debugInfo.searchResult = result;
+          debugInfo.resultCount = Array.isArray(result) ? result.length : ((result as any)?.items?.length || 0);
+          debugInfo.steps.push(`✅ Search completed. Found ${debugInfo.resultCount} strings`);
+          
+          if (debugMode && Array.isArray(result) && result.length > 0) {
+            // Show sample of found strings
+            debugInfo.sampleStrings = result.slice(0, 3).map((str: any) => ({
+              hashcode: str.hashcode,
+              stringText: str.stringText || str.parsedStringText,
+              tags: str.tags,
+              fileUri: str.fileUri
+            }));
+          }
+          
+        } catch (error) {
+          debugInfo.steps.push('❌ Error in string search: ' + (error instanceof Error ? error.message : String(error)));
+          debugInfo.searchError = error instanceof Error ? error.message : String(error);
+        }
+
+        return createToolResponse(debugInfo, false, 'smartling-debug-tags-search');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error in debug tags search: ${errorMessage}`, true, 'smartling-debug-tags-search');
+      }
+    }
+  );
 };

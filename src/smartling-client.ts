@@ -557,16 +557,54 @@ export class SmartlingClient {
     await this.authenticate();
     
     const params = new URLSearchParams();
-    tags.forEach(tag => params.append('tag', tag));
+    
+    // For tag-based search, we need to use a different approach
+    // First, let's try the strings search endpoint with proper tag filtering
+    tags.forEach(tag => params.append('tags', tag)); // Changed from 'tag' to 'tags'
+    
     if (fileUri) params.append('fileUri', fileUri);
+    
+    // Add other common parameters for string search
+    params.append('limit', '1000'); // Get more results by default
     
     try {
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings/search?${params.toString()}`
+        `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
       );
       return response.data.response.data;
     } catch (error: any) {
-      throw new Error(`Failed to get strings by tag: ${error.message}`);
+      // If the direct tag search fails, try an alternative approach
+      // Search for strings and then filter by tags in the response
+      try {
+        console.log('Direct tag search failed, trying alternative approach...');
+        
+        // Get all strings and filter client-side (less efficient but more compatible)
+        const searchParams = new URLSearchParams();
+        if (fileUri) searchParams.append('fileUri', fileUri);
+        searchParams.append('limit', '1000');
+        
+        const searchResponse = await this.api.get(
+          `/strings-api/v2/projects/${projectId}/strings?${searchParams.toString()}`
+        );
+        
+        const allStrings = searchResponse.data.response.data.items || searchResponse.data.response.data;
+        
+        // Filter strings that have any of the specified tags
+        if (Array.isArray(allStrings)) {
+          const filteredStrings = allStrings.filter((str: any) => {
+            if (str.tags && Array.isArray(str.tags)) {
+              return tags.some(tag => str.tags.includes(tag));
+            }
+            return false;
+          });
+          
+          return filteredStrings;
+        }
+        
+        return allStrings;
+      } catch (fallbackError: any) {
+        throw new Error(`Failed to get strings by tag: ${error.message}. Fallback also failed: ${fallbackError.message}`);
+      }
     }
   }
 
