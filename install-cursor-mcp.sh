@@ -102,8 +102,66 @@ read -s -p "Enter your Smartling User Secret: " USER_SECRET
 echo ""
 read -p "Enter your Smartling Account UID (optional): " ACCOUNT_UID
 
-# Create MCP configuration
-cat > "$CURSOR_CONFIG_FILE" << EOF
+# Check if config file exists and has content
+if [[ -f "$CURSOR_CONFIG_FILE" && -s "$CURSOR_CONFIG_FILE" ]]; then
+    echo "⚠️  Existing Cursor config found. Creating backup..."
+    cp "$CURSOR_CONFIG_FILE" "$CURSOR_CONFIG_FILE.backup.$(date +%Y%m%d-%H%M%S)"
+    
+    # Parse existing config and add our server
+    if command -v jq > /dev/null 2>&1; then
+        # Use jq if available
+        TEMP_CONFIG=$(mktemp)
+        if [[ -n "$ACCOUNT_UID" ]]; then
+            # With Account UID
+            jq --arg node_path "$NODE_PATH" \
+               --arg project_dir "$PROJECT_DIR" \
+               --arg user_id "$USER_ID" \
+               --arg user_secret "$USER_SECRET" \
+               --arg account_uid "$ACCOUNT_UID" \
+               '
+               # Ensure mcpServers exists
+               if .mcpServers == null then .mcpServers = {} else . end |
+               .mcpServers.smartling = {
+                  "command": $node_path,
+                  "args": [$project_dir + "/bin.js"],
+                  "env": {
+                    "SMARTLING_USER_IDENTIFIER": $user_id,
+                    "SMARTLING_USER_SECRET": $user_secret,
+                    "SMARTLING_BASE_URL": "https://api.smartling.com",
+                    "SMARTLING_ACCOUNT_UID": $account_uid
+                  }
+                }' "$CURSOR_CONFIG_FILE" > "$TEMP_CONFIG"
+        else
+            # Without Account UID
+            jq --arg node_path "$NODE_PATH" \
+               --arg project_dir "$PROJECT_DIR" \
+               --arg user_id "$USER_ID" \
+               --arg user_secret "$USER_SECRET" \
+               '
+               # Ensure mcpServers exists
+               if .mcpServers == null then .mcpServers = {} else . end |
+               .mcpServers.smartling = {
+                  "command": $node_path,
+                  "args": [$project_dir + "/bin.js"],
+                  "env": {
+                    "SMARTLING_USER_IDENTIFIER": $user_id,
+                    "SMARTLING_USER_SECRET": $user_secret,
+                    "SMARTLING_BASE_URL": "https://api.smartling.com"
+                  }
+                }' "$CURSOR_CONFIG_FILE" > "$TEMP_CONFIG"
+        fi
+        mv "$TEMP_CONFIG" "$CURSOR_CONFIG_FILE"
+    else
+        echo "⚠️  jq not found. Overwriting config file..."
+        CREATE_NEW_CONFIG=true
+    fi
+else
+    CREATE_NEW_CONFIG=true
+fi
+
+# Create new config if needed
+if [[ "$CREATE_NEW_CONFIG" == "true" ]]; then
+    cat > "$CURSOR_CONFIG_FILE" << EOF
 {
   "mcpServers": {
     "smartling": {
@@ -119,6 +177,7 @@ cat > "$CURSOR_CONFIG_FILE" << EOF
   }
 }
 EOF
+fi
 
 echo ""
 echo "🎉 Installation Complete!"

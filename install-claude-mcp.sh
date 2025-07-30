@@ -138,7 +138,10 @@ if [[ -f "$CLAUDE_CONFIG_FILE" && -s "$CLAUDE_CONFIG_FILE" ]]; then
                --arg user_id "$USER_ID" \
                --arg user_secret "$USER_SECRET" \
                --arg account_uid "$ACCOUNT_UID" \
-               '.mcpServers.smartling = {
+               '
+               # Ensure mcpServers exists
+               if .mcpServers == null then .mcpServers = {} else . end |
+               .mcpServers.smartling = {
                   "command": $node_path,
                   "args": [$project_dir + "/bin.js"],
                   "env": {
@@ -154,7 +157,10 @@ if [[ -f "$CLAUDE_CONFIG_FILE" && -s "$CLAUDE_CONFIG_FILE" ]]; then
                --arg project_dir "$PROJECT_DIR" \
                --arg user_id "$USER_ID" \
                --arg user_secret "$USER_SECRET" \
-               '.mcpServers.smartling = {
+               '
+               # Ensure mcpServers exists
+               if .mcpServers == null then .mcpServers = {} else . end |
+               .mcpServers.smartling = {
                   "command": $node_path,
                   "args": [$project_dir + "/bin.js"],
                   "env": {
