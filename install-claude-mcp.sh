@@ -131,20 +131,39 @@ if [[ -f "$CLAUDE_CONFIG_FILE" && -s "$CLAUDE_CONFIG_FILE" ]]; then
     if command -v jq > /dev/null 2>&1; then
         # Use jq if available
         TEMP_CONFIG=$(mktemp)
-        jq --arg node_path "$NODE_PATH" \
-           --arg project_dir "$PROJECT_DIR" \
-           --arg user_id "$USER_ID" \
-           --arg user_secret "$USER_SECRET" \
-           --arg account_uid "$ACCOUNT_UID" \
-           '.mcpServers.smartling = {
-              "command": $node_path,
-              "args": [$project_dir + "/bin.js"],
-              "env": {
-                "SMARTLING_USER_IDENTIFIER": $user_id,
-                "SMARTLING_USER_SECRET": $user_secret,
-                "SMARTLING_BASE_URL": "https://api.smartling.com"
-              } + (if $account_uid != "" then {"SMARTLING_ACCOUNT_UID": $account_uid} else {} end)
-            }' "$CLAUDE_CONFIG_FILE" > "$TEMP_CONFIG"
+        if [[ -n "$ACCOUNT_UID" ]]; then
+            # With Account UID
+            jq --arg node_path "$NODE_PATH" \
+               --arg project_dir "$PROJECT_DIR" \
+               --arg user_id "$USER_ID" \
+               --arg user_secret "$USER_SECRET" \
+               --arg account_uid "$ACCOUNT_UID" \
+               '.mcpServers.smartling = {
+                  "command": $node_path,
+                  "args": [$project_dir + "/bin.js"],
+                  "env": {
+                    "SMARTLING_USER_IDENTIFIER": $user_id,
+                    "SMARTLING_USER_SECRET": $user_secret,
+                    "SMARTLING_BASE_URL": "https://api.smartling.com",
+                    "SMARTLING_ACCOUNT_UID": $account_uid
+                  }
+                }' "$CLAUDE_CONFIG_FILE" > "$TEMP_CONFIG"
+        else
+            # Without Account UID
+            jq --arg node_path "$NODE_PATH" \
+               --arg project_dir "$PROJECT_DIR" \
+               --arg user_id "$USER_ID" \
+               --arg user_secret "$USER_SECRET" \
+               '.mcpServers.smartling = {
+                  "command": $node_path,
+                  "args": [$project_dir + "/bin.js"],
+                  "env": {
+                    "SMARTLING_USER_IDENTIFIER": $user_id,
+                    "SMARTLING_USER_SECRET": $user_secret,
+                    "SMARTLING_BASE_URL": "https://api.smartling.com"
+                  }
+                }' "$CLAUDE_CONFIG_FILE" > "$TEMP_CONFIG"
+        fi
         mv "$TEMP_CONFIG" "$CLAUDE_CONFIG_FILE"
     else
         echo "⚠️  jq not found. Overwriting config file..."
