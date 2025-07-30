@@ -5,6 +5,7 @@
 ### 📋 Prerequisites
 - **Node.js 18.0.0+** installed
 - **Smartling API credentials** (User ID + Secret)
+  - Get from: [Smartling Dashboard → Settings → API](https://dashboard.smartling.com/settings/api)
 
 ---
 
@@ -62,6 +63,23 @@ esac
 4. **⚙️ Configures:** MCP server settings automatically
 5. **🔑 Prompts:** For your Smartling credentials securely
 6. **📝 Creates:** Proper config files in the right locations
+7. **🛡️ Preserves:** Existing MCP server configurations (doesn't overwrite)
+
+---
+
+## 🔑 Smartling API Credentials
+
+Before running the installer, get your credentials from:
+**[Smartling Dashboard → Settings → API](https://dashboard.smartling.com/settings/api)**
+
+**Required:**
+- **User Identifier:** Your Smartling API user ID
+- **User Secret:** Your Smartling API secret key
+
+**Optional:**
+- **Account UID:** Your Smartling account ID (for multi-account access)
+
+**💡 Tip:** The installer will prompt for these during setup, so have them ready!
 
 ---
 
@@ -120,6 +138,12 @@ git clone https://github.com/Jacobolevy/smartling-mcp-server.git
 cd smartling-mcp-server
 npm install && npm run build
 ```
+
+### Credential issues?
+- Verify credentials at: https://dashboard.smartling.com/settings/api
+- Ensure User ID and Secret are correct
+- Check that you have access to the projects you want to manage
+- Account UID is optional unless you need multi-account access
 
 ### Still having issues?
 1. Check application logs/developer console
