@@ -44,7 +44,19 @@ else
             cd smartling-mcp-server
             if git status &> /dev/null; then
                 echo "✅ Valid git repository, updating..."
-                git pull origin main
+                
+                # Check if there are local changes that might conflict
+                if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+                    echo "⚠️  Local changes detected, discarding them to get latest version..."
+                    git reset --hard HEAD
+                fi
+                
+                # Fetch the latest changes
+                git fetch origin main
+                
+                # Reset to the latest remote version to avoid any conflicts
+                echo "🔄 Updating to latest version..."
+                git reset --hard origin/main
             else
                 echo "⚠️  Invalid git repository, recreating..."
                 cd ..
