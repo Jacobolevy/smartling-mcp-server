@@ -12,6 +12,7 @@ import { addQualityTools } from './tools/quality.js';
 import { addTaggingTools } from './tools/tagging.js';
 import { addGlossaryTools } from './tools/glossary.js';
 import { addWebhookTools } from './tools/webhooks.js';
+import { addStringTools } from './tools/strings.js';
 
 // Load environment variables silently - suppress all dotenv output
 const originalConsoleLog = console.log;
@@ -30,7 +31,7 @@ if (!process.env.SMARTLING_USER_IDENTIFIER || !process.env.SMARTLING_USER_SECRET
 const server = new McpServer(
   {
     name: 'smartling-mcp-server',
-    version: '3.0.0',
+    version: '3.1.0',
   },
   {
     capabilities: {
@@ -54,6 +55,7 @@ addQualityTools(server, smartlingClient);
 addTaggingTools(server, smartlingClient);
 addGlossaryTools(server, smartlingClient);
 addWebhookTools(server, smartlingClient);
+addStringTools(server, smartlingClient);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-07-30
+
+### 🚀 Enhanced String and Key Management
+
+This version adds **8 new tools** focused on advanced string management, tagging, and workflow operations, bringing the total to **35 tools**.
+
+### ✨ Added
+
+#### 🔤 Advanced String Management Tools (5 new tools):
+- **`smartling_get_workflow_steps`** - Get workflow steps for jobs and locales
+- **`smartling_assign_workflow_step`** - Assign workflow steps to specific users
+- **`smartling_get_string_translations`** - Get translations for strings across multiple locales
+- **`smartling_search_strings_advanced`** - Advanced string search with multiple filters and pagination
+- **`smartling_get_translation_progress`** - Get comprehensive translation progress reports
+
+#### 🏷️ Enhanced String Tagging Tools (3 new tools):
+- **`smartling_add_string_tags`** - Add tags to specific strings in files
+- **`smartling_remove_string_tags`** - Remove tags from specific strings
+- **`smartling_get_strings_by_tag`** - Find all strings with specific tags
+
+### 🔧 Enhanced
+- **String Tagging**: Improved `smartling_get_available_tags` with better error handling and standardized response format
+- **Tool Count**: Updated from 27 to 35 total tools across all installers and documentation
+- **API Coverage**: Now includes workflow management and advanced string operations
+
+### 📈 Benefits
+- **Advanced String Management**: Complete control over string tagging and organization
+- **Workflow Integration**: Manage translation workflows and assignments directly
+- **Enhanced Search**: Advanced filtering and pagination for large string datasets
+- **Progress Tracking**: Comprehensive translation progress monitoring across projects
+- **Better Organization**: Tag-based string organization and retrieval
+
+---
+
 ## [3.0.0] - 2024-12-21
 
 ### 🎉 Major Release - Complete Smartling API Coverage

@@ -98,7 +98,7 @@ Before running the installer, get your credentials from:
 
 1. **Restart** your AI application completely
 2. **Test** with: *"Show me my Smartling projects"*
-3. **Enjoy** 27 Smartling tools integrated! 🎉
+3. **Enjoy** 35 Smartling tools integrated! 🎉
 
 ---
 
