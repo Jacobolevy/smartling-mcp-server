@@ -3,7 +3,9 @@
 ## One-Line Installers
 
 ### 📋 Prerequisites
-- **Node.js 18.0.0+** installed
+- **Node.js 18.0.0+** installed ([Download here](https://nodejs.org/))
+- **Git** (optional, installers have fallback methods)
+- **PowerShell** (Windows) or **Terminal** (macOS/Linux)
 - **Smartling API credentials** (User ID + Secret)
   - Get from: [Smartling Dashboard → Settings → API](https://dashboard.smartling.com/settings/api)
 
@@ -11,6 +13,16 @@
 
 ## 🎯 For Cursor IDE
 
+### **Windows (PowerShell)**
+```powershell
+# Download and run Windows installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-cursor-windows.bat" -OutFile "install-cursor.bat"
+.\install-cursor.bat
+```
+
+**⚠️ Note:** Cursor on Windows may open additional PowerShell windows - this is a known limitation.
+
+### **macOS/Linux (Terminal)**
 ```bash
 curl -sSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-cursor-mcp.sh | bash
 ```
@@ -24,6 +36,14 @@ cd smartling-mcp-server && ./install-cursor-mcp.sh
 
 ## 🎯 For Claude Desktop
 
+### **Windows (PowerShell)**
+```powershell
+# Download and run Windows installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-claude-windows.bat" -OutFile "install-claude.bat"
+.\install-claude.bat
+```
+
+### **macOS/Linux (Terminal)**
 ```bash
 curl -sSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-claude-mcp.sh | bash
 ```
@@ -37,6 +57,26 @@ cd smartling-mcp-server && ./install-claude-mcp.sh
 
 ## 🎯 For Both (Interactive)
 
+### **Windows (PowerShell)**
+```powershell
+# Download repository
+git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+cd smartling-mcp-server
+
+# Interactive setup
+Write-Host "Choose your platform:"
+Write-Host "1) Cursor IDE"
+Write-Host "2) Claude Desktop"
+Write-Host "3) Both"
+$choice = Read-Host "Selection"
+switch ($choice) {
+    1 { .\install-cursor-windows.bat }
+    2 { .\install-claude-windows.bat }
+    3 { .\install-cursor-windows.bat; .\install-claude-windows.bat }
+}
+```
+
+### **macOS/Linux (Terminal)**
 ```bash
 # Download and setup for both platforms
 git clone https://github.com/Jacobolevy/smartling-mcp-server.git
@@ -85,12 +125,14 @@ Before running the installer, get your credentials from:
 
 ## 🗂️ Config File Locations
 
-| Platform | Config Location |
-|----------|----------------|
-| **Cursor** | `~/.cursor/mcp.json` |
-| **Claude (macOS)** | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| **Claude (Linux)** | `~/.config/claude/claude_desktop_config.json` |
-| **Claude (Windows)** | `%APPDATA%/Claude/claude_desktop_config.json` |
+| Platform | Application | Config Location |
+|----------|-------------|----------------|
+| **Windows** | Cursor | `%USERPROFILE%\.cursor\mcp.json` |
+| **Windows** | Claude | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **macOS** | Cursor | `~/.cursor/mcp.json` |
+| **macOS** | Claude | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Linux** | Cursor | `~/.cursor/mcp.json` |
+| **Linux** | Claude | `~/.config/claude/claude_desktop_config.json` |
 
 ---
 
@@ -127,6 +169,20 @@ chmod +x /path/to/smartling-mcp-server/bin.js
 ```
 
 ### Installation failed?
+
+**Windows (PowerShell):**
+```powershell
+# Check required tools
+where node    # Node.js required
+where git     # Git preferred (PowerShell download as fallback)
+
+# Manual installation
+git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+cd smartling-mcp-server
+npm install; npm run build
+```
+
+**macOS/Linux (Terminal):**
 ```bash
 # Ensure you have required tools
 which node    # Node.js required
@@ -144,6 +200,12 @@ npm install && npm run build
 - Ensure User ID and Secret are correct
 - Check that you have access to the projects you want to manage
 - Account UID is optional unless you need multi-account access
+
+### Windows-specific issues?
+- **PowerShell windows opening**: This is a known Cursor limitation on Windows, not an installer issue
+- **Bash not recognized**: Use PowerShell installers (`.bat` files) instead of bash commands
+- **Git not found**: The installer will use PowerShell download as fallback
+- **Permission errors**: Try running PowerShell as Administrator if needed
 
 ### Still having issues?
 1. Check application logs/developer console
