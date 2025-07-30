@@ -14,7 +14,7 @@
 curl -sSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-cursor-mcp.sh | bash
 ```
 
-**Or locally:**
+**Or locally (if you already have the repository):**
 ```bash
 cd smartling-mcp-server && ./install-cursor-mcp.sh
 ```
@@ -27,7 +27,7 @@ cd smartling-mcp-server && ./install-cursor-mcp.sh
 curl -sSL https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/install-claude-mcp.sh | bash
 ```
 
-**Or locally:**
+**Or locally (if you already have the repository):**
 ```bash
 cd smartling-mcp-server && ./install-claude-mcp.sh
 ```
@@ -56,11 +56,12 @@ esac
 
 ## ✅ What the Installer Does
 
-1. **🔍 Auto-detects:** Node.js path, project directory, OS
-2. **📦 Installs:** Dependencies and builds the project
-3. **⚙️ Configures:** MCP server settings automatically
-4. **🔑 Prompts:** For your Smartling credentials securely
-5. **📝 Creates:** Proper config files in the right locations
+1. **📥 Downloads:** Automatically clones/downloads the repository
+2. **🔍 Auto-detects:** Node.js path, project directory, OS
+3. **📦 Installs:** Dependencies and builds the project
+4. **⚙️ Configures:** MCP server settings automatically
+5. **🔑 Prompts:** For your Smartling credentials securely
+6. **📝 Creates:** Proper config files in the right locations
 
 ---
 
@@ -105,6 +106,19 @@ node /path/to/smartling-mcp-server/bin.js --help
 chmod +x /path/to/smartling-mcp-server/bin.js
 
 # On macOS, grant Claude necessary permissions in System Preferences
+```
+
+### Installation failed?
+```bash
+# Ensure you have required tools
+which node    # Node.js required
+which git     # Git preferred (curl/wget as fallback)
+which unzip   # Required for zip download fallback
+
+# Manual installation
+git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+cd smartling-mcp-server
+npm install && npm run build
 ```
 
 ### Still having issues?

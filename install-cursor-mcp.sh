@@ -8,10 +8,51 @@ set -e
 echo "🚀 Smartling MCP Installer for Cursor"
 echo "====================================="
 
-# Detect project directory
-PROJECT_DIR="$(pwd)"
+# Check if we're already in the project directory
+if [[ -f "package.json" ]] && grep -q "smartling-mcp-server" package.json 2>/dev/null; then
+    echo "✅ Already in smartling-mcp-server directory"
+    PROJECT_DIR="$(pwd)"
+else
+    echo "📥 Downloading smartling-mcp-server..."
+    
+    # Check if git is available
+    if command -v git &> /dev/null; then
+        # Use git clone if available
+        if [[ -d "smartling-mcp-server" ]]; then
+            echo "🔄 Directory exists, updating..."
+            cd smartling-mcp-server
+            git pull origin main
+        else
+            git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+            cd smartling-mcp-server
+        fi
+    else
+        # Fallback to downloading zip
+        echo "📦 Git not found, downloading zip..."
+        if command -v curl &> /dev/null; then
+            curl -L https://github.com/Jacobolevy/smartling-mcp-server/archive/refs/heads/main.zip -o smartling-mcp-server.zip
+            unzip -q smartling-mcp-server.zip
+            mv smartling-mcp-server-main smartling-mcp-server
+            cd smartling-mcp-server
+            rm ../smartling-mcp-server.zip
+        elif command -v wget &> /dev/null; then
+            wget https://github.com/Jacobolevy/smartling-mcp-server/archive/refs/heads/main.zip -O smartling-mcp-server.zip
+            unzip -q smartling-mcp-server.zip
+            mv smartling-mcp-server-main smartling-mcp-server
+            cd smartling-mcp-server
+            rm ../smartling-mcp-server.zip
+        else
+            echo "❌ Error: Neither git, curl, nor wget found. Please install one of them first."
+            exit 1
+        fi
+    fi
+    
+    PROJECT_DIR="$(pwd)"
+fi
+
+# Verify we're in the right directory
 if [[ ! -f "$PROJECT_DIR/package.json" ]]; then
-    echo "❌ Error: Run this script from the smartling-mcp-server directory"
+    echo "❌ Error: Could not find package.json in $PROJECT_DIR"
     exit 1
 fi
 
@@ -69,6 +110,7 @@ EOF
 echo ""
 echo "🎉 Installation Complete!"
 echo "========================"
+echo "✅ Project downloaded to: $PROJECT_DIR"
 echo "✅ Cursor MCP configured at: $CURSOR_CONFIG_FILE"
 echo "✅ 27 Smartling tools available"
 echo ""
