@@ -40,9 +40,18 @@ else
     if command -v git &> /dev/null; then
         # Use git clone if available
         if [[ -d "smartling-mcp-server" ]]; then
-            echo "🔄 Directory exists, updating..."
+            echo "🔄 Directory exists, checking if it's a valid git repository..."
             cd smartling-mcp-server
-            git pull origin main
+            if git status &> /dev/null; then
+                echo "✅ Valid git repository, updating..."
+                git pull origin main
+            else
+                echo "⚠️  Invalid git repository, recreating..."
+                cd ..
+                mv smartling-mcp-server smartling-mcp-server.backup.$(date +%Y%m%d-%H%M%S)
+                git clone https://github.com/Jacobolevy/smartling-mcp-server.git
+                cd smartling-mcp-server
+            fi
         else
             git clone https://github.com/Jacobolevy/smartling-mcp-server.git
             cd smartling-mcp-server
@@ -50,6 +59,10 @@ else
     else
         # Fallback to downloading zip
         echo "📦 Git not found, downloading zip..."
+        if [[ -d "smartling-mcp-server" ]]; then
+            echo "⚠️  Directory exists, backing up..."
+            mv smartling-mcp-server smartling-mcp-server.backup.$(date +%Y%m%d-%H%M%S)
+        fi
         if command -v curl &> /dev/null; then
             curl -L https://github.com/Jacobolevy/smartling-mcp-server/archive/refs/heads/main.zip -o smartling-mcp-server.zip
             unzip -q smartling-mcp-server.zip
