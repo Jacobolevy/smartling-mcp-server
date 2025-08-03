@@ -14,9 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optional filtering by specific locale IDs
   - Complete word count and completion statistics
 
+### 🔧 Installer Improvements
+- **Credential Preservation**: Installers now automatically preserve existing Smartling credentials
+  - No more re-entering credentials on updates
+  - Smart detection of existing User ID, Secret, and Account UID
+  - Interactive choice to keep or update credentials
+  - Works on all platforms (macOS, Linux, Windows)
+
 ### 🔧 Technical Details
 - Added `JobProgress` interface in types
 - Implemented `getJobProgress` method in SmartlingClient
+- Enhanced all installers with credential preservation logic
 - Added comprehensive error handling and parameter validation
 - Follows existing code patterns and standards
 
@@ -27,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better job monitoring and reporting capabilities
 - Detailed locale-specific progress tracking
 - Enhanced project management visibility
-- Seamless integration with existing job management tools
+- Seamless installation and update experience
+- No more credential re-entry on updates
 
 ---
 

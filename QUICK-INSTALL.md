@@ -101,7 +101,7 @@ esac
 2. **🔍 Auto-detects:** Node.js path, project directory, OS
 3. **📦 Installs:** Dependencies and builds the project
 4. **⚙️ Configures:** MCP server settings automatically
-5. **🔑 Prompts:** For your Smartling credentials securely
+5. **🔑 Preserves:** Existing Smartling credentials (asks before changing)
 6. **📝 Creates:** Proper config files in the right locations
 7. **🛡️ Preserves:** Existing MCP server configurations (doesn't overwrite)
 
@@ -119,7 +119,13 @@ Before running the installer, get your credentials from:
 **Optional:**
 - **Account UID:** Your Smartling account ID (for multi-account access)
 
-**💡 Tip:** The installer will prompt for these during setup, so have them ready!
+**💡 Smart Updates:** The installer automatically detects and preserves existing credentials when updating. It will only ask for new credentials if none are found or if you choose to change them.
+
+**🔄 Updating:** When you run the installer again, it will:
+- ✅ Detect your existing credentials
+- ✅ Show you the first 8 characters of your User ID for verification
+- ✅ Ask if you want to keep them or enter new ones
+- ✅ Preserve all your settings
 
 ---
 

@@ -78,13 +78,52 @@ set "CLAUDE_DIR=%APPDATA%\Claude"
 if not exist "%CLAUDE_DIR%" mkdir "%CLAUDE_DIR%"
 set "CLAUDE_CONFIG=%CLAUDE_DIR%\claude_desktop_config.json"
 
+:: Check for existing credentials
+set "EXISTING_USER_ID="
+set "EXISTING_USER_SECRET="
+set "EXISTING_ACCOUNT_UID="
+set "USE_EXISTING=N"
+
+if exist "%CLAUDE_CONFIG%" (
+    echo 🔍 Checking for existing Smartling credentials...
+    for /f "tokens=*" %%i in ('powershell -Command "try { $config = Get-Content '%CLAUDE_CONFIG%' | ConvertFrom-Json; $config.mcpServers.smartling.env.SMARTLING_USER_IDENTIFIER } catch { '' }"') do set "EXISTING_USER_ID=%%i"
+    for /f "tokens=*" %%i in ('powershell -Command "try { $config = Get-Content '%CLAUDE_CONFIG%' | ConvertFrom-Json; $config.mcpServers.smartling.env.SMARTLING_USER_SECRET } catch { '' }"') do set "EXISTING_USER_SECRET=%%i"
+    for /f "tokens=*" %%i in ('powershell -Command "try { $config = Get-Content '%CLAUDE_CONFIG%' | ConvertFrom-Json; $config.mcpServers.smartling.env.SMARTLING_ACCOUNT_UID } catch { '' }"') do set "EXISTING_ACCOUNT_UID=%%i"
+)
+
 :: Prompt for credentials
 echo.
 echo 🔑 Smartling API Credentials Setup
 echo ================================
-set /p USER_ID="Enter your Smartling User Identifier: "
-set /p USER_SECRET="Enter your Smartling User Secret: "
-set /p ACCOUNT_UID="Enter your Smartling Account UID (optional): "
+
+if not "%EXISTING_USER_ID%"=="" if not "%EXISTING_USER_SECRET%"=="" (
+    echo ✅ Found existing credentials!
+    echo    User ID: %EXISTING_USER_ID:~0,8%***
+    if not "%EXISTING_ACCOUNT_UID%"=="" (
+        echo    Account UID: %EXISTING_ACCOUNT_UID%
+    ) else (
+        echo    Account UID: ^(not set^)
+    )
+    echo.
+    set /p USE_EXISTING="Keep existing credentials? (Y/n): "
+    
+    if /i "%USE_EXISTING%"=="n" (
+        echo 📝 Enter new credentials:
+        set /p USER_ID="Enter your Smartling User Identifier: "
+        set /p USER_SECRET="Enter your Smartling User Secret: "
+        set /p ACCOUNT_UID="Enter your Smartling Account UID (optional): "
+    ) else (
+        echo 🔄 Using existing credentials...
+        set "USER_ID=%EXISTING_USER_ID%"
+        set "USER_SECRET=%EXISTING_USER_SECRET%"
+        set "ACCOUNT_UID=%EXISTING_ACCOUNT_UID%"
+    )
+) else (
+    echo 📝 No existing credentials found. Please enter your Smartling credentials:
+    set /p USER_ID="Enter your Smartling User Identifier: "
+    set /p USER_SECRET="Enter your Smartling User Secret: "
+    set /p ACCOUNT_UID="Enter your Smartling Account UID (optional): "
+)
 
 :: Check if config file exists
 if exist "%CLAUDE_CONFIG%" (

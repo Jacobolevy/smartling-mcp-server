@@ -125,14 +125,49 @@ npm run build > /dev/null 2>&1
 # Create Claude config directory
 mkdir -p "$CLAUDE_CONFIG_DIR"
 
-# Read credentials
+# Check for existing credentials first
+EXISTING_USER_ID=""
+EXISTING_USER_SECRET=""
+EXISTING_ACCOUNT_UID=""
+
+if [[ -f "$CLAUDE_CONFIG_FILE" && -s "$CLAUDE_CONFIG_FILE" ]] && command -v jq > /dev/null 2>&1; then
+    echo "🔍 Checking for existing Smartling credentials..."
+    EXISTING_USER_ID=$(jq -r '.mcpServers.smartling.env.SMARTLING_USER_IDENTIFIER // ""' "$CLAUDE_CONFIG_FILE" 2>/dev/null)
+    EXISTING_USER_SECRET=$(jq -r '.mcpServers.smartling.env.SMARTLING_USER_SECRET // ""' "$CLAUDE_CONFIG_FILE" 2>/dev/null)
+    EXISTING_ACCOUNT_UID=$(jq -r '.mcpServers.smartling.env.SMARTLING_ACCOUNT_UID // ""' "$CLAUDE_CONFIG_FILE" 2>/dev/null)
+fi
+
+# Setup credentials
 echo ""
 echo "🔑 Smartling Credentials Setup"
 echo "=============================="
-read -p "Enter your Smartling User Identifier: " USER_ID
-read -s -p "Enter your Smartling User Secret: " USER_SECRET
-echo ""
-read -p "Enter your Smartling Account UID (optional): " ACCOUNT_UID
+
+if [[ -n "$EXISTING_USER_ID" && -n "$EXISTING_USER_SECRET" ]]; then
+    echo "✅ Found existing credentials!"
+    echo "   User ID: ${EXISTING_USER_ID:0:8}***"
+    echo "   Account UID: ${EXISTING_ACCOUNT_UID:-"(not set)"}"
+    echo ""
+    read -p "Keep existing credentials? (Y/n): " KEEP_EXISTING
+    
+    if [[ "$KEEP_EXISTING" =~ ^[Nn]$ ]]; then
+        echo "📝 Enter new credentials:"
+        read -p "Enter your Smartling User Identifier: " USER_ID
+        read -s -p "Enter your Smartling User Secret: " USER_SECRET
+        echo ""
+        read -p "Enter your Smartling Account UID (optional): " ACCOUNT_UID
+    else
+        echo "🔄 Using existing credentials..."
+        USER_ID="$EXISTING_USER_ID"
+        USER_SECRET="$EXISTING_USER_SECRET" 
+        ACCOUNT_UID="$EXISTING_ACCOUNT_UID"
+    fi
+else
+    echo "📝 No existing credentials found. Please enter your Smartling credentials:"
+    read -p "Enter your Smartling User Identifier: " USER_ID
+    read -s -p "Enter your Smartling User Secret: " USER_SECRET
+    echo ""
+    read -p "Enter your Smartling Account UID (optional): " ACCOUNT_UID
+fi
 
 # Check if config file exists and has content
 if [[ -f "$CLAUDE_CONFIG_FILE" && -s "$CLAUDE_CONFIG_FILE" ]]; then
