@@ -31,7 +31,7 @@ if (!process.env.SMARTLING_USER_IDENTIFIER || !process.env.SMARTLING_USER_SECRET
 const server = new McpServer(
   {
     name: 'smartling-mcp-server',
-    version: '3.1.0',
+    version: '3.2.0',
   },
   {
     capabilities: {

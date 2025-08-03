@@ -251,4 +251,50 @@ export const addJobTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
+
+  server.tool(
+    'smartling_get_job_progress',
+    'Get detailed translation progress for a specific job, including progress by locale',
+    {
+      projectId: z.string().describe('The project ID'),
+      jobId: z.string().describe('The job ID (translationJobUid)'),
+      localeIds: z.array(z.string()).optional().describe('Optional: specific locale IDs to get progress for'),
+    },
+    async ({ projectId, jobId, localeIds }) => {
+      if (!projectId || !jobId) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Error: projectId and jobId are required parameters',
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      try {
+        const result = await client.getJobProgress(projectId, jobId, localeIds);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error getting job progress: ${errorMessage}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 };

@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2025-01-30
+
+### ✨ New Features
+- **Job Progress Endpoint**: Added `smartling_get_job_progress` tool to get detailed translation progress for jobs
+  - Get overall job completion percentage
+  - View progress breakdown by locale
+  - Optional filtering by specific locale IDs
+  - Complete word count and completion statistics
+
+### 🔧 Technical Details
+- Added `JobProgress` interface in types
+- Implemented `getJobProgress` method in SmartlingClient
+- Added comprehensive error handling and parameter validation
+- Follows existing code patterns and standards
+
+### 📊 Total Tools Available
+- **36 tools** now available (up from 35)
+
+### 🎯 Benefits
+- Better job monitoring and reporting capabilities
+- Detailed locale-specific progress tracking
+- Enhanced project management visibility
+- Seamless integration with existing job management tools
+
+---
+
 ## [3.1.0] - 2025-07-30
 
 ### 🚀 Enhanced String and Key Management

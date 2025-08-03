@@ -72,7 +72,7 @@ export const addTaggingTools = (server: McpServer, client: SmartlingClient) => {
       fileUri: z.string().describe('The file URI containing the strings'),
       stringUids: z.array(z.string()).describe('Array of string UIDs to remove tags from'),
       tags: z.array(z.string()).describe('Array of tags to remove from the strings'),
-    },
+            },
     async ({ projectId, fileUri, stringUids, tags }) => {
       try {
         await client.removeStringTags(projectId, fileUri, stringUids, tags);

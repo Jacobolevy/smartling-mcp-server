@@ -60,6 +60,18 @@ export interface SmartlingJob {
   workflowUid?: string;
 }
 
+export interface JobProgress {
+  percentComplete: number;
+  totalWordCount: number;
+  completedWordCount: number;
+  localeProgress?: {
+    localeId: string;
+    percentComplete: number;
+    wordCount: number;
+    completedWordCount: number;
+  }[];
+}
+
 export interface WorkflowStep {
   stepUid: string;
   stepName: string;

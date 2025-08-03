@@ -358,6 +358,29 @@ export class SmartlingClient {
     }
   }
 
+  async getJobProgress(
+    projectId: string,
+    jobId: string,
+    localeIds?: string[]
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (localeIds && localeIds.length > 0) {
+        params.localeIds = localeIds.join(',');
+      }
+      
+      const response = await this.api.get(
+        `/jobs-api/v3/projects/${projectId}/jobs/${jobId}/progress`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get job progress: ${error.message}`);
+    }
+  }
+
   // ================== QUALITY CHECKS API ==================
   async runQualityCheck(
     projectId: string,
