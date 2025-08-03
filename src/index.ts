@@ -13,6 +13,9 @@ import { addTaggingTools } from './tools/tagging.js';
 import { addGlossaryTools } from './tools/glossary.js';
 import { addWebhookTools } from './tools/webhooks.js';
 import { addStringTools } from './tools/strings.js';
+import { addContextTools } from './tools/context.js';
+import { addLocaleTools } from './tools/locales.js';
+import { addReportTools } from './tools/reports.js';
 
 // Load environment variables silently - suppress all dotenv output
 const originalConsoleLog = console.log;
@@ -31,7 +34,7 @@ if (!process.env.SMARTLING_USER_IDENTIFIER || !process.env.SMARTLING_USER_SECRET
 const server = new McpServer(
   {
     name: 'smartling-mcp-server',
-    version: '3.2.0',
+    version: '3.3.0',
   },
   {
     capabilities: {
@@ -56,6 +59,9 @@ addTaggingTools(server, smartlingClient);
 addGlossaryTools(server, smartlingClient);
 addWebhookTools(server, smartlingClient);
 addStringTools(server, smartlingClient);
+addContextTools(server, smartlingClient);
+addLocaleTools(server, smartlingClient);
+addReportTools(server, smartlingClient);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2025-01-30
+
+### 🚀 **MAJOR EXPANSION** - Three New API Groups
+
+#### ✨ **Context API (5 new tools)**
+Visual context management for better translation quality:
+- **`smartling_upload_context`** - Upload screenshots/images to provide visual context
+- **`smartling_get_context`** - Get details of a specific context
+- **`smartling_list_contexts`** - List all visual contexts in project
+- **`smartling_bind_context_to_string`** - Associate images with specific strings
+- **`smartling_delete_context`** - Remove visual contexts
+
+#### 🌍 **Locales API (5 new tools)**
+Complete language management for projects:
+- **`smartling_get_project_locales`** - Get all configured project languages
+- **`smartling_add_locale_to_project`** - Add new languages to projects
+- **`smartling_get_locale_details`** - Get specific language configuration
+- **`smartling_remove_locale_from_project`** - Remove languages from projects
+- **`smartling_get_supported_locales`** - Get all Smartling-supported languages
+
+#### 📊 **Reports API (6 new tools)**
+Advanced analytics and cost management:
+- **`smartling_get_project_summary_report`** - Project overview with key metrics
+- **`smartling_get_job_progress_report`** - Detailed job progress analytics
+- **`smartling_get_cost_estimate`** - Translation cost estimation
+- **`smartling_get_translation_velocity_report`** - Translation speed analysis
+- **`smartling_get_word_count_report`** - Comprehensive word count analytics
+- **`smartling_get_quality_score_report`** - Quality metrics and scores
+
+### 🔧 **Technical Enhancements**
+- **16 new client methods** in SmartlingClient with proper error handling
+- **Advanced parameter handling** for optional filters and configurations
+- **Comprehensive input validation** with Zod schemas
+- **Consistent error messaging** across all new endpoints
+- **Type-safe implementations** following existing patterns
+
+### 📊 **Updated Statistics**
+- **52 tools total** (up from 36 - a 44% increase!)
+- **Complete API coverage** for Context, Locales, and Reports
+- **Enhanced project management** capabilities
+- **Professional-grade analytics** and reporting
+
+### 🎯 **New Use Cases Enabled**
+- **Visual Context Management**: Upload screenshots to help translators understand UI elements
+- **Multi-language Project Setup**: Easily manage dozens of target languages
+- **Cost Planning**: Get accurate translation estimates before starting projects
+- **Performance Analytics**: Track translation speed and quality metrics
+- **Project Reporting**: Generate comprehensive reports for stakeholders
+
+### 🚀 **Benefits**
+- **Better Translation Quality**: Visual context reduces ambiguity and errors
+- **Streamlined Language Management**: Add/remove languages with workflow assignment
+- **Cost Control**: Accurate estimates help budget planning
+- **Performance Insights**: Velocity reports help optimize translation workflows
+- **Professional Reporting**: Quality scores and analytics for project management
+
+---
+
 ## [3.2.0] - 2025-01-30
 
 ### ✨ New Features

@@ -146,7 +146,7 @@ Before running the installer, get your credentials from:
 
 1. **Restart** your AI application completely
 2. **Test** with: *"Show me my Smartling projects"*
-3. **Enjoy** 36 Smartling tools integrated! 🎉
+3. **Enjoy** 52 Smartling tools integrated! 🎉
 
 ---
 
@@ -229,5 +229,8 @@ npm install && npm run build
 - **✅ Quality Control** - Run automated quality checks
 - **📚 Glossary Management** - Manage translation glossaries
 - **🔗 Webhooks** - Set up automation triggers
+- **🖼️ Visual Context** - Upload screenshots for better translations
+- **🌍 Language Management** - Add/remove project languages dynamically
+- **📈 Advanced Reports** - Cost estimates, velocity, and quality analytics
 
 **All from your favorite AI assistant!** 🤖✨ 

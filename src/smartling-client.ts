@@ -381,6 +381,350 @@ export class SmartlingClient {
     }
   }
 
+  // ================== CONTEXT API ==================
+  async uploadContext(
+    projectId: string,
+    contextData: {
+      contextType: 'image' | 'video' | 'html';
+      contextName: string;
+      fileContent: string;
+      contextDescription?: string;
+    }
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.post(
+        `/context-api/v2/projects/${projectId}/contexts`,
+        contextData
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to upload context: ${error.message}`);
+    }
+  }
+
+  async getContext(projectId: string, contextUid: string): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get(
+        `/context-api/v2/projects/${projectId}/contexts/${contextUid}`
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get context: ${error.message}`);
+    }
+  }
+
+  async listContexts(
+    projectId: string,
+    options: {
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (options.limit !== undefined) params.limit = options.limit;
+      if (options.offset !== undefined) params.offset = options.offset;
+      
+      const response = await this.api.get(
+        `/context-api/v2/projects/${projectId}/contexts`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to list contexts: ${error.message}`);
+    }
+  }
+
+  async bindContextToString(
+    projectId: string,
+    bindingData: {
+      contextUid: string;
+      stringHashcodes: string[];
+      coordinates?: {
+        x: number;
+        y: number;
+        width?: number;
+        height?: number;
+      };
+    }
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.post(
+        `/context-api/v2/projects/${projectId}/bindings`,
+        bindingData
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to bind context to string: ${error.message}`);
+    }
+  }
+
+  async deleteContext(projectId: string, contextUid: string): Promise<void> {
+    await this.authenticate();
+    
+    try {
+      await this.api.delete(
+        `/context-api/v2/projects/${projectId}/contexts/${contextUid}`
+      );
+    } catch (error: any) {
+      throw new Error(`Failed to delete context: ${error.message}`);
+    }
+  }
+
+  // ================== LOCALES API ==================
+  async getProjectLocales(projectId: string): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get(
+        `/projects-api/v2/projects/${projectId}/locales`
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get project locales: ${error.message}`);
+    }
+  }
+
+  async addLocaleToProject(
+    projectId: string,
+    localeId: string,
+    options: {
+      workflowUid?: string;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.post(
+        `/projects-api/v2/projects/${projectId}/locales/${localeId}`,
+        options
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to add locale to project: ${error.message}`);
+    }
+  }
+
+  async getLocaleDetails(projectId: string, localeId: string): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get(
+        `/projects-api/v2/projects/${projectId}/locales/${localeId}`
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get locale details: ${error.message}`);
+    }
+  }
+
+  async removeLocaleFromProject(projectId: string, localeId: string): Promise<void> {
+    await this.authenticate();
+    
+    try {
+      await this.api.delete(
+        `/projects-api/v2/projects/${projectId}/locales/${localeId}`
+      );
+    } catch (error: any) {
+      throw new Error(`Failed to remove locale from project: ${error.message}`);
+    }
+  }
+
+  async getSupportedLocales(): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get('/projects-api/v2/locales');
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get supported locales: ${error.message}`);
+    }
+  }
+
+  // ================== REPORTS API ==================
+  async getProjectSummaryReport(
+    projectId: string,
+    options: {
+      localeIds?: string[];
+      dateRange?: {
+        start: string;
+        end: string;
+      };
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (options.localeIds && options.localeIds.length > 0) {
+        params.localeIds = options.localeIds.join(',');
+      }
+      if (options.dateRange) {
+        params.startDate = options.dateRange.start;
+        params.endDate = options.dateRange.end;
+      }
+      
+      const response = await this.api.get(
+        `/reports-api/v2/projects/${projectId}/summary`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get project summary report: ${error.message}`);
+    }
+  }
+
+  async getJobProgressReport(
+    projectId: string,
+    jobId: string,
+    options: {
+      includeWordCounts?: boolean;
+      includeProgress?: boolean;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (options.includeWordCounts !== undefined) params.includeWordCounts = options.includeWordCounts;
+      if (options.includeProgress !== undefined) params.includeProgress = options.includeProgress;
+      
+      const response = await this.api.get(
+        `/reports-api/v2/projects/${projectId}/jobs/${jobId}/progress`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get job progress report: ${error.message}`);
+    }
+  }
+
+  async getCostEstimate(
+    projectId: string,
+    estimateData: {
+      fileUris: string[];
+      targetLocaleIds: string[];
+      workflowUid?: string;
+    }
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.post(
+        `/reports-api/v2/projects/${projectId}/cost-estimate`,
+        estimateData
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get cost estimate: ${error.message}`);
+    }
+  }
+
+  async getTranslationVelocityReport(
+    projectId: string,
+    period: 'daily' | 'weekly' | 'monthly',
+    options: {
+      localeIds?: string[];
+      startDate?: string;
+      endDate?: string;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = { period };
+      if (options.localeIds && options.localeIds.length > 0) {
+        params.localeIds = options.localeIds.join(',');
+      }
+      if (options.startDate) params.startDate = options.startDate;
+      if (options.endDate) params.endDate = options.endDate;
+      
+      const response = await this.api.get(
+        `/reports-api/v2/projects/${projectId}/velocity`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get translation velocity report: ${error.message}`);
+    }
+  }
+
+  async getWordCountReport(
+    projectId: string,
+    options: {
+      fileUris?: string[];
+      localeIds?: string[];
+      includeInProgressContent?: boolean;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (options.fileUris && options.fileUris.length > 0) {
+        params.fileUris = options.fileUris.join(',');
+      }
+      if (options.localeIds && options.localeIds.length > 0) {
+        params.localeIds = options.localeIds.join(',');
+      }
+      if (options.includeInProgressContent !== undefined) {
+        params.includeInProgressContent = options.includeInProgressContent;
+      }
+      
+      const response = await this.api.get(
+        `/reports-api/v2/projects/${projectId}/word-counts`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get word count report: ${error.message}`);
+    }
+  }
+
+  async getQualityScoreReport(
+    projectId: string,
+    options: {
+      localeIds?: string[];
+      dateRange?: {
+        start: string;
+        end: string;
+      };
+      includeDetails?: boolean;
+    } = {}
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const params: any = {};
+      if (options.localeIds && options.localeIds.length > 0) {
+        params.localeIds = options.localeIds.join(',');
+      }
+      if (options.dateRange) {
+        params.startDate = options.dateRange.start;
+        params.endDate = options.dateRange.end;
+      }
+      if (options.includeDetails !== undefined) {
+        params.includeDetails = options.includeDetails;
+      }
+      
+      const response = await this.api.get(
+        `/reports-api/v2/projects/${projectId}/quality-scores`,
+        { params }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get quality score report: ${error.message}`);
+    }
+  }
+
   // ================== QUALITY CHECKS API ==================
   async runQualityCheck(
     projectId: string,
