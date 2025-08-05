@@ -572,7 +572,7 @@ main() {
     create_scripts
     
     # Mark completion
-    todo_write '{"id": "phase7", "content": "Crear script de instalación mejorado", "status": "completed"}' true
+    todo_write '{"id": "phase7", "content": "Create enhanced installation script", "status": "completed"}' true
     
     # Show results
     show_completion

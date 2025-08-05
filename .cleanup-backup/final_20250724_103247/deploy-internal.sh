@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🏢 Deployando Smartling HTTP Server INTERNO"
-echo "✅ Sin conexiones externas - Sin problemas de proxy"
+echo "🏢 Deploying INTERNAL Smartling HTTP Server"
+echo "✅ No external connections - No proxy issues"
 echo ""
 
 # Variables
@@ -9,14 +9,14 @@ IMAGE_NAME="smartling-http-internal"
 CONTAINER_NAME="smartling-http-server"
 PORT=3000
 
-echo "📦 Construyendo imagen Docker..."
+echo "📦 Building Docker image..."
 docker build -t $IMAGE_NAME .
 
-echo "🛑 Deteniendo container anterior (si existe)..."
+echo "🛑 Stopping previous container (if exists)..."
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
 
-echo "🚀 Iniciando servidor interno..."
+echo "🚀 Starting internal server..."
 docker run -d \
   --name $CONTAINER_NAME \
   -p $PORT:$PORT \
@@ -27,17 +27,17 @@ docker run -d \
   $IMAGE_NAME
 
 echo ""
-echo "✅ Servidor desplegado exitosamente!"
+echo "✅ Server deployed successfully!"
 echo ""
-echo "📊 URLs disponibles:"
-echo "  🏠 Servidor interno: http://localhost:$PORT"
+echo "📊 Available URLs:"
+echo "  🏠 Internal server: http://localhost:$PORT"
 echo "  ❤️  Health check: http://localhost:$PORT/health"
-echo "  🛠️  Herramientas: http://localhost:$PORT/tools"
+echo "  🛠️  Tools: http://localhost:$PORT/tools"
 echo ""
-echo "🔍 Ver logs:"
+echo "🔍 View logs:"
 echo "  docker logs -f $CONTAINER_NAME"
 echo ""
-echo "🛑 Detener servidor:"
+echo "🛑 Stop server:"
 echo "  docker stop $CONTAINER_NAME"
 echo ""
-echo "🎯 Para tu chat interno usa: http://TU-SERVIDOR-INTERNO:$PORT" 
+echo "🎯 For your internal chat use: http://YOUR-INTERNAL-SERVER:$PORT" 

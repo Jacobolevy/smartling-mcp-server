@@ -1,23 +1,23 @@
-# Ejemplos de Uso - Smartling MCP Server
+# Usage Examples - Smartling MCP Server
 
-Este documento proporciona ejemplos prácticos de cómo utilizar las herramientas del servidor MCP de Smartling.
+This document provides practical examples of how to use the Smartling MCP server tools.
 
-## 🚀 Configuración Inicial
+## 🚀 Initial Setup
 
-### 1. Obtener lista de proyectos
+### 1. Get list of projects
 
 ```json
 {
   "tool": "smartling_get_projects",
   "arguments": {
-    "accountId": "tu_account_id"
+    "accountId": "your_account_id"
   }
 }
 ```
 
-## 📁 Gestión de Archivos
+## 📁 File Management
 
-### 2. Subir archivo para traducción
+### 2. Upload file for translation
 
 ```json
 {
@@ -33,7 +33,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-### 3. Verificar estado de traducción
+### 3. Check translation status
 
 ```json
 {
@@ -45,7 +45,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-### 4. Descargar archivo traducido
+### 4. Download translated file
 
 ```json
 {
@@ -59,9 +59,9 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-## 👷 Gestión de Jobs
+## 👷 Job Management
 
-### 5. Crear trabajo de traducción
+### 5. Create translation job
 
 ```json
 {
@@ -70,15 +70,15 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
     "projectId": "abc123def",
     "jobName": "Website Q1 2024 Updates",
     "targetLocaleIds": ["es-ES", "fr-FR", "de-DE"],
-    "description": "Traducción de actualizaciones del sitio web para Q1 2024",
+    "description": "Translation of website updates for Q1 2024",
     "dueDate": "2024-03-31T23:59:59Z",
-    "callbackUrl": "https://mi-app.com/webhook/smartling",
+    "callbackUrl": "https://my-app.com/webhook/smartling",
     "callbackMethod": "POST"
   }
 }
 ```
 
-### 6. Agregar archivos a un trabajo
+### 6. Add files to a job
 
 ```json
 {
@@ -95,7 +95,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-### 7. Autorizar trabajo
+### 7. Authorize job
 
 ```json
 {
@@ -107,9 +107,9 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-## 🔍 Control de Calidad
+## 🔍 Quality Control
 
-### 8. Ejecutar verificaciones de calidad
+### 8. Run quality checks
 
 ```json
 {
@@ -123,7 +123,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-### 9. Obtener resultados de calidad
+### 9. Get quality results
 
 ```json
 {
@@ -136,9 +136,9 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-## 🏷️ Sistema de Etiquetado
+## 🏷️ Tagging System
 
-### 10. Agregar etiquetas a strings
+### 10. Add tags to strings
 
 ```json
 {
@@ -152,7 +152,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-### 11. Buscar strings por etiqueta
+### 11. Search strings by tag
 
 ```json
 {
@@ -165,24 +165,24 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 }
 ```
 
-## 📚 Gestión de Glosarios
+## 📚 Glossary Management
 
-### 12. Crear glosario
+### 12. Create glossary
 
 ```json
 {
   "tool": "smartling_create_glossary",
   "arguments": {
     "accountId": "account_123",
-    "name": "Glosario de Marketing",
-    "description": "Términos específicos para contenido de marketing",
+    "name": "Marketing Glossary",
+    "description": "Specific terms for marketing content",
     "sourceLocaleId": "en-US",
     "targetLocaleIds": ["es-ES", "fr-FR", "de-DE"]
   }
 }
 ```
 
-### 13. Agregar término al glosario
+### 13. Add term to glossary
 
 ```json
 {
@@ -192,7 +192,7 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
     "sourceText": "Brand",
     "targetText": "Marca",
     "localeId": "es-ES",
-    "definition": "Nombre comercial de la empresa",
+    "definition": "Commercial name of the company",
     "partOfSpeech": "noun",
     "caseSensitive": true,
     "exactMatch": true
@@ -202,31 +202,31 @@ Este documento proporciona ejemplos prácticos de cómo utilizar las herramienta
 
 ## 🔔 Webhooks
 
-### 14. Configurar webhook
+### 14. Configure webhook
 
 ```json
 {
   "tool": "smartling_create_webhook",
   "arguments": {
     "projectId": "abc123def",
-    "url": "https://mi-app.com/webhook/smartling",
+    "url": "https://my-app.com/webhook/smartling",
     "events": [
       "job.completed",
       "translation.completed",
       "quality.check.completed"
     ],
-    "secretKey": "mi_clave_secreta_webhook",
+    "secretKey": "my_webhook_secret_key",
     "enabled": true
   }
 }
 ```
 
-## 🔄 Flujo de Trabajo Completo
+## 🔄 Complete Workflow
 
-### Ejemplo: Subir archivo, crear job y verificar calidad
+### Example: Upload file, create job and verify quality
 
 ```bash
-# 1. Subir archivo
+# 1. Upload file
 smartling_upload_file
 {
   "projectId": "abc123def",
@@ -237,7 +237,7 @@ smartling_upload_file
   "localeIdsToAuthorize": ["es-ES", "fr-FR"]
 }
 
-# 2. Crear trabajo de traducción
+# 2. Create translation job
 smartling_create_job
 {
   "projectId": "abc123def",
@@ -246,7 +246,7 @@ smartling_create_job
   "dueDate": "2024-02-15T23:59:59Z"
 }
 
-# 3. Agregar archivo al trabajo
+# 3. Add file to job
 smartling_add_files_to_job
 {
   "projectId": "abc123def",
@@ -254,14 +254,14 @@ smartling_add_files_to_job
   "fileUris": ["/i18n/new-feature.json"]
 }
 
-# 4. Autorizar trabajo
+# 4. Authorize job
 smartling_authorize_job
 {
   "projectId": "abc123def",
   "jobId": "returned_job_id"
 }
 
-# 5. Verificar calidad cuando esté listo
+# 5. Check quality when ready
 smartling_run_quality_check
 {
   "projectId": "abc123def",
@@ -271,28 +271,28 @@ smartling_run_quality_check
 }
 ```
 
-## 💡 Consejos y Mejores Prácticas
+## 💡 Tips and Best Practices
 
-### Codificación de archivos
-- Los archivos deben estar codificados en base64 antes de subirlos
-- Ejemplo en JavaScript: `Buffer.from(fileContent).toString('base64')`
+### File encoding
+- Files must be base64 encoded before uploading
+- JavaScript example: `Buffer.from(fileContent).toString('base64')`
 
-### Gestión de trabajos
-- Siempre autoriza los trabajos después de agregar todos los archivos
-- Usa fechas de vencimiento realistas
-- Incluye descripciones detalladas para los traductores
+### Job management
+- Always authorize jobs after adding all files
+- Use realistic due dates
+- Include detailed descriptions for translators
 
-### Control de calidad
-- Ejecuta verificaciones después de cada actualización importante
-- Prioriza corregir problemas críticos antes de publicar
-- Usa glosarios para mantener consistencia terminológica
+### Quality control
+- Run checks after each major update
+- Prioritize fixing critical issues before publishing
+- Use glossaries to maintain terminology consistency
 
-### Etiquetado
-- Usa etiquetas consistentes como "urgent", "marketing", "ui"
-- Las etiquetas facilitan la organización y búsqueda de contenido
-- Considera usar prefijos por categoría: "ui_button", "error_message"
+### Tagging
+- Use consistent tags like "urgent", "marketing", "ui"
+- Tags facilitate content organization and search
+- Consider using category prefixes: "ui_button", "error_message"
 
 ### Webhooks
-- Configura webhooks para automatizar flujos de trabajo
-- Usa claves secretas para verificar la autenticidad
-- Maneja los eventos de forma asíncrona en tu aplicación 
+- Configure webhooks to automate workflows
+- Use secret keys to verify authenticity
+- Handle events asynchronously in your application 
