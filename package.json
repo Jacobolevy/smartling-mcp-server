@@ -101,7 +101,7 @@
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
-    "openai": "^4.73.1",
+    "openai": "^4.0.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
@@ -113,7 +113,7 @@
     "@types/node": "^22",
     "@types/uuid": "^10.0.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.6.2",
+    "typescript": "^5.9.2",
     "vitest": "^2.1.0"
   },
   "peerDependencies": {
@@ -127,7 +127,7 @@
   "enhancedFeatures": {
     "aiShortcuts": [
       "@translate",
-      "@progress", 
+      "@progress",
       "@costs",
       "@quality",
       "@debug",
@@ -136,7 +136,7 @@
     "advancedFeatures": [
       "AI-powered translation enhancement",
       "Cost optimization suggestions",
-      "Predictive project analytics", 
+      "Predictive project analytics",
       "Auto-debugging assistance",
       "Async bulk operations",
       "Context-aware AI insights",
@@ -144,10 +144,10 @@
     ],
     "modelsSupported": [
       "gpt-4o",
-      "gpt-4o-mini", 
+      "gpt-4o-mini",
       "o1-preview"
     ],
-    "totalTools": "68+",
+    "totalTools": "65",
     "backwardCompatible": true
   }
 }

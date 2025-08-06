@@ -161,7 +161,7 @@ curl -s https://raw.githubusercontent.com/Jacobolevy/smartling-mcp-server/main/i
 ## 🎯 **Final Result: Smartling MCP v4.0 Enhanced**
 
 ### **Impressive Statistics:**
-- ✅ **68+ total tools** (52 legacy + 16 AI-enhanced)
+- ✅ **65 total tools** (53 legacy + 12 AI-enhanced)
 - ✅ **6 memorable AI shortcuts** (@translate, @progress, @costs, @quality, @debug, @insights)
 - ✅ **100% backward compatibility** with existing installations
 - ✅ **25% average cost reduction** through AI optimization
