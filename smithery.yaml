@@ -1,28 +1,27 @@
 # Smithery configuration file: https://smithery.ai/docs/build/project-config
-
+runtime: "typescript"
 startCommand:
-  type: http
+  type: "http"
   configSchema:
     # JSON Schema defining the configuration options for the MCP.
-    type: object
+    type: "object"
     properties:
       SMARTLING_USER_IDENTIFIER:
-        type: string
-        description: Smartling User Identifier for API authentication
+        type: "string"
+        description: "Smartling User Identifier for API authentication"
       SMARTLING_USER_SECRET:
-        type: string
-        description: Smartling User Secret for API authentication
+        type: "string"
+        description: "Smartling User Secret for API authentication"
       SMARTLING_BASE_URL:
-        type: string
+        type: "string"
         default: "https://api.smartling.com"
-        description: Smartling API base URL
+        description: "Smartling API base URL"
       OPENAI_API_KEY:
-        type: string
-        description: OpenAI API key for AI-powered features (optional but recommended)
-    required:
-      - SMARTLING_USER_IDENTIFIER
-      - SMARTLING_USER_SECRET
+        type: "string"
+        description: "OpenAI API key for AI-powered features (optional but recommended)"
+    required: ["SMARTLING_USER_IDENTIFIER", "SMARTLING_USER_SECRET"]
   exampleConfig:
     SMARTLING_USER_IDENTIFIER: "your_user_identifier"
     SMARTLING_USER_SECRET: "your_user_secret"
     SMARTLING_BASE_URL: "https://api.smartling.com"
+    OPENAI_API_KEY: "your_openai_api_key"
