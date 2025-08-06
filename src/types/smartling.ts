@@ -2,6 +2,7 @@ export interface SmartlingConfig {
   userIdentifier: string;
   userSecret: string;
   baseUrl?: string;
+  accountId?: string | undefined;
 }
 
 export interface SmartlingProject {

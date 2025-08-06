@@ -7,7 +7,7 @@ export const addGlossaryTools = (server: McpServer, client: SmartlingClient) => 
     'smartling_get_glossaries',
     'Get all glossaries for an account',
     {
-      accountId: z.string().describe('The account ID'),
+      accountId: z.string().optional().describe('The account ID (optional if set in environment)'),
     },
     async ({ accountId }) => {
       try {

@@ -14,6 +14,9 @@ startCommand:
         type: "string"
         default: "https://api.smartling.com"
         description: "Smartling API base URL"
+      SMARTLING_ACCOUNT_ID:
+        type: "string"
+        description: "Default Smartling Account ID (optional but recommended)"
       OPENAI_API_KEY:
         type: "string"
         description: "OpenAI API key for AI-powered features (optional but recommended)"
@@ -22,4 +25,5 @@ startCommand:
     SMARTLING_USER_IDENTIFIER: "your_user_identifier"
     SMARTLING_USER_SECRET: "your_user_secret"
     SMARTLING_BASE_URL: "https://api.smartling.com"
+    SMARTLING_ACCOUNT_ID: "your_account_id"
     OPENAI_API_KEY: "your_openai_api_key"

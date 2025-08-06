@@ -9,7 +9,8 @@ export const addProjectTools = (server: McpServer, client: SmartlingClient) => {
     {
       accountId: z
         .string()
-        .describe('The Smartling account ID')
+        .optional()
+        .describe('The Smartling account ID (optional if set in environment)')
     },
     async ({ accountId }) => {
       const startTime = Date.now();

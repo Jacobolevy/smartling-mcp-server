@@ -50,10 +50,13 @@ export class SmartlingClient {
 
   // ================== PROJECTS API ==================
   async getProjects(accountId?: string): Promise<SmartlingProject[]> {
+    // Use provided accountId or fall back to default from config
+    const targetAccountId = accountId || this.config.accountId;
+    
     try {
       await this.authenticate();
-      const url = accountId ? 
-        `/accounts-api/v2/accounts/${accountId}/projects` : 
+      const url = targetAccountId ? 
+        `/accounts-api/v2/accounts/${targetAccountId}/projects` : 
         '/accounts-api/v2/accounts';
       
       const response = await this.api.get(url);
@@ -65,7 +68,7 @@ export class SmartlingClient {
         {
           projectId: 'demo-project-1',
           projectName: 'Demo Translation Project',
-          accountUid: accountId || 'demo-account',
+          accountUid: targetAccountId || 'demo-account',
           projectTypeCode: 'APPLICATION',
           sourceLocaleId: 'en-US',
           targetLocales: [
@@ -84,7 +87,7 @@ export class SmartlingClient {
         {
           projectId: 'demo-project-2',
           projectName: 'Demo Marketing Content',
-          accountUid: accountId || 'demo-account',
+          accountUid: targetAccountId || 'demo-account',
           projectTypeCode: 'WEBSITE',
           sourceLocaleId: 'en-US',
           targetLocales: [
@@ -798,11 +801,17 @@ export class SmartlingClient {
     }
   }
 
-  async getGlossaries(accountId: string): Promise<Glossary[]> {
+  async getGlossaries(accountId?: string): Promise<Glossary[]> {
     await this.authenticate();
     
+    // Use provided accountId or fall back to default from config
+    const targetAccountId = accountId || this.config.accountId;
+    if (!targetAccountId) {
+      throw new Error('Account ID is required. Please provide accountId parameter or set SMARTLING_ACCOUNT_ID in environment variables.');
+    }
+    
     try {
-      const response = await this.api.get(`/glossary-api/v2/accounts/${accountId}/glossaries`);
+      const response = await this.api.get(`/glossary-api/v2/accounts/${targetAccountId}/glossaries`);
       return response.data.response.data;
     } catch (error: any) {
       throw new Error(`Failed to get glossaries: ${error.message}`);

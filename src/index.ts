@@ -26,6 +26,7 @@ export const configSchema = z.object({
   SMARTLING_USER_IDENTIFIER: z.string().describe("Smartling User Identifier for API authentication"),
   SMARTLING_USER_SECRET: z.string().describe("Smartling User Secret for API authentication"),
   SMARTLING_BASE_URL: z.string().default("https://api.smartling.com").describe("Smartling API base URL"),
+  SMARTLING_ACCOUNT_ID: z.string().optional().describe("Default Smartling Account ID (optional but recommended)"),
   OPENAI_API_KEY: z.string().optional().describe("OpenAI API key for AI-powered features (optional but recommended)"),
 });
 
@@ -51,6 +52,7 @@ export default function createSmartlingMCP({ config }: { config: Config }) {
     userIdentifier: config.SMARTLING_USER_IDENTIFIER,
     userSecret: config.SMARTLING_USER_SECRET,
     baseUrl: config.SMARTLING_BASE_URL,
+    accountId: config.SMARTLING_ACCOUNT_ID,
   });
 
   // Add all tool groups
@@ -97,6 +99,7 @@ async function main() {
       SMARTLING_USER_IDENTIFIER: process.env.SMARTLING_USER_IDENTIFIER,
       SMARTLING_USER_SECRET: process.env.SMARTLING_USER_SECRET,
       SMARTLING_BASE_URL: process.env.SMARTLING_BASE_URL || 'https://api.smartling.com',
+      SMARTLING_ACCOUNT_ID: process.env.SMARTLING_ACCOUNT_ID,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     };
 
