@@ -4,26 +4,27 @@ A **next-generation Model Context Protocol (MCP) server** that provides enterpri
 
 ## 🚀 Quick Installation
 
-### ⚡ Ultra-Optimized Autonomous Installer (Recommended)
+### Manual Installation
 
-**🎯 One-Command Installation:**
-```bash
-curl -s https://raw.githubusercontent.com/YOUR_USERNAME/smartling-mcp-server/main/install-smartling-mcp-ultra.sh | bash -s "YOUR_USER_IDENTIFIER" "YOUR_USER_SECRET"
-```
+**Prerequisites:**
+- Node.js 18.0.0 or higher
+- Smartling API credentials (User Identifier and User Secret)
 
-**🔧 Download & Run:**
+**Installation Steps:**
 ```bash
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/smartling-mcp-server/main/install-smartling-mcp-ultra.sh
-chmod +x install-smartling-mcp-ultra.sh
-./install-smartling-mcp-ultra.sh "YOUR_USER_IDENTIFIER" "YOUR_USER_SECRET"
-```
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/smartling-mcp-server.git
+cd smartling-mcp-server
 
-**🛡️ Interactive Mode (Secure):**
-```bash
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/smartling-mcp-server/main/install-smartling-mcp-ultra.sh
-chmod +x install-smartling-mcp-ultra.sh
-./install-smartling-mcp-ultra.sh
-# Will prompt for credentials securely
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Setup environment variables
+cp config-example.env .env
+# Edit .env with your Smartling credentials
 ```
 
 ### 🏆 What the Ultra-Optimized Installer Does:
