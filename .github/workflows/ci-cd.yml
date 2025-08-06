@@ -141,15 +141,6 @@ jobs:
     - name: 📦 Install dependencies
       run: npm ci
       
-    - name: 🧪 Run integration tests
-      run: |
-        echo "🧪 Running integration tests..."
-        echo "✅ Testing installer scripts..."
-        chmod +x install-*.sh
-        echo "✅ Testing ultra-optimized server..."
-        node -e "console.log('🚀 Ultra-optimized server syntax check passed')"
-        echo "✅ Integration tests completed"
-
   # 📋 Deployment Health Check
   health-check:
     name: 📋 Health Check
