@@ -232,8 +232,12 @@ export class SmartlingClient {
         ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps })
       };
       
+      // Try different search parameter names based on API documentation
       if (searchText && searchText.trim()) {
-        params.q = searchText;
+        params.q = searchText;  // Standard query
+        params.search = searchText;  // Alternative parameter
+        params.text = searchText;  // Another alternative
+        params.stringText = searchText;  // Specific to strings
       }
       
       if (options.localeId) params.localeId = options.localeId;
