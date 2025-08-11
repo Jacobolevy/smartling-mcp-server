@@ -230,23 +230,6 @@ export class SmartlingClient {
     }
   }
 
-  async getStringDetails(
-    projectId: string, 
-    hashcode: string, 
-    localeId: string
-  ): Promise<any> {
-    await this.authenticate();
-    
-    try {
-      const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings/${hashcode}`
-      );
-      return response.data.response.data;
-    } catch (error: any) {
-      throw new Error(`Failed to get string details: ${error.message}`);
-    }
-  }
-
   async getStringDetailsByHashcode(
     projectId: string, 
     hashcode: string
@@ -277,6 +260,17 @@ export class SmartlingClient {
     } catch (error: any) {
       throw new Error(`Failed to get string translations: ${error.message}`);
     }
+  }
+
+  // Backward compatibility function - maps to getStringTranslations for legacy code
+  async getStringDetails(
+    projectId: string, 
+    hashcode: string, 
+    localeId: string
+  ): Promise<any> {
+    // This function now delegates to getStringTranslations for backward compatibility
+    // The localeId parameter is kept for compatibility but not used in the API call
+    return this.getStringTranslations(projectId, hashcode);
   }
 
   async getRecentlyLocalized(
