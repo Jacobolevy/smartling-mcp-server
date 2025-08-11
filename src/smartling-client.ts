@@ -225,17 +225,25 @@ export class SmartlingClient {
       // https://api-reference.smartling.com/#tag/Strings/operation/getAllSourceStringsByProject
       
       console.log(`[DEBUG] Trying official endpoint: /strings-api/v2/projects/${projectId}/source-strings`);
+      
+      // First try with search text
+      let params: any = {
+        ...(options.limit && { limit: options.limit }),
+        ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps })
+      };
+      
+      if (searchText && searchText.trim()) {
+        params.q = searchText;
+      }
+      
+      if (options.localeId) params.localeId = options.localeId;
+      if (options.fileUris) params.fileUris = options.fileUris.join(',');
+      
+      console.log(`[DEBUG] Request params:`, params);
+      
       const response = await this.api.get(
         `/strings-api/v2/projects/${projectId}/source-strings`,
-        {
-          params: {
-            q: searchText,
-            ...(options.localeId && { localeId: options.localeId }),
-            ...(options.fileUris && { fileUris: options.fileUris.join(',') }),
-            ...(options.limit && { limit: options.limit }),
-            ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps })
-          }
-        }
+        { params }
       );
       return response.data.response.data;
     } catch (error: any) {
