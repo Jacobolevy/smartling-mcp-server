@@ -19,7 +19,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/index.js",
+    "build": "tsc",
     "build:enhanced": "tsc && node -e \"console.log('✅ Enhanced MCP Server v4.0 built successfully!')\"",
     "watch": "tsc --watch",
     "start": "node dist/index.js",

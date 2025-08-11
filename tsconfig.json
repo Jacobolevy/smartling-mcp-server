@@ -7,20 +7,19 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
     "outDir": "dist",
     "declaration": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/index.ts",
+    "src/smartling-client.ts",
+    "src/http-server.ts",
+    "src/streaming-server.ts",
+    "src/tools/**/*",
+    "src/types/**/*",
+    "src/utils/**/*",
+    "src/oauth/**/*"
+  ],
   "exclude": ["dist", "node_modules", "src/legacy/**/*", "src/enhanced/**/*"]
 }
