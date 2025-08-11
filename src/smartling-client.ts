@@ -221,57 +221,26 @@ export class SmartlingClient {
     }
 
     try {
-      // Try different endpoint variations based on Smartling web interface patterns
+      // Use official Smartling API endpoints from documentation
+      // https://api-reference.smartling.com/#tag/Strings/operation/getAllSourceStringsByProject
       
-      // First try: strings-api/v2 with search
-      console.log(`[DEBUG] Trying POST: /strings-api/v2/projects/${projectId}/strings/search`);
-      const postResponse = await this.api.post(
-        `/strings-api/v2/projects/${projectId}/strings/search`,
+      console.log(`[DEBUG] Trying official endpoint: /strings-api/v2/projects/${projectId}/source-strings`);
+      const response = await this.api.get(
+        `/strings-api/v2/projects/${projectId}/source-strings`,
         {
-          q: searchText,
-          localeId: options.localeId,
-          fileUris: options.fileUris,
-          limit: options.limit,
-          includeTimestamps: options.includeTimestamps
-        }
-      );
-      return postResponse.data.response.data;
-    } catch (postError: any) {
-      console.log(`[DEBUG] POST failed: ${postError.message}`);
-      
-      // Second try: strings-api/v2 with GET
-      try {
-        console.log(`[DEBUG] Trying GET: /strings-api/v2/projects/${projectId}/strings?${params.toString()}`);
-        const response = await this.api.get(
-          `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
-        );
-        return response.data.response.data;
-      } catch (getError: any) {
-        console.log(`[DEBUG] GET strings-api failed: ${getError.message}`);
-        
-        // Third try: different API version
-        try {
-          console.log(`[DEBUG] Trying GET: /projects-api/v2/projects/${projectId}/strings?${params.toString()}`);
-          const response = await this.api.get(
-            `/projects-api/v2/projects/${projectId}/strings?${params.toString()}`
-          );
-          return response.data.response.data;
-        } catch (projectsError: any) {
-          console.log(`[DEBUG] GET projects-api failed: ${projectsError.message}`);
-          
-          // Fourth try: sourceKeyword parameter like web interface
-          try {
-            console.log(`[DEBUG] Trying GET with sourceKeyword: /strings-api/v2/projects/${projectId}/strings?${paramsSourceKeyword.toString()}`);
-            const response = await this.api.get(
-              `/strings-api/v2/projects/${projectId}/strings?${paramsSourceKeyword.toString()}`
-            );
-            return response.data.response.data;
-          } catch (sourceKeywordError: any) {
-            console.log(`[DEBUG] GET sourceKeyword failed: ${sourceKeywordError.message}`);
-            throw new Error(`Failed to search strings: ${getError.message}`);
+          params: {
+            q: searchText,
+            ...(options.localeId && { localeId: options.localeId }),
+            ...(options.fileUris && { fileUris: options.fileUris.join(',') }),
+            ...(options.limit && { limit: options.limit }),
+            ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps })
           }
         }
-      }
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      console.log(`[DEBUG] Official endpoint failed: ${error.message}`);
+      throw new Error(`Failed to search strings using official API: ${error.message}`);
     }
   }
 
@@ -282,8 +251,14 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
+      // Use official endpoint for source strings with hashcode filter
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings/${hashcode}`
+        `/strings-api/v2/projects/${projectId}/source-strings`,
+        {
+          params: {
+            hashcodeFilter: hashcode
+          }
+        }
       );
       return response.data.response.data;
     } catch (error: any) {
@@ -298,8 +273,15 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
+      // Use official endpoint for translations
+      // https://api-reference.smartling.com/#tag/Strings/operation/getAllTranslationsByProject
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings/${hashcode}/translations`
+        `/strings-api/v2/projects/${projectId}/translations`,
+        {
+          params: {
+            hashcodeFilter: hashcode
+          }
+        }
       );
       return response.data.response.data;
     } catch (error: any) {
