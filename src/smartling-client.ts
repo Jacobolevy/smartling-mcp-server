@@ -205,12 +205,28 @@ export class SmartlingClient {
     if (options.includeTimestamps) params.append('includeTimestamps', 'true');
 
     try {
-      const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings/search?${params.toString()}`
+      // First try POST method for advanced search
+      const postResponse = await this.api.post(
+        `/strings-api/v2/projects/${projectId}/strings/search`,
+        {
+          q: searchText,
+          localeId: options.localeId,
+          fileUris: options.fileUris,
+          limit: options.limit,
+          includeTimestamps: options.includeTimestamps
+        }
       );
-      return response.data.response.data;
-    } catch (error: any) {
-      throw new Error(`Failed to search strings: ${error.message}`);
+      return postResponse.data.response.data;
+    } catch (postError: any) {
+      // Fallback to GET method for basic search  
+      try {
+        const response = await this.api.get(
+          `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
+        );
+        return response.data.response.data;
+      } catch (getError: any) {
+        throw new Error(`Failed to search strings: ${getError.message}`);
+      }
     }
   }
 
@@ -223,11 +239,43 @@ export class SmartlingClient {
     
     try {
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/locales/${localeId}/strings/${hashcode}`
+        `/strings-api/v2/projects/${projectId}/strings/${hashcode}`
       );
       return response.data.response.data;
     } catch (error: any) {
       throw new Error(`Failed to get string details: ${error.message}`);
+    }
+  }
+
+  async getStringDetailsByHashcode(
+    projectId: string, 
+    hashcode: string
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get(
+        `/strings-api/v2/projects/${projectId}/strings/${hashcode}`
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get string details: ${error.message}`);
+    }
+  }
+
+  async getStringTranslations(
+    projectId: string, 
+    hashcode: string
+  ): Promise<any> {
+    await this.authenticate();
+    
+    try {
+      const response = await this.api.get(
+        `/strings-api/v2/projects/${projectId}/strings/${hashcode}/translations`
+      );
+      return response.data.response.data;
+    } catch (error: any) {
+      throw new Error(`Failed to get string translations: ${error.message}`);
     }
   }
 

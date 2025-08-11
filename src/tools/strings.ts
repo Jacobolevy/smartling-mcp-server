@@ -22,6 +22,58 @@ const createToolResponse = (content: any, isError: boolean = false, requestId: s
 
 export const addStringTools = (server: McpServer, client: SmartlingClient) => {
   server.tool(
+    'smartling_search_strings',
+    'Search strings by text with optional filters',
+    {
+      projectId: z.string().describe('The project ID'),
+      searchText: z.string().describe('Text to search for'),
+      localeId: z.string().optional().describe('Optional locale filter'),
+      fileUris: z.array(z.string()).optional().describe('Optional fileUri filters'),
+      includeTimestamps: z.boolean().optional().describe('Include timestamps'),
+      limit: z.number().optional().describe('Pagination limit'),
+      offset: z.number().optional().describe('Pagination offset'),
+    },
+    async ({ projectId, searchText, localeId, fileUris, includeTimestamps, limit, offset }) => {
+      try {
+        const options: any = {};
+        if (localeId) options.localeId = localeId;
+        if (fileUris) options.fileUris = fileUris;
+        if (includeTimestamps) options.includeTimestamps = includeTimestamps;
+        if (limit) options.limit = limit;
+
+        const result = await client.searchStrings(projectId, searchText, options);
+        
+        // Apply offset if provided
+        if (offset && result.items && Array.isArray(result.items)) {
+          result.items = result.items.slice(offset);
+        }
+
+        return createToolResponse(result, false, 'smartling-search-strings');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error searching strings: ${errorMessage}`, true, 'smartling-search-strings');
+      }
+    }
+  );
+
+  server.tool(
+    'smartling_get_string_details',
+    'Get string details by hashcode',
+    {
+      projectId: z.string().describe('The project ID'),
+      hashcode: z.string().describe('The string hashcode'),
+    },
+    async ({ projectId, hashcode }) => {
+      try {
+        const result = await client.getStringDetailsByHashcode(projectId, hashcode);
+        return createToolResponse(result, false, 'smartling-string-details');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error getting string details: ${errorMessage}`, true, 'smartling-string-details');
+      }
+    }
+  );
+  server.tool(
     'smartling_get_workflow_steps',
     'Get workflow steps for a job and locale',
     {
