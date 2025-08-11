@@ -23,23 +23,27 @@ const createToolResponse = (content: any, isError: boolean = false, requestId: s
 export const addStringTools = (server: McpServer, client: SmartlingClient) => {
   server.tool(
     'smartling_search_strings',
-    'Search strings by text with optional filters',
+    'Search strings by text with optional filters. If no specific fileUri provided, searches across all files in the project.',
     {
       projectId: z.string().describe('The project ID'),
       searchText: z.string().describe('Text to search for'),
       localeId: z.string().optional().describe('Optional locale filter'),
-      fileUris: z.array(z.string()).optional().describe('Optional fileUri filters'),
+      fileUri: z.string().optional().describe('Optional: specific file URI to search in'),
+      fileUris: z.array(z.string()).optional().describe('Optional: multiple fileUri filters'),
       includeTimestamps: z.boolean().optional().describe('Include timestamps'),
       limit: z.number().optional().describe('Pagination limit'),
       offset: z.number().optional().describe('Pagination offset'),
+      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: 50)'),
     },
-    async ({ projectId, searchText, localeId, fileUris, includeTimestamps, limit, offset }) => {
+    async ({ projectId, searchText, localeId, fileUri, fileUris, includeTimestamps, limit, offset, maxFiles }) => {
       try {
         const options: any = {};
         if (localeId) options.localeId = localeId;
+        if (fileUri) options.fileUri = fileUri;
         if (fileUris) options.fileUris = fileUris;
         if (includeTimestamps) options.includeTimestamps = includeTimestamps;
         if (limit) options.limit = limit;
+        if (maxFiles) options.maxFiles = maxFiles;
 
         const result = await client.searchStrings(projectId, searchText, options);
         
@@ -192,26 +196,30 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
 
   server.tool(
     'smartling_search_strings_advanced',
-    'Advanced search for strings with multiple filters and sorting options',
+    'Advanced search for strings with multiple filters and sorting options. If no specific fileUri provided, searches across all files in the project.',
     {
       projectId: z.string().describe('The project ID'),
       searchText: z.string().describe('Text to search for in strings'),
       localeId: z.string().optional().describe('Optional: specific locale to search in'),
+      fileUri: z.string().optional().describe('Optional: specific file URI to search in'),
       fileUris: z.array(z.string()).optional().describe('Optional: specific file URIs to search in'),
       tags: z.array(z.string()).optional().describe('Optional: filter by tags'),
       translationStatus: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'EXCLUDED']).optional().describe('Optional: filter by translation status'),
       includeTimestamps: z.boolean().optional().describe('Include timestamp information'),
       limit: z.number().optional().describe('Maximum number of results to return'),
       offset: z.number().optional().describe('Number of results to skip (for pagination)'),
+      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: 50)'),
     },
-    async ({ projectId, searchText, localeId, fileUris, tags, translationStatus, includeTimestamps, limit, offset }) => {
+    async ({ projectId, searchText, localeId, fileUri, fileUris, tags, translationStatus, includeTimestamps, limit, offset, maxFiles }) => {
       try {
         // First, perform basic string search
         const searchOptions: any = {};
         if (localeId) searchOptions.localeId = localeId;
+        if (fileUri) searchOptions.fileUri = fileUri;
         if (fileUris) searchOptions.fileUris = fileUris;
         if (includeTimestamps) searchOptions.includeTimestamps = includeTimestamps;
         if (limit) searchOptions.limit = limit;
+        if (maxFiles) searchOptions.maxFiles = maxFiles;
 
         let results = await client.searchStrings(projectId, searchText, searchOptions);
 

@@ -190,69 +190,158 @@ export class SmartlingClient {
       fileUris?: string[];
       includeTimestamps?: boolean;
       limit?: number;
+      fileUri?: string;
+      maxFiles?: number;
     } = {}
   ): Promise<any> {
     await this.authenticate();
 
-    const params = new URLSearchParams();
-    params.append('q', searchText);
-    
-    // Also try sourceKeyword parameter as seen in web interface
-    const paramsSourceKeyword = new URLSearchParams();
-    paramsSourceKeyword.append('sourceKeyword', searchText);
-    
-    if (options.localeId) {
-      params.append('localeId', options.localeId);
-      paramsSourceKeyword.append('localeId', options.localeId);
+    // If no specific fileUri provided, search across all files
+    if (!options.fileUri && (!options.fileUris || options.fileUris.length === 0)) {
+      return await this.searchAcrossAllFiles(projectId, searchText, options);
     }
-    if (options.fileUris) {
-      options.fileUris.forEach(uri => {
-        params.append('fileUri', uri);
-        paramsSourceKeyword.append('fileUri', uri);
-      });
-    }
-    if (options.limit) {
-      params.append('limit', options.limit.toString());
-      paramsSourceKeyword.append('limit', options.limit.toString());
-    }
-    if (options.includeTimestamps) {
-      params.append('includeTimestamps', 'true');
-      paramsSourceKeyword.append('includeTimestamps', 'true');
+
+    // Search in specific file(s)
+    const params: any = {
+      ...(searchText && { q: searchText }),
+      ...(options.limit && { limit: options.limit }),
+      ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps }),
+      ...(options.localeId && { localeId: options.localeId })
+    };
+
+    // Handle single file or multiple files
+    if (options.fileUri) {
+      params.fileUri = options.fileUri;
+    } else if (options.fileUris && options.fileUris.length > 0) {
+      // For multiple files, search each one separately and combine results
+      let allResults: any[] = [];
+      let totalFound = 0;
+
+      for (const fileUri of options.fileUris) {
+        try {
+          const fileParams = { ...params, fileUri };
+          const response = await this.api.get(
+            `/strings-api/v2/projects/${projectId}/source-strings`,
+            { params: fileParams }
+          );
+          
+          const results = response.data.response?.data?.items || [];
+          if (results.length > 0) {
+            // Add file info to each result
+            results.forEach((item: any) => {
+              item.fileUri = fileUri;
+            });
+            allResults = allResults.concat(results);
+            totalFound += results.length;
+          }
+        } catch (error: any) {
+          console.log(`[DEBUG] Skipped file ${fileUri}: ${error.message}`);
+        }
+      }
+
+      return {
+        items: allResults,
+        totalCount: totalFound,
+        filesSearched: options.fileUris.length
+      };
     }
 
     try {
-      // Use official Smartling API endpoints from documentation
-      // https://api-reference.smartling.com/#tag/Strings/operation/getAllSourceStringsByProject
-      
-      console.log(`[DEBUG] Trying official endpoint: /strings-api/v2/projects/${projectId}/source-strings`);
-      
-      // First try with search text
-      let params: any = {
-        ...(options.limit && { limit: options.limit }),
-        ...(options.includeTimestamps && { includeTimestamps: options.includeTimestamps })
-      };
-      
-      // Try different search parameter names based on API documentation
-      if (searchText && searchText.trim()) {
-        params.q = searchText;  // Standard query
-        params.search = searchText;  // Alternative parameter
-        params.text = searchText;  // Another alternative
-        params.stringText = searchText;  // Specific to strings
-      }
-      
-      if (options.localeId) params.localeId = options.localeId;
-      if (options.fileUris) params.fileUris = options.fileUris.join(',');
-      
-      console.log(`[DEBUG] Request params:`, params);
-      
       const response = await this.api.get(
         `/strings-api/v2/projects/${projectId}/source-strings`,
         { params }
       );
       return response.data.response.data;
     } catch (error: any) {
-      console.log(`[DEBUG] Official endpoint failed: ${error.message}`);
-      throw new Error(`Failed to search strings using official API: ${error.message}`);
+      throw new Error(`Failed to search strings: ${error.message}`);
+    }
+  }
+
+  async searchAcrossAllFiles(
+    projectId: string, 
+    searchText: string, 
+    options: any = {}
+  ): Promise<any> {
+    console.log(`[DEBUG] Searching across all files for: "${searchText}"`);
+    
+    try {
+      // First get all files in the project
+      const filesResponse = await this.api.get(
+        `/files-api/v2/projects/${projectId}/files/list`
+      );
+      
+      const files = filesResponse.data.response?.data?.items || [];
+      console.log(`[DEBUG] Found ${files.length} files in project`);
+      
+      let allResults: any[] = [];
+      let totalFound = 0;
+      
+      // Search through files (limit to reasonable number to avoid timeouts)
+      const maxFilesToSearch = options.maxFiles || 50;
+      const filesToSearch = files.slice(0, maxFilesToSearch);
+      
+      for (const file of filesToSearch) {
+        try {
+          const params: any = {
+            fileUri: file.fileUri,
+            limit: options.limit || 100
+          };
+          
+          if (searchText) {
+            params.q = searchText;
+          }
+          
+          if (options.includeTimestamps) {
+            params.includeTimestamps = options.includeTimestamps;
+          }
+          
+          const response = await this.api.get(
+            `/strings-api/v2/projects/${projectId}/source-strings`,
+            { params }
+          );
+          
+          const results = response.data.response?.data?.items || [];
+          
+          if (results.length > 0) {
+            // Filter results if searchText provided
+            let filteredResults = results;
+            if (searchText) {
+              filteredResults = results.filter((item: any) => {
+                const text = (item.stringText || item.parsedStringText || '').toLowerCase();
+                return text.includes(searchText.toLowerCase());
+              });
+            }
+            
+            if (filteredResults.length > 0) {
+              // Add file info to each result
+              filteredResults.forEach((item: any) => {
+                item.fileUri = file.fileUri;
+                item.fileName = file.fileName || file.fileUri;
+              });
+              
+              allResults = allResults.concat(filteredResults);
+              totalFound += filteredResults.length;
+              
+              console.log(`[DEBUG] Found ${filteredResults.length} matches in ${file.fileUri}`);
+            }
+          }
+        } catch (fileError: any) {
+          // Skip files that error out
+          console.log(`[DEBUG] Skipped file ${file.fileUri}: ${fileError.message}`);
+        }
+      }
+      
+      console.log(`[DEBUG] Total results found: ${totalFound} across ${filesToSearch.length} files`);
+      
+      return {
+        items: allResults,
+        totalCount: totalFound,
+        filesSearched: filesToSearch.length,
+        totalFiles: files.length
+      };
+      
+    } catch (error: any) {
+      throw new Error(`Failed to search across all files: ${error.message}`);
     }
   }
 
