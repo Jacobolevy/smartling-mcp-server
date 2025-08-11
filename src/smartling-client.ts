@@ -205,7 +205,10 @@ export class SmartlingClient {
     if (options.includeTimestamps) params.append('includeTimestamps', 'true');
 
     try {
-      // First try POST method for advanced search
+      // Try different endpoint variations based on Smartling web interface patterns
+      
+      // First try: strings-api/v2 with search
+      console.log(`[DEBUG] Trying POST: /strings-api/v2/projects/${projectId}/strings/search`);
       const postResponse = await this.api.post(
         `/strings-api/v2/projects/${projectId}/strings/search`,
         {
@@ -218,14 +221,29 @@ export class SmartlingClient {
       );
       return postResponse.data.response.data;
     } catch (postError: any) {
-      // Fallback to GET method for basic search  
+      console.log(`[DEBUG] POST failed: ${postError.message}`);
+      
+      // Second try: strings-api/v2 with GET
       try {
+        console.log(`[DEBUG] Trying GET: /strings-api/v2/projects/${projectId}/strings?${params.toString()}`);
         const response = await this.api.get(
           `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
         );
         return response.data.response.data;
       } catch (getError: any) {
-        throw new Error(`Failed to search strings: ${getError.message}`);
+        console.log(`[DEBUG] GET strings-api failed: ${getError.message}`);
+        
+        // Third try: different API version
+        try {
+          console.log(`[DEBUG] Trying GET: /projects-api/v2/projects/${projectId}/strings?${params.toString()}`);
+          const response = await this.api.get(
+            `/projects-api/v2/projects/${projectId}/strings?${params.toString()}`
+          );
+          return response.data.response.data;
+        } catch (projectsError: any) {
+          console.log(`[DEBUG] GET projects-api failed: ${projectsError.message}`);
+          throw new Error(`Failed to search strings: ${getError.message}`);
+        }
       }
     }
   }
