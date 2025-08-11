@@ -276,8 +276,8 @@ export class SmartlingClient {
       let allResults: any[] = [];
       let totalFound = 0;
       
-      // Search through files (limit to reasonable number to avoid timeouts)
-      const maxFilesToSearch = options.maxFiles || 50;
+      // Search through ALL files unless maxFiles is explicitly specified
+      const maxFilesToSearch = options.maxFiles || files.length;
       const filesToSearch = files.slice(0, maxFilesToSearch);
       
       for (const file of filesToSearch) {

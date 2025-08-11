@@ -33,7 +33,7 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
       includeTimestamps: z.boolean().optional().describe('Include timestamps'),
       limit: z.number().optional().describe('Pagination limit'),
       offset: z.number().optional().describe('Pagination offset'),
-      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: 50)'),
+      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: all files)'),
     },
     async ({ projectId, searchText, localeId, fileUri, fileUris, includeTimestamps, limit, offset, maxFiles }) => {
       try {
@@ -208,7 +208,7 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
       includeTimestamps: z.boolean().optional().describe('Include timestamp information'),
       limit: z.number().optional().describe('Maximum number of results to return'),
       offset: z.number().optional().describe('Number of results to skip (for pagination)'),
-      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: 50)'),
+      maxFiles: z.number().optional().describe('Maximum number of files to search when searching across all files (default: all files)'),
     },
     async ({ projectId, searchText, localeId, fileUri, fileUris, tags, translationStatus, includeTimestamps, limit, offset, maxFiles }) => {
       try {
