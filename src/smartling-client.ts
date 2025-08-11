@@ -197,12 +197,28 @@ export class SmartlingClient {
     const params = new URLSearchParams();
     params.append('q', searchText);
     
-    if (options.localeId) params.append('localeId', options.localeId);
-    if (options.fileUris) {
-      options.fileUris.forEach(uri => params.append('fileUri', uri));
+    // Also try sourceKeyword parameter as seen in web interface
+    const paramsSourceKeyword = new URLSearchParams();
+    paramsSourceKeyword.append('sourceKeyword', searchText);
+    
+    if (options.localeId) {
+      params.append('localeId', options.localeId);
+      paramsSourceKeyword.append('localeId', options.localeId);
     }
-    if (options.limit) params.append('limit', options.limit.toString());
-    if (options.includeTimestamps) params.append('includeTimestamps', 'true');
+    if (options.fileUris) {
+      options.fileUris.forEach(uri => {
+        params.append('fileUri', uri);
+        paramsSourceKeyword.append('fileUri', uri);
+      });
+    }
+    if (options.limit) {
+      params.append('limit', options.limit.toString());
+      paramsSourceKeyword.append('limit', options.limit.toString());
+    }
+    if (options.includeTimestamps) {
+      params.append('includeTimestamps', 'true');
+      paramsSourceKeyword.append('includeTimestamps', 'true');
+    }
 
     try {
       // Try different endpoint variations based on Smartling web interface patterns
@@ -242,7 +258,18 @@ export class SmartlingClient {
           return response.data.response.data;
         } catch (projectsError: any) {
           console.log(`[DEBUG] GET projects-api failed: ${projectsError.message}`);
-          throw new Error(`Failed to search strings: ${getError.message}`);
+          
+          // Fourth try: sourceKeyword parameter like web interface
+          try {
+            console.log(`[DEBUG] Trying GET with sourceKeyword: /strings-api/v2/projects/${projectId}/strings?${paramsSourceKeyword.toString()}`);
+            const response = await this.api.get(
+              `/strings-api/v2/projects/${projectId}/strings?${paramsSourceKeyword.toString()}`
+            );
+            return response.data.response.data;
+          } catch (sourceKeywordError: any) {
+            console.log(`[DEBUG] GET sourceKeyword failed: ${sourceKeywordError.message}`);
+            throw new Error(`Failed to search strings: ${getError.message}`);
+          }
         }
       }
     }
