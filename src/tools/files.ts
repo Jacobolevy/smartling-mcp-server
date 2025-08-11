@@ -131,7 +131,7 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
   );
 
   server.tool(
-    'smartling_search_strings',
+    'smartling_file_search_strings',
     'Search for strings in translation files',
     {
       projectId: z.string().describe('The project ID'),
@@ -159,8 +159,8 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
   );
 
   server.tool(
-    'smartling_get_string_details',
-    'Get detailed information about a specific string',
+    'smartling_get_translations_by_locale',
+    'Get translations for a string by locale',
     {
       projectId: z.string().describe('The project ID'),
       hashcode: z.string().describe('The unique hashcode of the string'),
