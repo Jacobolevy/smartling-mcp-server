@@ -595,17 +595,23 @@ export class SmartlingClient {
     contextData: {
       contextType: 'image' | 'video' | 'html';
       contextName: string;
-      filePath?: string;           // New: file path for multipart upload
+      filePath?: string;           // File path for multipart upload
       fileContent?: string;        // Legacy: base64 content (fallback)
+      imageUrl?: string;           // New: URL for downloading and uploading
       contextDescription?: string;
-      autoOptimize?: boolean;      // New: auto-optimize images
+      autoOptimize?: boolean;      // Auto-optimize images
     }
   ): Promise<any> {
     await this.authenticate();
     
     try {
-      // Check file path vs base64 content
-      if (contextData.filePath) {
+      // Check upload method: URL, file path, or base64 content
+      if (contextData.imageUrl) {
+        return await this.uploadContextFromUrl(projectId, {
+          ...contextData,
+          imageUrl: contextData.imageUrl
+        });
+      } else if (contextData.filePath) {
         return await this.uploadContextFromFile(projectId, {
           ...contextData,
           filePath: contextData.filePath
@@ -616,7 +622,7 @@ export class SmartlingClient {
           fileContent: contextData.fileContent
         });
       } else {
-        throw new Error('Either filePath or fileContent must be provided');
+        throw new Error('Either imageUrl, filePath, or fileContent must be provided');
       }
       
     } catch (error: any) {
@@ -707,6 +713,75 @@ export class SmartlingClient {
     return response.data.response?.data || response.data;
   }
 
+  private async uploadContextFromUrl(
+    projectId: string,
+    contextData: {
+      contextType: 'image' | 'video' | 'html';
+      contextName: string;
+      imageUrl: string;
+      contextDescription?: string;
+      autoOptimize?: boolean;
+    }
+  ): Promise<any> {
+    const { contextType, contextName, imageUrl, contextDescription, autoOptimize } = contextData;
+    
+    // Download image from URL
+    const imageResponse = await this.api.get(imageUrl, {
+      responseType: 'stream'
+    });
+    
+    // Get filename from URL or use default
+    const urlPath = new URL(imageUrl).pathname;
+    const fileName = path.basename(urlPath) || `context-${Date.now()}.png`;
+    const mimeType = this.getMimeTypeFromUrl(imageUrl) || 
+                     imageResponse.headers['content-type'] || 
+                     this.getMimeType(fileName);
+    
+    // Check file size if possible
+    const contentLength = imageResponse.headers['content-length'];
+    if (contentLength) {
+      const fileSizeInMB = parseInt(contentLength) / (1024 * 1024);
+      const maxSizeInMB = contextType === 'video' ? 512 : contextType === 'image' ? 20 : 32;
+      
+      if (fileSizeInMB > maxSizeInMB) {
+        if (autoOptimize && contextType === 'image') {
+          throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit. Auto-optimization not yet implemented.`);
+        } else {
+          throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit for ${contextType} files. Consider enabling autoOptimize.`);
+        }
+      }
+    }
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('contextType', contextType);
+    formData.append('contextName', contextName);
+    if (contextDescription) {
+      formData.append('contextDescription', contextDescription);
+    }
+    
+    // Append image stream from URL
+    formData.append('content', imageResponse.data, {
+      filename: fileName,
+      contentType: mimeType
+    });
+    
+    // Upload using multipart/form-data
+    const response = await this.api.post(
+      `/context-api/v2/projects/${projectId}/contexts`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders()
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      }
+    );
+    
+    return response.data.response?.data || response.data;
+  }
+
   private getMimeType(fileName: string): string {
     const ext = path.extname(fileName).toLowerCase();
     const mimeTypes: { [key: string]: string } = {
@@ -724,6 +799,16 @@ export class SmartlingClient {
     };
     
     return mimeTypes[ext] || 'application/octet-stream';
+  }
+
+  private getMimeTypeFromUrl(url: string): string | null {
+    try {
+      const urlPath = new URL(url).pathname;
+      const ext = path.extname(urlPath).toLowerCase();
+      return this.getMimeType(ext);
+    } catch {
+      return null;
+    }
   }
 
   async getContext(projectId: string, contextUid: string): Promise<any> {

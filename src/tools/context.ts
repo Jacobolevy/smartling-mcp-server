@@ -5,21 +5,22 @@ import { SmartlingClient } from '../smartling-client.js';
 export const addContextTools = (server: McpServer, client: SmartlingClient) => {
   server.tool(
     'smartling_upload_context',
-    'Upload visual context (image/screenshot) to help translators. Use filePath for files up to 20MB (images), 512MB (videos), or fileContent for base64 (limited by MCP).',
+    'Upload visual context (image/screenshot) to help translators. Use imageUrl for URLs (Figma, etc), filePath for local files up to 20MB (images), 512MB (videos), or fileContent for base64 (limited by MCP).',
     {
       projectId: z.string().describe('The project ID'),
       contextType: z.enum(['image', 'video', 'html']).describe('Type of context'),
       contextName: z.string().describe('Descriptive name for the context'),
-      filePath: z.string().optional().describe('Local file path (preferred for large files - supports up to 20MB images, 512MB videos)'),
+      imageUrl: z.string().optional().describe('Image URL (preferred for team workflows - supports Figma URLs, etc)'),
+      filePath: z.string().optional().describe('Local file path (for individual use - supports up to 20MB images, 512MB videos)'),
       fileContent: z.string().optional().describe('File content (base64 encoded) - fallback for small files only'),
       contextDescription: z.string().optional().describe('Optional description of the context'),
       autoOptimize: z.boolean().optional().describe('Auto-optimize large images (future feature)'),
     },
-    async ({ projectId, contextType, contextName, filePath, fileContent, contextDescription, autoOptimize }) => {
+    async ({ projectId, contextType, contextName, imageUrl, filePath, fileContent, contextDescription, autoOptimize }) => {
       try {
-        // Validate that either filePath or fileContent is provided
-        if (!filePath && !fileContent) {
-          throw new Error('Either filePath or fileContent must be provided');
+        // Validate that at least one upload method is provided
+        if (!imageUrl && !filePath && !fileContent) {
+          throw new Error('Either imageUrl, filePath, or fileContent must be provided');
         }
         
         const contextData: any = {
@@ -27,6 +28,9 @@ export const addContextTools = (server: McpServer, client: SmartlingClient) => {
           contextName,
         };
         
+        if (imageUrl) {
+          contextData.imageUrl = imageUrl;
+        }
         if (filePath) {
           contextData.filePath = filePath;
         }
