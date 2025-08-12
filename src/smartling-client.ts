@@ -664,11 +664,11 @@ export class SmartlingClient {
     }
     
     // Read file and append with proper content type
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileStream = fs.createReadStream(filePath);
     const fileName = path.basename(filePath);
     const mimeType = this.getMimeType(fileName);
     
-    formData.append('file', fileBuffer, {
+    formData.append('content', fileStream, {
       filename: fileName,
       contentType: mimeType
     });
@@ -678,6 +678,9 @@ export class SmartlingClient {
       `/context-api/v2/projects/${projectId}/contexts`,
       formData,
       {
+        headers: {
+          ...formData.getHeaders()
+        },
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       }
