@@ -5,23 +5,39 @@ import { SmartlingClient } from '../smartling-client.js';
 export const addContextTools = (server: McpServer, client: SmartlingClient) => {
   server.tool(
     'smartling_upload_context',
-    'Upload visual context (image/screenshot) to help translators',
+    'Upload visual context (image/screenshot) to help translators. Use filePath for files up to 20MB (images), 512MB (videos), or fileContent for base64 (limited by MCP).',
     {
       projectId: z.string().describe('The project ID'),
       contextType: z.enum(['image', 'video', 'html']).describe('Type of context'),
       contextName: z.string().describe('Descriptive name for the context'),
-      fileContent: z.string().describe('File content (base64 encoded)'),
+      filePath: z.string().optional().describe('Local file path (preferred for large files - supports up to 20MB images, 512MB videos)'),
+      fileContent: z.string().optional().describe('File content (base64 encoded) - fallback for small files only'),
       contextDescription: z.string().optional().describe('Optional description of the context'),
+      autoOptimize: z.boolean().optional().describe('Auto-optimize large images (future feature)'),
     },
-    async ({ projectId, contextType, contextName, fileContent, contextDescription }) => {
+    async ({ projectId, contextType, contextName, filePath, fileContent, contextDescription, autoOptimize }) => {
       try {
+        // Validate that either filePath or fileContent is provided
+        if (!filePath && !fileContent) {
+          throw new Error('Either filePath or fileContent must be provided');
+        }
+        
         const contextData: any = {
           contextType,
           contextName,
-          fileContent,
         };
+        
+        if (filePath) {
+          contextData.filePath = filePath;
+        }
+        if (fileContent) {
+          contextData.fileContent = fileContent;
+        }
         if (contextDescription !== undefined) {
           contextData.contextDescription = contextDescription;
+        }
+        if (autoOptimize !== undefined) {
+          contextData.autoOptimize = autoOptimize;
         }
         
         const result = await client.uploadContext(projectId, contextData);

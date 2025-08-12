@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import FormData from 'form-data';
+import fs from 'fs';
+import path from 'path';
 import { 
   SmartlingConfig, 
   SmartlingProject, 
@@ -604,8 +606,10 @@ export class SmartlingClient {
     contextData: {
       contextType: 'image' | 'video' | 'html';
       contextName: string;
-      fileContent: string;
+      filePath?: string;           // New: file path for multipart upload
+      fileContent?: string;        // Legacy: base64 content (fallback)
       contextDescription?: string;
+      autoOptimize?: boolean;      // New: auto-optimize images
     }
   ): Promise<any> {
     await this.authenticate();
@@ -614,20 +618,141 @@ export class SmartlingClient {
       console.log(`[DEBUG] uploadContext - projectId: ${projectId}`);
       console.log(`[DEBUG] uploadContext - contextType: ${contextData.contextType}`);
       console.log(`[DEBUG] uploadContext - contextName: ${contextData.contextName}`);
-      console.log(`[DEBUG] uploadContext - fileContent length: ${contextData.fileContent?.length || 0}`);
-      console.log(`[DEBUG] uploadContext - contextDescription: ${contextData.contextDescription || 'none'}`);
+      console.log(`[DEBUG] uploadContext - filePath: ${contextData.filePath || 'none'}`);
+      console.log(`[DEBUG] uploadContext - autoOptimize: ${contextData.autoOptimize || false}`);
       
-      const response = await this.api.post(
-        `/context-api/v2/projects/${projectId}/contexts`,
-        contextData
-      );
+      // Check file path vs base64 content
+      if (contextData.filePath) {
+        return await this.uploadContextFromFile(projectId, {
+          ...contextData,
+          filePath: contextData.filePath
+        });
+      } else if (contextData.fileContent) {
+        return await this.uploadContextFromBase64(projectId, {
+          ...contextData,
+          fileContent: contextData.fileContent
+        });
+      } else {
+        throw new Error('Either filePath or fileContent must be provided');
+      }
       
-      console.log(`[DEBUG] uploadContext - Success:`, response.data.response?.data);
-      return response.data.response?.data || response.data;
     } catch (error: any) {
       console.log(`[DEBUG] uploadContext - Error:`, error.response?.data || error.message);
       throw new Error(`Failed to upload context: ${error.message}`);
     }
+  }
+
+  private async uploadContextFromFile(
+    projectId: string,
+    contextData: {
+      contextType: 'image' | 'video' | 'html';
+      contextName: string;
+      filePath: string;
+      contextDescription?: string;
+      autoOptimize?: boolean;
+    }
+  ): Promise<any> {
+    const { filePath, contextType, contextName, contextDescription, autoOptimize } = contextData;
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    
+    // Get file info
+    const stats = fs.statSync(filePath);
+    const fileSizeInMB = stats.size / (1024 * 1024);
+    const maxSizeInMB = contextType === 'video' ? 512 : contextType === 'image' ? 20 : 32;
+    
+    console.log(`[DEBUG] uploadContextFromFile - File size: ${fileSizeInMB.toFixed(2)}MB (max: ${maxSizeInMB}MB)`);
+    
+    // Check size limits
+    if (fileSizeInMB > maxSizeInMB) {
+      if (autoOptimize && contextType === 'image') {
+        console.log(`[DEBUG] uploadContextFromFile - File too large, auto-optimization requested but not implemented yet`);
+        throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit. Auto-optimization not yet implemented.`);
+      } else {
+        throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit for ${contextType} files. Consider enabling autoOptimize.`);
+      }
+    }
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('contextType', contextType);
+    formData.append('contextName', contextName);
+    if (contextDescription) {
+      formData.append('contextDescription', contextDescription);
+    }
+    
+    // Append file with proper content type
+    const fileStream = fs.createReadStream(filePath);
+    const fileName = path.basename(filePath);
+    const mimeType = this.getMimeType(fileName);
+    
+    formData.append('file', fileStream, {
+      filename: fileName,
+      contentType: mimeType
+    });
+    
+    console.log(`[DEBUG] uploadContextFromFile - Uploading with mime type: ${mimeType}`);
+    
+    // Upload using multipart/form-data
+    const response = await this.api.post(
+      `/context-api/v2/projects/${projectId}/contexts`,
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          'Authorization': this.api.defaults.headers.common['Authorization']
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      }
+    );
+    
+    console.log(`[DEBUG] uploadContextFromFile - Success:`, response.data.response?.data);
+    return response.data.response?.data || response.data;
+  }
+
+  private async uploadContextFromBase64(
+    projectId: string,
+    contextData: {
+      contextType: 'image' | 'video' | 'html';
+      contextName: string;
+      fileContent: string;
+      contextDescription?: string;
+    }
+  ): Promise<any> {
+    console.log(`[DEBUG] uploadContextFromBase64 - Using legacy base64 method`);
+    console.log(`[DEBUG] uploadContextFromBase64 - fileContent length: ${contextData.fileContent?.length || 0}`);
+    
+    // Legacy method using JSON + base64 (limited by MCP token size)
+    const response = await this.api.post(
+      `/context-api/v2/projects/${projectId}/contexts`,
+      contextData
+    );
+    
+    console.log(`[DEBUG] uploadContextFromBase64 - Success:`, response.data.response?.data);
+    return response.data.response?.data || response.data;
+  }
+
+  private getMimeType(fileName: string): string {
+    const ext = path.extname(fileName).toLowerCase();
+    const mimeTypes: { [key: string]: string } = {
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.webp': 'image/webp',
+      '.mp4': 'video/mp4',
+      '.avi': 'video/avi',
+      '.mov': 'video/quicktime',
+      '.pdf': 'application/pdf',
+      '.html': 'text/html',
+      '.htm': 'text/html'
+    };
+    
+    return mimeTypes[ext] || 'application/octet-stream';
   }
 
   async getContext(projectId: string, contextUid: string): Promise<any> {
