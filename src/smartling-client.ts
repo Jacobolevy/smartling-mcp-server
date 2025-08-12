@@ -911,12 +911,15 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
+      console.log(`[DEBUG] Binding context ${bindingData.contextUid} to strings:`, bindingData.stringHashcodes);
       const response = await this.api.post(
         `/context-api/v2/projects/${projectId}/bindings`,
         bindingData
       );
-      return response.data.response.data;
+      console.log(`[DEBUG] Bind response:`, response.data);
+      return response.data.response?.data || response.data;
     } catch (error: any) {
+      console.log(`[DEBUG] Bind error:`, error.response?.data);
       throw new Error(`Failed to bind context to string: ${error.message}`);
     }
   }
