@@ -729,11 +729,35 @@ export class SmartlingClient {
   ): Promise<any> {
     const { contextType, contextName, imageUrl, contextDescription, autoOptimize } = contextData;
     
+    try {
+    
     console.log(`[TEMP DEBUG] Downloading image from URL: ${imageUrl}`);
+    
+    // Prepare headers for CORS and Figma URLs
+    const headers: any = {
+      'User-Agent': 'Smartling-MCP/1.0',
+      'Accept': 'image/*,*/*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    };
+    
+    // Add specific headers for Figma URLs
+    if (imageUrl.includes('figma') || imageUrl.includes('figma-alpha-api')) {
+      headers['Origin'] = 'https://smartling.com';
+      headers['Referer'] = 'https://smartling.com';
+      headers['Sec-Fetch-Dest'] = 'image';
+      headers['Sec-Fetch-Mode'] = 'cors';
+      headers['Sec-Fetch-Site'] = 'cross-site';
+    }
     
     // Download image from URL as buffer
     const imageResponse = await this.api.get(imageUrl, {
-      responseType: 'arraybuffer'
+      responseType: 'arraybuffer',
+      headers,
+      timeout: 30000, // 30 second timeout
+      maxRedirects: 5
     });
     
     console.log(`[TEMP DEBUG] Download successful, content-type: ${imageResponse.headers['content-type']}`);
@@ -791,6 +815,21 @@ export class SmartlingClient {
     );
     
     return response.data.response?.data || response.data;
+    
+    } catch (error: any) {
+      if (error.code === 'ENOTFOUND') {
+        throw new Error(`Failed to resolve URL: ${imageUrl}. The domain may not exist or be accessible.`);
+      } else if (error.response?.status === 403) {
+        throw new Error(`Access denied to URL: ${imageUrl}. The resource may require authentication or have CORS restrictions.`);
+      } else if (error.response?.status === 404) {
+        throw new Error(`Image not found at URL: ${imageUrl}. The resource may have been moved or deleted.`);
+      } else if (error.code === 'ECONNREFUSED') {
+        throw new Error(`Connection refused to URL: ${imageUrl}. The server may be down or blocking requests.`);
+      } else if (error.code === 'ETIMEDOUT') {
+        throw new Error(`Timeout downloading image from URL: ${imageUrl}. The server may be slow or unresponsive.`);
+      }
+      throw new Error(`Failed to download image from URL: ${imageUrl}. Error: ${error.message}`);
+    }
   }
 
   private getMimeType(fileName: string): string {
