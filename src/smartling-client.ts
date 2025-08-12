@@ -237,7 +237,7 @@ export class SmartlingClient {
             totalFound += results.length;
           }
         } catch (error: any) {
-          console.log(`[DEBUG] Skipped file ${fileUri}: ${error.message}`);
+          // Skip files that cause errors and continue
         }
       }
 
@@ -290,15 +290,12 @@ export class SmartlingClient {
         includeInactive: options.includeInactive !== undefined ? options.includeInactive : true // Default to true
       };
 
-      console.log(`[DEBUG] getFileSourceStrings - projectId: ${projectId}, fileUri: ${fileUri}, params:`, params);
-
       const response = await this.api.get(
         `/strings-api/v2/projects/${projectId}/source-strings`,
         { params }
       );
       return response.data.response?.data || { items: [] };
     } catch (error: any) {
-      console.log(`[DEBUG] getFileSourceStrings error:`, error.response?.data || error.message);
       throw new Error(`Failed to get file source strings: ${error.message}`);
     }
   }
@@ -308,8 +305,6 @@ export class SmartlingClient {
     searchText: string, 
     options: any = {}
   ): Promise<any> {
-    console.log(`[DEBUG] Searching across all files for: "${searchText}"`);
-    
     try {
       // First get all files in the project
       const filesResponse = await this.api.get(
@@ -317,7 +312,6 @@ export class SmartlingClient {
       );
       
       const files = filesResponse.data.response?.data?.items || [];
-      console.log(`[DEBUG] Found ${files.length} files in project`);
       
       let allResults: any[] = [];
       let totalFound = 0;
@@ -367,17 +361,12 @@ export class SmartlingClient {
               
               allResults = allResults.concat(filteredResults);
               totalFound += filteredResults.length;
-              
-              console.log(`[DEBUG] Found ${filteredResults.length} matches in ${file.fileUri}`);
             }
           }
         } catch (fileError: any) {
           // Skip files that error out
-          console.log(`[DEBUG] Skipped file ${file.fileUri}: ${fileError.message}`);
         }
       }
-      
-      console.log(`[DEBUG] Total results found: ${totalFound} across ${filesToSearch.length} files`);
       
       return {
         items: allResults,
@@ -615,12 +604,6 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
-      console.log(`[DEBUG] uploadContext - projectId: ${projectId}`);
-      console.log(`[DEBUG] uploadContext - contextType: ${contextData.contextType}`);
-      console.log(`[DEBUG] uploadContext - contextName: ${contextData.contextName}`);
-      console.log(`[DEBUG] uploadContext - filePath: ${contextData.filePath || 'none'}`);
-      console.log(`[DEBUG] uploadContext - autoOptimize: ${contextData.autoOptimize || false}`);
-      
       // Check file path vs base64 content
       if (contextData.filePath) {
         return await this.uploadContextFromFile(projectId, {
@@ -637,7 +620,6 @@ export class SmartlingClient {
       }
       
     } catch (error: any) {
-      console.log(`[DEBUG] uploadContext - Error:`, error.response?.data || error.message);
       throw new Error(`Failed to upload context: ${error.message}`);
     }
   }
@@ -664,12 +646,9 @@ export class SmartlingClient {
     const fileSizeInMB = stats.size / (1024 * 1024);
     const maxSizeInMB = contextType === 'video' ? 512 : contextType === 'image' ? 20 : 32;
     
-    console.log(`[DEBUG] uploadContextFromFile - File size: ${fileSizeInMB.toFixed(2)}MB (max: ${maxSizeInMB}MB)`);
-    
     // Check size limits
     if (fileSizeInMB > maxSizeInMB) {
       if (autoOptimize && contextType === 'image') {
-        console.log(`[DEBUG] uploadContextFromFile - File too large, auto-optimization requested but not implemented yet`);
         throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit. Auto-optimization not yet implemented.`);
       } else {
         throw new Error(`File too large: ${fileSizeInMB.toFixed(2)}MB exceeds ${maxSizeInMB}MB limit for ${contextType} files. Consider enabling autoOptimize.`);
@@ -694,8 +673,6 @@ export class SmartlingClient {
       contentType: mimeType
     });
     
-    console.log(`[DEBUG] uploadContextFromFile - Uploading with mime type: ${mimeType}`);
-    
     // Upload using multipart/form-data
     const response = await this.api.post(
       `/context-api/v2/projects/${projectId}/contexts`,
@@ -710,7 +687,6 @@ export class SmartlingClient {
       }
     );
     
-    console.log(`[DEBUG] uploadContextFromFile - Success:`, response.data.response?.data);
     return response.data.response?.data || response.data;
   }
 
@@ -723,16 +699,12 @@ export class SmartlingClient {
       contextDescription?: string;
     }
   ): Promise<any> {
-    console.log(`[DEBUG] uploadContextFromBase64 - Using legacy base64 method`);
-    console.log(`[DEBUG] uploadContextFromBase64 - fileContent length: ${contextData.fileContent?.length || 0}`);
-    
     // Legacy method using JSON + base64 (limited by MCP token size)
     const response = await this.api.post(
       `/context-api/v2/projects/${projectId}/contexts`,
       contextData
     );
     
-    console.log(`[DEBUG] uploadContextFromBase64 - Success:`, response.data.response?.data);
     return response.data.response?.data || response.data;
   }
 
