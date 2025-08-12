@@ -288,12 +288,15 @@ export class SmartlingClient {
         ...(options.includeInactive !== undefined && { includeInactive: options.includeInactive })
       };
 
+      console.log(`[DEBUG] getFileSourceStrings - projectId: ${projectId}, fileUri: ${fileUri}, params:`, params);
+
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/source-strings`,
+        `/files-api/v2/projects/${projectId}/file/strings`,
         { params }
       );
       return response.data.response?.data || { items: [] };
     } catch (error: any) {
+      console.log(`[DEBUG] getFileSourceStrings error:`, error.response?.data || error.message);
       throw new Error(`Failed to get file source strings: ${error.message}`);
     }
   }
