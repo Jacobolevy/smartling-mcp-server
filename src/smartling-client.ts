@@ -663,12 +663,12 @@ export class SmartlingClient {
       formData.append('contextDescription', contextDescription);
     }
     
-    // Append file with proper content type
-    const fileStream = fs.createReadStream(filePath);
+    // Read file and append with proper content type
+    const fileBuffer = fs.readFileSync(filePath);
     const fileName = path.basename(filePath);
     const mimeType = this.getMimeType(fileName);
     
-    formData.append('file', fileStream, {
+    formData.append('file', fileBuffer, {
       filename: fileName,
       contentType: mimeType
     });
@@ -678,10 +678,6 @@ export class SmartlingClient {
       `/context-api/v2/projects/${projectId}/contexts`,
       formData,
       {
-        headers: {
-          ...formData.getHeaders(),
-          'Authorization': this.api.defaults.headers.common['Authorization']
-        },
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       }
