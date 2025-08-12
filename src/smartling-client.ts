@@ -282,16 +282,16 @@ export class SmartlingClient {
     try {
       await this.authenticate();
       const params: any = {
-        fileUri,
-        ...(options.offset !== undefined && { offset: options.offset }),
-        ...(options.limit !== undefined && { limit: options.limit }),
-        ...(options.includeInactive !== undefined && { includeInactive: options.includeInactive })
+        fileUri: encodeURIComponent(fileUri), // URL encode like in Apps Script
+        offset: options.offset || 0,
+        limit: options.limit || 500, // Default limit like Apps Script
+        includeInactive: options.includeInactive !== undefined ? options.includeInactive : true // Default to true
       };
 
       console.log(`[DEBUG] getFileSourceStrings - projectId: ${projectId}, fileUri: ${fileUri}, params:`, params);
 
       const response = await this.api.get(
-        `/files-api/v2/projects/${projectId}/file/strings`,
+        `/strings-api/v2/projects/${projectId}/source-strings`,
         { params }
       );
       return response.data.response?.data || { items: [] };
