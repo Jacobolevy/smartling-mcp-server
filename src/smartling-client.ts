@@ -260,6 +260,7 @@ export class SmartlingClient {
   // ================== PROJECT FILES API ==================
   async getProjectFiles(projectId: string): Promise<any> {
     try {
+      await this.authenticate();
       const response = await this.api.get(
         `/files-api/v2/projects/${projectId}/files/list`
       );
@@ -279,6 +280,7 @@ export class SmartlingClient {
     } = {}
   ): Promise<any> {
     try {
+      await this.authenticate();
       const params: any = {
         fileUri,
         ...(options.offset !== undefined && { offset: options.offset }),
