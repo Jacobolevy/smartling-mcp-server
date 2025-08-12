@@ -200,4 +200,47 @@ export const addFileTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
+
+  server.tool(
+    'smartling_get_project_files',
+    'Get list of all files in a Smartling project',
+    {
+      projectId: z.string().describe('The project ID'),
+    },
+    async ({ projectId }) => {
+      try {
+        const result = await client.getProjectFiles(projectId);
+        return createToolResponse(result, false, 'smartling-project-files');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error getting project files: ${errorMessage}`, true, 'smartling-project-files');
+      }
+    }
+  );
+
+  server.tool(
+    'smartling_get_file_source_strings',
+    'Get all source strings from a specific file in a Smartling project',
+    {
+      projectId: z.string().describe('The project ID'),
+      fileUri: z.string().describe('The file URI'),
+      offset: z.number().optional().describe('Number of items to skip (for pagination)'),
+      limit: z.number().optional().describe('Maximum number of results to return'),
+      includeInactive: z.boolean().optional().default(true).describe('Include inactive strings (default: true)'),
+    },
+    async ({ projectId, fileUri, offset, limit, includeInactive }) => {
+      try {
+        const options: any = {};
+        if (offset !== undefined) options.offset = offset;
+        if (limit !== undefined) options.limit = limit;
+        if (includeInactive !== undefined) options.includeInactive = includeInactive;
+        
+        const result = await client.getFileSourceStrings(projectId, fileUri, options);
+        return createToolResponse(result, false, 'smartling-file-source-strings');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error getting file source strings: ${errorMessage}`, true, 'smartling-file-source-strings');
+      }
+    }
+  );
 };

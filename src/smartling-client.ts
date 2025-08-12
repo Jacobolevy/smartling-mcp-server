@@ -257,6 +257,45 @@ export class SmartlingClient {
     }
   }
 
+  // ================== PROJECT FILES API ==================
+  async getProjectFiles(projectId: string): Promise<any> {
+    try {
+      const response = await this.api.get(
+        `/files-api/v2/projects/${projectId}/files/list`
+      );
+      return response.data.response?.data || { items: [] };
+    } catch (error: any) {
+      throw new Error(`Failed to get project files: ${error.message}`);
+    }
+  }
+
+  async getFileSourceStrings(
+    projectId: string, 
+    fileUri: string, 
+    options: {
+      offset?: number;
+      limit?: number;
+      includeInactive?: boolean;
+    } = {}
+  ): Promise<any> {
+    try {
+      const params: any = {
+        fileUri,
+        ...(options.offset !== undefined && { offset: options.offset }),
+        ...(options.limit !== undefined && { limit: options.limit }),
+        ...(options.includeInactive !== undefined && { includeInactive: options.includeInactive })
+      };
+
+      const response = await this.api.get(
+        `/strings-api/v2/projects/${projectId}/source-strings`,
+        { params }
+      );
+      return response.data.response?.data || { items: [] };
+    } catch (error: any) {
+      throw new Error(`Failed to get file source strings: ${error.message}`);
+    }
+  }
+
   async searchAcrossAllFiles(
     projectId: string, 
     searchText: string, 
