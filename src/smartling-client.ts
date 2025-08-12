@@ -282,7 +282,7 @@ export class SmartlingClient {
     } = {}
   ): Promise<any> {
     try {
-      await this.authenticate();
+    await this.authenticate();
       const params: any = {
         fileUri: encodeURIComponent(fileUri), // URL encode like in Apps Script
         offset: options.offset || 0,
@@ -335,7 +335,7 @@ export class SmartlingClient {
             params.includeTimestamps = options.includeTimestamps;
           }
           
-          const response = await this.api.get(
+      const response = await this.api.get(
             `/strings-api/v2/projects/${projectId}/source-strings`,
             { params }
           );
@@ -709,10 +709,10 @@ export class SmartlingClient {
     }
   ): Promise<any> {
     // Legacy method using JSON + base64 (limited by MCP token size)
-    const response = await this.api.post(
-      `/context-api/v2/projects/${projectId}/contexts`,
-      contextData
-    );
+      const response = await this.api.post(
+        `/context-api/v2/projects/${projectId}/contexts`,
+        contextData
+      );
     
     return response.data.response?.data || response.data;
   }
@@ -733,30 +733,24 @@ export class SmartlingClient {
     
     console.log(`[TEMP DEBUG] Downloading image from URL: ${imageUrl}`);
     
-    // Prepare headers for different URL types
-    const headers: any = {
-      'User-Agent': 'Mozilla/5.0 (compatible; Smartling-Bot/1.0)',
-      'Accept': 'image/png,image/jpeg,image/webp,image/*,*/*'
-    };
+    // Ultra minimal headers - only what's absolutely necessary
+    const headers: any = {};
     
-    // Different strategies for different services
+    // For AWS S3 URLs (Figma), use minimal headers to avoid rejection
     if (imageUrl.includes('figma-alpha-api.s3') || imageUrl.includes('amazonaws.com')) {
-      // AWS S3 (including Figma) - minimal headers to avoid CORS rejection
-      // Don't add Origin/Referer as S3 may reject unauthorized domains
-      headers['Accept-Encoding'] = 'identity'; // Avoid compression issues
-    } else if (imageUrl.includes('figma.com')) {
-      // Direct Figma URLs (not S3) - may need origin
-      headers['Origin'] = 'https://figma.com';
-      headers['Referer'] = 'https://figma.com';
+      // AWS S3 - absolutely minimal headers
+      headers['Accept'] = '*/*';
     } else {
-      // General URLs - standard browser headers
-      headers['Accept-Language'] = 'en-US,en;q=0.9';
-      headers['Accept-Encoding'] = 'gzip, deflate, br';
-      headers['Cache-Control'] = 'no-cache';
+      // For other URLs, use slightly more headers
+      headers['User-Agent'] = 'Mozilla/5.0 (compatible; Smartling-Bot/1.0)';
+      headers['Accept'] = 'image/*,*/*';
     }
     
+    // Create a separate axios instance for image downloads to avoid conflicts
+    const imageApi = axios.create();
+    
     // Download image from URL as buffer
-    const imageResponse = await this.api.get(imageUrl, {
+    const imageResponse = await imageApi.get(imageUrl, {
       responseType: 'arraybuffer',
       headers,
       timeout: 30000, // 30 second timeout
