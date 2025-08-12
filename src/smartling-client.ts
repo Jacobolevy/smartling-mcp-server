@@ -606,7 +606,10 @@ export class SmartlingClient {
     
     try {
       // Check upload method: URL, file path, or base64 content
+      console.log(`[TEMP DEBUG] Upload method check - imageUrl: ${contextData.imageUrl}, filePath: ${contextData.filePath}, fileContent: ${contextData.fileContent ? 'provided' : 'not provided'}`);
+      
       if (contextData.imageUrl) {
+        console.log(`[TEMP DEBUG] Using uploadContextFromUrl method`);
         return await this.uploadContextFromUrl(projectId, {
           ...contextData,
           imageUrl: contextData.imageUrl
@@ -626,6 +629,7 @@ export class SmartlingClient {
       }
       
     } catch (error: any) {
+      console.log(`[TEMP DEBUG] Upload context error:`, error.response?.data);
       throw new Error(`Failed to upload context: ${error.message}`);
     }
   }
@@ -725,10 +729,16 @@ export class SmartlingClient {
   ): Promise<any> {
     const { contextType, contextName, imageUrl, contextDescription, autoOptimize } = contextData;
     
-    // Download image from URL
+    console.log(`[TEMP DEBUG] Downloading image from URL: ${imageUrl}`);
+    
+    // Download image from URL as buffer
     const imageResponse = await this.api.get(imageUrl, {
-      responseType: 'stream'
+      responseType: 'arraybuffer'
     });
+    
+    console.log(`[TEMP DEBUG] Download successful, content-type: ${imageResponse.headers['content-type']}`);
+    console.log(`[TEMP DEBUG] Content-length: ${imageResponse.headers['content-length']}`);
+    console.log(`[TEMP DEBUG] Status: ${imageResponse.status}`);
     
     // Get filename from URL or use default
     const urlPath = new URL(imageUrl).pathname;
@@ -760,8 +770,9 @@ export class SmartlingClient {
       formData.append('contextDescription', contextDescription);
     }
     
-    // Append image stream from URL
-    formData.append('content', imageResponse.data, {
+    // Convert arraybuffer to buffer and append
+    const imageBuffer = Buffer.from(imageResponse.data);
+    formData.append('content', imageBuffer, {
       filename: fileName,
       contentType: mimeType
     });
