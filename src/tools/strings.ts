@@ -358,4 +358,39 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
+
+  server.tool(
+    'smartling_find_hashcodes_for_keys',
+    'Find hashcodes for a list of key names using exact Apps Script logic - searches across all files in the project',
+    {
+      projectId: z.string().describe('The project ID'),
+      keyNames: z.array(z.string()).describe('Array of key names to search for (e.g., ["auto-renew-mobile.network_issue.toast", "auto-renew-mobile.cta"])'),
+    },
+    async ({ projectId, keyNames }) => {
+      try {
+        // Get all project files first (like Apps Script)
+        const projectFiles = await client.getProjectFiles(projectId);
+        const fileUris = projectFiles.items ? projectFiles.items.map((file: any) => file.fileUri) : [];
+        
+        console.log(`Starting search for ${keyNames.length} keys across ${fileUris.length} files`);
+        
+        // Use exact Apps Script logic
+        const result = await client.findHashcodesForKeys(keyNames, fileUris, projectId);
+        
+        const response = {
+          totalKeysSearched: keyNames.length,
+          foundKeys: result.hashcodesInfo.length,
+          notFoundKeys: keyNames.filter(key => !result.processedOriginalKeys.includes(key)),
+          hashcodesInfo: result.hashcodesInfo,
+          processedOriginalKeys: result.processedOriginalKeys,
+          filesProcessed: fileUris.length
+        };
+        
+        return createToolResponse(response, false, 'smartling-find-hashcodes');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error finding hashcodes: ${errorMessage}`, true, 'smartling-find-hashcodes');
+      }
+    }
+  );
 }; 

@@ -911,15 +911,12 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
-      console.log(`[DEBUG] Binding context ${bindingData.contextUid} to strings:`, bindingData.stringHashcodes);
       const response = await this.api.post(
         `/context-api/v2/projects/${projectId}/bindings`,
         bindingData
       );
-      console.log(`[DEBUG] Bind response:`, response.data);
       return response.data.response?.data || response.data;
     } catch (error: any) {
-      console.log(`[DEBUG] Bind error:`, error.response?.data);
       throw new Error(`Failed to bind context to string: ${error.message}`);
     }
   }
@@ -1540,5 +1537,220 @@ export class SmartlingClient {
     } catch (error: any) {
       throw new Error(`Failed to assign workflow step: ${error.message}`);
     }
+  }
+
+  // ================== APPS SCRIPT COMPATIBLE FUNCTIONS ==================
+  
+  /**
+   * Find hashcodes for a list of key names - exact replication of Apps Script logic
+   */
+  async findHashcodesForKeys(
+    keyNames: string[], 
+    fileUris: string[], 
+    projectId: string
+  ): Promise<{
+    hashcodesInfo: Array<{localeKey: string, hashcode: string, originalKey: string}>,
+    processedOriginalKeys: string[]
+  }> {
+    await this.authenticate();
+    
+    const foundHashcodes: Array<{localeKey: string, hashcode: string, originalKey: string}> = [];
+    const processedOriginalKeys = new Set<string>();
+    
+    // Normalize key names once and create lookup map (exact Apps Script logic)
+    const normalizedKeyMap = new Map<string, string>();
+    keyNames.forEach(key => {
+      normalizedKeyMap.set(this.normalizeKey(key), key);
+    });
+    
+    // Process files in batches (like Apps Script)
+    const batchSize = 5; // Process 5 files at once
+    const fileBatches: string[][] = [];
+    
+    for (let i = 0; i < fileUris.length; i += batchSize) {
+      fileBatches.push(fileUris.slice(i, i + batchSize));
+    }
+    
+    for (const batch of fileBatches) {
+      const batchPromises = batch.map(fileUri =>
+        this.processFileForKeys(fileUri, projectId, normalizedKeyMap, foundHashcodes, processedOriginalKeys)
+      );
+      
+      // Wait for all files in batch to complete
+      await Promise.all(batchPromises.map(p => p.catch(e => console.warn(`Batch error: ${e.message}`))));
+      
+      // Early termination if all keys found
+      if (processedOriginalKeys.size === keyNames.length) {
+        console.log('All keys found, stopping early');
+        break;
+      }
+      
+      console.log(`Processed batch. Found: ${processedOriginalKeys.size}/${keyNames.length} keys`);
+    }
+    
+    return {
+      hashcodesInfo: foundHashcodes,
+      processedOriginalKeys: Array.from(processedOriginalKeys)
+    };
+  }
+
+  /**
+   * Process a single file for keys - exact Apps Script logic
+   */
+  private async processFileForKeys(
+    fileUri: string, 
+    projectId: string, 
+    normalizedKeyMap: Map<string, string>, 
+    foundHashcodes: Array<{localeKey: string, hashcode: string, originalKey: string}>, 
+    processedOriginalKeys: Set<string>
+  ): Promise<void> {
+    try {
+      console.log(`Processing file: ${fileUri}`);
+      const sourceStrings = await this.getSourceStringsForFileComplete(fileUri, projectId);
+      
+      if (!sourceStrings || sourceStrings.length === 0) {
+        console.log(`No strings found in file: ${fileUri}`);
+        return;
+      }
+      
+      // Create a map of normalized strings for faster lookup (exact Apps Script logic)
+      const stringMap = new Map<string, any[]>();
+      sourceStrings.forEach(str => {
+        const normalized = this.normalizeKey(str.stringVariant);
+        if (!stringMap.has(normalized)) {
+          stringMap.set(normalized, []);
+        }
+        stringMap.get(normalized)!.push(str);
+      });
+      
+      // Process keys more efficiently (exact Apps Script logic)
+      for (const [normalizedKey, originalKey] of normalizedKeyMap.entries()) {
+        if (processedOriginalKeys.has(originalKey)) continue; // Skip already found keys
+        
+        // 1. Exact match (O(1) lookup)
+        if (stringMap.has(normalizedKey)) {
+          const matches = stringMap.get(normalizedKey)!;
+          matches.forEach(match => {
+            if (!foundHashcodes.some(info => info.hashcode === match.hashcode)) {
+              foundHashcodes.push({
+                localeKey: match.stringVariant,
+                hashcode: match.hashcode,
+                originalKey: originalKey
+              });
+            }
+          });
+          processedOriginalKeys.add(originalKey);
+          console.log(`Exact match found for ${originalKey}`);
+          continue;
+        }
+        
+        // 2. Partial matches (only if exact match not found)
+        const partialMatches = this.findPartialMatches(normalizedKey, stringMap);
+        if (partialMatches.length > 0) {
+          partialMatches.forEach(match => {
+            if (!foundHashcodes.some(info => info.hashcode === match.hashcode)) {
+              foundHashcodes.push({
+                localeKey: match.stringVariant,
+                hashcode: match.hashcode,
+                originalKey: originalKey
+              });
+            }
+          });
+          processedOriginalKeys.add(originalKey);
+          console.log(`Partial matches found for ${originalKey}: ${partialMatches.length}`);
+        }
+      }
+      
+    } catch (error: any) {
+      console.warn(`Error processing file ${fileUri}:`, error.message);
+    }
+  }
+
+  /**
+   * Find partial matches - exact Apps Script logic
+   */
+  private findPartialMatches(normalizedKey: string, stringMap: Map<string, any[]>): any[] {
+    const matches: any[] = [];
+    
+    // Only do partial matching for keys longer than 3 characters
+    if (normalizedKey.length < 4) return matches;
+    
+    for (const [normalizedString, stringObjects] of stringMap.entries()) {
+      // Skip fuzzy matching for very different lengths
+      const lengthDiff = Math.abs(normalizedString.length - normalizedKey.length);
+      if (lengthDiff > normalizedKey.length * 0.5) continue;
+      
+      // Quick contains check first (faster than similarity calculation)
+      if (normalizedString.includes(normalizedKey) || normalizedKey.includes(normalizedString)) {
+        matches.push(...stringObjects);
+      }
+    }
+    
+    return matches;
+  }
+
+  /**
+   * Normalize key function - exact Apps Script logic
+   */
+  private normalizeKey(key: string): string {
+    return key.toString().trim().toLowerCase();
+  }
+
+  /**
+   * Get all source strings for a file with pagination - exact Apps Script logic
+   */
+  async getSourceStringsForFileComplete(fileUri: string, projectId: string): Promise<any[]> {
+    await this.authenticate();
+    
+    let allStrings: any[] = [];
+    let offset = 0;
+    const pageSize = 500; // Maximum allowed by API
+    
+    while (true) {
+      const params = new URLSearchParams({
+        fileUri: fileUri,
+        offset: offset.toString(),
+        limit: pageSize.toString(),
+        includeInactive: 'true'
+      });
+      
+      try {
+        const response = await this.api.get(
+          `/strings-api/v2/projects/${projectId}/source-strings?${params.toString()}`
+        );
+        
+        const data = response.data;
+        
+        if (!data.response || !data.response.data || !data.response.data.items) {
+          break;
+        }
+        
+        const items = data.response.data.items;
+        allStrings = allStrings.concat(items);
+        
+        if (items.length < pageSize) {
+          break;
+        }
+        
+        offset += pageSize;
+        
+        // Reduced sleep time for better performance (simulate Apps Script behavior)
+        if (offset % 2000 === 0) { // Only sleep every 4 requests
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        
+      } catch (error: any) {
+        console.error(`Error retrieving strings for file ${fileUri} at offset ${offset}:`, error);
+        // Retry once on error (like Apps Script)
+        if (!(error as any).retried) {
+          (error as any).retried = true;
+          await new Promise(resolve => setTimeout(resolve, 200));
+          continue;
+        }
+        break;
+      }
+    }
+    
+    return allStrings;
   }
 }
