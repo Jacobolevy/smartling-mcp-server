@@ -733,23 +733,26 @@ export class SmartlingClient {
     
     console.log(`[TEMP DEBUG] Downloading image from URL: ${imageUrl}`);
     
-    // Prepare headers for CORS and Figma URLs
+    // Prepare headers for different URL types
     const headers: any = {
-      'User-Agent': 'Smartling-MCP/1.0',
-      'Accept': 'image/*,*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
+      'User-Agent': 'Mozilla/5.0 (compatible; Smartling-Bot/1.0)',
+      'Accept': 'image/png,image/jpeg,image/webp,image/*,*/*'
     };
     
-    // Add specific headers for Figma URLs
-    if (imageUrl.includes('figma') || imageUrl.includes('figma-alpha-api')) {
-      headers['Origin'] = 'https://smartling.com';
-      headers['Referer'] = 'https://smartling.com';
-      headers['Sec-Fetch-Dest'] = 'image';
-      headers['Sec-Fetch-Mode'] = 'cors';
-      headers['Sec-Fetch-Site'] = 'cross-site';
+    // Different strategies for different services
+    if (imageUrl.includes('figma-alpha-api.s3') || imageUrl.includes('amazonaws.com')) {
+      // AWS S3 (including Figma) - minimal headers to avoid CORS rejection
+      // Don't add Origin/Referer as S3 may reject unauthorized domains
+      headers['Accept-Encoding'] = 'identity'; // Avoid compression issues
+    } else if (imageUrl.includes('figma.com')) {
+      // Direct Figma URLs (not S3) - may need origin
+      headers['Origin'] = 'https://figma.com';
+      headers['Referer'] = 'https://figma.com';
+    } else {
+      // General URLs - standard browser headers
+      headers['Accept-Language'] = 'en-US,en;q=0.9';
+      headers['Accept-Encoding'] = 'gzip, deflate, br';
+      headers['Cache-Control'] = 'no-cache';
     }
     
     // Download image from URL as buffer
