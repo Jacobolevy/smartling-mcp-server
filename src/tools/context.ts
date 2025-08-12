@@ -200,4 +200,4 @@ export const addContextTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
-}; 
+};

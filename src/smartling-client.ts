@@ -611,12 +611,21 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
+      console.log(`[DEBUG] uploadContext - projectId: ${projectId}`);
+      console.log(`[DEBUG] uploadContext - contextType: ${contextData.contextType}`);
+      console.log(`[DEBUG] uploadContext - contextName: ${contextData.contextName}`);
+      console.log(`[DEBUG] uploadContext - fileContent length: ${contextData.fileContent?.length || 0}`);
+      console.log(`[DEBUG] uploadContext - contextDescription: ${contextData.contextDescription || 'none'}`);
+      
       const response = await this.api.post(
         `/context-api/v2/projects/${projectId}/contexts`,
         contextData
       );
-      return response.data.response.data;
+      
+      console.log(`[DEBUG] uploadContext - Success:`, response.data.response?.data);
+      return response.data.response?.data || response.data;
     } catch (error: any) {
+      console.log(`[DEBUG] uploadContext - Error:`, error.response?.data || error.message);
       throw new Error(`Failed to upload context: ${error.message}`);
     }
   }
