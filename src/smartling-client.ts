@@ -910,14 +910,26 @@ export class SmartlingClient {
   ): Promise<any> {
     await this.authenticate();
     
+    const { contextUid, ...bindingPayload } = bindingData;
+    
     try {
+      // Try the more specific endpoint first (based on your research)
       const response = await this.api.post(
-        `/context-api/v2/projects/${projectId}/bindings`,
-        bindingData
+        `/context-api/v2/projects/${projectId}/contexts/${contextUid}/bindings`,
+        bindingPayload
       );
       return response.data.response?.data || response.data;
     } catch (error: any) {
-      throw new Error(`Failed to bind context to string: ${error.message}`);
+      // If that fails, try the alternative endpoint structure
+      try {
+        const response = await this.api.post(
+          `/context-api/v2/projects/${projectId}/bindings`,
+          bindingData
+        );
+        return response.data.response?.data || response.data;
+      } catch (secondError: any) {
+        throw new Error(`Failed to bind context to string. Primary endpoint error: ${error.message}. Alternative endpoint error: ${secondError.message}`);
+      }
     }
   }
 
