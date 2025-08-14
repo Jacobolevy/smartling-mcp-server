@@ -1709,6 +1709,116 @@ export class SmartlingClient {
   }
 
   /**
+   * Get all source strings from project and filter by authorization status
+   * Strategy: Use source-strings endpoint with pagination and filter by "authorized": false
+   */
+  async getAllSourceStringsFilteredByAuthorization(
+    projectId: string,
+    onlyUnauthorized: boolean = true
+  ): Promise<any[]> {
+    await this.authenticate();
+    
+    console.log(`🔍 Getting ALL source strings for project ${projectId}`);
+    console.log(`📋 Filter: ${onlyUnauthorized ? 'ONLY unauthorized (authorized: false)' : 'ALL strings'}`);
+    
+    let allStrings: any[] = [];
+    let offset = 0;
+    const limit = 500; // Max per request
+    let hasMore = true;
+    
+    while (hasMore) {
+      try {
+        console.log(`   📄 Page ${Math.floor(offset / limit) + 1} (offset: ${offset}, limit: ${limit})`);
+        
+        const response = await this.api.get(`/strings-api/v2/projects/${projectId}/source-strings`, {
+          params: {
+            offset,
+            limit,
+            includeInactive: true // Include all strings
+          }
+        });
+        
+        const data = response.data.response?.data;
+        const strings = data?.items || [];
+        
+        console.log(`   ✅ Retrieved ${strings.length} strings from API`);
+        
+        if (strings.length === 0) {
+          hasMore = false;
+          break;
+        }
+        
+        // Filter by authorization status if requested
+        let filteredStrings = strings;
+        if (onlyUnauthorized) {
+          filteredStrings = strings.filter((str: any) => {
+            // Check if string is NOT authorized (awaiting authorization)
+            return str.authorized === false || str.authorized === 'false' || !str.authorized;
+          });
+          
+          console.log(`   🔍 After authorization filter: ${filteredStrings.length} unauthorized strings`);
+        }
+        
+        // Add each string with key info
+        filteredStrings.forEach((str: any) => {
+          allStrings.push({
+            key: str.key || str.stringText || str.parsedStringText,
+            stringId: str.stringUid || str.hashcode,
+            authorized: str.authorized,
+            createdDate: str.createdDate,
+            modifiedDate: str.modifiedDate,
+            fileUri: str.fileUri,
+            originalString: str
+          });
+        });
+        
+        // Check if we have more pages
+        if (strings.length < limit) {
+          hasMore = false;
+        } else {
+          offset += limit;
+        }
+        
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error: any) {
+        console.error(`❌ Error at offset ${offset}: ${error.response?.status} - ${error.message}`);
+        
+        if (error.response?.status === 401) {
+          console.log('🔄 Re-authenticating...');
+          await this.authenticate();
+          continue; // Retry same page
+        }
+        
+        // For other errors, try to continue to next page
+        offset += limit;
+        if (offset > 10000) { // Safety break
+          console.log('⚠️ Too many errors, stopping pagination');
+          break;
+        }
+      }
+    }
+    
+    console.log(`\n📊 FINAL RESULTS:`);
+    console.log(`   Total strings found: ${allStrings.length}`);
+    console.log(`   Filter applied: ${onlyUnauthorized ? 'Only unauthorized (awaiting authorization)' : 'All strings'}`);
+    
+    // Show sample of results
+    if (allStrings.length > 0) {
+      console.log(`\n📝 Sample results (first 3):`);
+      allStrings.slice(0, 3).forEach((str, index) => {
+        console.log(`   ${index + 1}. Key: "${str.key}"`);
+        console.log(`      StringId: ${str.stringId}`);
+        console.log(`      Authorized: ${str.authorized}`);
+        console.log(`      Created: ${str.createdDate}`);
+      });
+    }
+    
+    return allStrings;
+  }
+
+  /**
    * Get strings by translation status focusing on AWAITING_AUTHORIZATION (pending)
    */
   async getStringsByTranslationStatus(
