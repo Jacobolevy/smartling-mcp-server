@@ -393,4 +393,37 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
       }
     }
   );
+
+  server.tool(
+    'smartling_get_strings_by_translation_status',
+    'Get strings by translation status (e.g., PENDING, AWAITING_AUTHORIZATION)',
+    {
+      projectId: z.string().describe('The project ID'),
+      translationStatus: z.string().describe('Translation status to filter by (PENDING, AWAITING_AUTHORIZATION, etc.)'),
+      localeId: z.string().optional().describe('Optional: specific locale to check'),
+      createdBefore: z.string().optional().describe('Optional: ISO date string to filter strings created before this date'),
+    },
+    async ({ projectId, translationStatus, localeId, createdBefore }) => {
+      try {
+        const result = await client.getStringsByTranslationStatus(
+          projectId, 
+          translationStatus,
+          localeId,
+          createdBefore
+        );
+        
+        return createToolResponse({
+          projectId,
+          translationStatus,
+          localeId,
+          createdBefore,
+          totalFound: result.length,
+          strings: result
+        }, false, 'smartling-strings-by-status');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return createToolResponse(`Error getting strings by translation status: ${errorMessage}`, true, 'smartling-strings-by-status');
+      }
+    }
+  );
 }; 

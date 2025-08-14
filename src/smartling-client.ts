@@ -1709,6 +1709,138 @@ export class SmartlingClient {
   }
 
   /**
+   * Get strings by translation status focusing on AWAITING_AUTHORIZATION (pending)
+   */
+  async getStringsByTranslationStatus(
+    projectId: string, 
+    translationStatus: string = 'PENDING',
+    localeId: string = 'es',
+    createdBefore?: string
+  ): Promise<any[]> {
+    await this.authenticate();
+    
+    let allStrings: any[] = [];
+    
+    // Get all files first
+    const filesResponse = await this.api.get(`/files-api/v2/projects/${projectId}/files/list`);
+    const files = filesResponse.data.response?.data?.items || [];
+    
+    console.log(`Checking ${files.length} files for strings in status: ${translationStatus}`);
+    
+    // For each file, get strings and check their authorization status
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      console.log(`[${i+1}/${files.length}] Processing: ${file.fileUri}`);
+      
+      try {
+        // Get file status to check authorization state
+        const fileStatusResponse = await this.api.get(
+          `/files-api/v2/projects/${projectId}/file/status`,
+          { params: { fileUri: file.fileUri } }
+        );
+        
+        const fileStatus = fileStatusResponse.data.response?.data;
+        
+        // Check if file has any locales in pending/awaiting authorization state
+        const hasPendingLocales = fileStatus?.items?.some((item: any) => 
+          item.localeId === localeId && 
+          (item.authorizedStringCount < item.stringCount || 
+           item.excludedStringCount > 0 ||
+           item.completedStringCount < item.stringCount)
+        );
+        
+        if (hasPendingLocales) {
+          // Get source strings for this file
+          const stringsResponse = await this.api.get(
+            `/strings-api/v2/projects/${projectId}/source-strings`,
+            { params: { fileUri: file.fileUri, limit: 1000 } }
+          );
+          
+          const sourceStrings = stringsResponse.data.response?.data?.items || [];
+          
+          // For pending status, we consider strings that are not yet authorized
+          // These would be strings created before a certain date that haven't been processed
+          let candidateStrings = sourceStrings;
+          
+          // Filter by creation date if specified
+          if (createdBefore) {
+            const cutoffDate = new Date(createdBefore);
+            candidateStrings = sourceStrings.filter((str: any) => {
+              const stringDate = new Date(str.createdDate || str.modifiedDate || str.firstSeenDate);
+              return !isNaN(stringDate.getTime()) && stringDate < cutoffDate;
+            });
+          }
+          
+          // Add file info to each string
+          candidateStrings.forEach((str: any) => {
+            str.sourceFileUri = file.fileUri;
+            str.fileName = file.fileName || file.fileUri;
+            str.estimatedStatus = 'PENDING_AUTHORIZATION'; // Our estimation
+          });
+          
+          if (candidateStrings.length > 0) {
+            console.log(`  ✅ Found ${candidateStrings.length} candidate strings`);
+            allStrings = allStrings.concat(candidateStrings);
+          } else {
+            console.log(`  ⚪ No candidate strings after date filter`);
+          }
+        } else {
+          console.log(`  ⚪ No pending locales`);
+        }
+        
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+      } catch (error: any) {
+        if (error.response?.status === 404) {
+          // File status not available, try direct source strings approach
+          try {
+            const stringsResponse = await this.api.get(
+              `/strings-api/v2/projects/${projectId}/source-strings`,
+              { params: { fileUri: file.fileUri, limit: 1000 } }
+            );
+            
+            let candidateStrings = stringsResponse.data.response?.data?.items || [];
+            
+            // Filter by creation date if specified
+            if (createdBefore) {
+              const cutoffDate = new Date(createdBefore);
+              candidateStrings = candidateStrings.filter((str: any) => {
+                const stringDate = new Date(str.createdDate || str.modifiedDate || str.firstSeenDate);
+                return !isNaN(stringDate.getTime()) && stringDate < cutoffDate;
+              });
+            }
+            
+            // Add file info
+            candidateStrings.forEach((str: any) => {
+              str.sourceFileUri = file.fileUri;
+              str.fileName = file.fileName || file.fileUri;
+              str.estimatedStatus = 'POTENTIAL_PENDING';
+            });
+            
+            if (candidateStrings.length > 0) {
+              console.log(`  ✅ Found ${candidateStrings.length} strings (fallback method)`);
+              allStrings = allStrings.concat(candidateStrings);
+            }
+          } catch (fallbackError: any) {
+            console.log(`  ❌ Error with fallback: ${fallbackError.response?.status}`);
+          }
+        } else {
+          console.log(`  ❌ Error: ${error.response?.status} - ${error.message}`);
+        }
+      }
+    }
+    
+    console.log(`\n📊 Total strings found: ${allStrings.length}`);
+    console.log(`🎯 Target status: ${translationStatus}`);
+    if (createdBefore) {
+      console.log(`📅 Created before: ${createdBefore}`);
+    }
+    
+    return allStrings;
+  }
+
+  /**
    * Get all source strings for a file with pagination - exact Apps Script logic
    */
   async getSourceStringsForFileComplete(fileUri: string, projectId: string): Promise<any[]> {
