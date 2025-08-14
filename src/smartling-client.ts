@@ -249,13 +249,23 @@ export class SmartlingClient {
     }
 
     try {
+      // Try strings search endpoint first (better for search)
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/source-strings`,
+        `/strings-api/v2/projects/${projectId}/strings/search`,
         { params }
       );
-      return response.data.response.data;
+      return response.data.response?.data || { items: [], totalCount: 0 };
     } catch (error: any) {
-      throw new Error(`Failed to search strings: ${error.message}`);
+      // Fallback to source-strings if search endpoint doesn't work
+      try {
+        const response = await this.api.get(
+          `/strings-api/v2/projects/${projectId}/source-strings`,
+          { params }
+        );
+        return response.data.response?.data || { items: [], totalCount: 0 };
+      } catch (fallbackError: any) {
+        throw new Error(`Failed to search strings: ${error.message}. Fallback failed: ${fallbackError.message}`);
+      }
     }
   }
 
@@ -284,7 +294,7 @@ export class SmartlingClient {
     try {
     await this.authenticate();
       const params: any = {
-        fileUri: encodeURIComponent(fileUri), // URL encode like in Apps Script
+        fileUri: fileUri,
         offset: options.offset || 0,
         limit: options.limit || 500, // Default limit like Apps Script
         includeInactive: options.includeInactive !== undefined ? options.includeInactive : true // Default to true
@@ -457,12 +467,21 @@ export class SmartlingClient {
     }
 
     try {
+      // Try recent strings endpoint
       const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
+        `/strings-api/v2/projects/${projectId}/strings/recent?${params.toString()}`
       );
-      return response.data.response.data;
+      return response.data.response?.data || { items: [], totalCount: 0 };
     } catch (error: any) {
-      throw new Error(`Failed to get recently localized strings: ${error.message}`);
+      // Fallback to regular strings endpoint
+      try {
+        const response = await this.api.get(
+          `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
+        );
+        return response.data.response?.data || { items: [], totalCount: 0 };
+      } catch (fallbackError: any) {
+        throw new Error(`Failed to get recently localized strings: ${error.message}. Fallback failed: ${fallbackError.message}`);
+      }
     }
   }
 
@@ -1351,15 +1370,15 @@ export class SmartlingClient {
   async addStringTags(
     projectId: string,
     fileUri: string,
-    stringUids: string[],
+    stringHashcodes: string[],
     tags: string[]
   ): Promise<void> {
     await this.authenticate();
     
     try {
-      await this.api.post(`/strings-api/v2/projects/${projectId}/strings/tags`, {
-        fileUri,
-        stringUids,
+      // Use correct tags API endpoint without fileUri as per Apps Script analysis
+      await this.api.post(`/tags-api/v2/projects/${projectId}/strings/tags/add`, {
+        stringHashcodes,
         tags
       });
     } catch (error: any) {
@@ -1370,18 +1389,16 @@ export class SmartlingClient {
   async removeStringTags(
     projectId: string,
     fileUri: string,
-    stringUids: string[],
+    stringHashcodes: string[],
     tags: string[]
   ): Promise<void> {
     await this.authenticate();
     
     try {
-      await this.api.delete(`/strings-api/v2/projects/${projectId}/strings/tags`, {
-        data: {
-          fileUri,
-          stringUids,
-          tags
-        }
+      // Use correct tags API endpoint without fileUri as per Apps Script analysis
+      await this.api.post(`/tags-api/v2/projects/${projectId}/strings/tags/remove`, {
+        stringHashcodes,
+        tags
       });
     } catch (error: any) {
       throw new Error(`Failed to remove string tags: ${error.message}`);
@@ -1407,10 +1424,12 @@ export class SmartlingClient {
     params.append('limit', '1000'); // Get more results by default
     
     try {
-      const response = await this.api.get(
-        `/strings-api/v2/projects/${projectId}/strings?${params.toString()}`
+      // Use tags API to get strings by tags
+      const response = await this.api.post(
+        `/tags-api/v2/projects/${projectId}/strings/tags/search`,
+        { tags: tags, fileUri: fileUri }
       );
-      return response.data.response.data;
+      return response.data.response?.data?.items || response.data.response?.data || [];
     } catch (error: any) {
       // If the direct tag search fails, try an alternative approach
       // Search for strings and then filter by tags in the response
@@ -1451,10 +1470,17 @@ export class SmartlingClient {
     await this.authenticate();
     
     try {
-      const response = await this.api.get(`/strings-api/v2/projects/${projectId}/tags`);
-      return response.data.response.data;
+      // Try tags API endpoint first
+      const response = await this.api.get(`/tags-api/v2/projects/${projectId}/tags`);
+      return response.data.response?.data || [];
     } catch (error: any) {
-      throw new Error(`Failed to get available tags: ${error.message}`);
+      // Fallback to strings API
+      try {
+        const response = await this.api.get(`/strings-api/v2/projects/${projectId}/tags`);
+        return response.data.response?.data || [];
+      } catch (fallbackError: any) {
+        throw new Error(`Failed to get available tags: ${error.message}. Fallback failed: ${fallbackError.message}`);
+      }
     }
   }
 
@@ -1708,115 +1734,6 @@ export class SmartlingClient {
     return key.toString().trim().toLowerCase();
   }
 
-  /**
-   * Get all source strings from project and filter by authorization status
-   * Strategy: Use source-strings endpoint with pagination and filter by "authorized": false
-   */
-  async getAllSourceStringsFilteredByAuthorization(
-    projectId: string,
-    onlyUnauthorized: boolean = true
-  ): Promise<any[]> {
-    await this.authenticate();
-    
-    console.log(`🔍 Getting ALL source strings for project ${projectId}`);
-    console.log(`📋 Filter: ${onlyUnauthorized ? 'ONLY unauthorized (authorized: false)' : 'ALL strings'}`);
-    
-    let allStrings: any[] = [];
-    let offset = 0;
-    const limit = 500; // Max per request
-    let hasMore = true;
-    
-    while (hasMore) {
-      try {
-        console.log(`   📄 Page ${Math.floor(offset / limit) + 1} (offset: ${offset}, limit: ${limit})`);
-        
-        const response = await this.api.get(`/strings-api/v2/projects/${projectId}/source-strings`, {
-          params: {
-            offset,
-            limit,
-            includeInactive: true // Include all strings
-          }
-        });
-        
-        const data = response.data.response?.data;
-        const strings = data?.items || [];
-        
-        console.log(`   ✅ Retrieved ${strings.length} strings from API`);
-        
-        if (strings.length === 0) {
-          hasMore = false;
-          break;
-        }
-        
-        // Filter by authorization status if requested
-        let filteredStrings = strings;
-        if (onlyUnauthorized) {
-          filteredStrings = strings.filter((str: any) => {
-            // Check if string is NOT authorized (awaiting authorization)
-            return str.authorized === false || str.authorized === 'false' || !str.authorized;
-          });
-          
-          console.log(`   🔍 After authorization filter: ${filteredStrings.length} unauthorized strings`);
-        }
-        
-        // Add each string with key info
-        filteredStrings.forEach((str: any) => {
-          allStrings.push({
-            key: str.key || str.stringText || str.parsedStringText,
-            stringId: str.stringUid || str.hashcode,
-            authorized: str.authorized,
-            createdDate: str.createdDate,
-            modifiedDate: str.modifiedDate,
-            fileUri: str.fileUri,
-            originalString: str
-          });
-        });
-        
-        // Check if we have more pages
-        if (strings.length < limit) {
-          hasMore = false;
-        } else {
-          offset += limit;
-        }
-        
-        // Rate limiting
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-      } catch (error: any) {
-        console.error(`❌ Error at offset ${offset}: ${error.response?.status} - ${error.message}`);
-        
-        if (error.response?.status === 401) {
-          console.log('🔄 Re-authenticating...');
-          await this.authenticate();
-          continue; // Retry same page
-        }
-        
-        // For other errors, try to continue to next page
-        offset += limit;
-        if (offset > 10000) { // Safety break
-          console.log('⚠️ Too many errors, stopping pagination');
-          break;
-        }
-      }
-    }
-    
-    console.log(`\n📊 FINAL RESULTS:`);
-    console.log(`   Total strings found: ${allStrings.length}`);
-    console.log(`   Filter applied: ${onlyUnauthorized ? 'Only unauthorized (awaiting authorization)' : 'All strings'}`);
-    
-    // Show sample of results
-    if (allStrings.length > 0) {
-      console.log(`\n📝 Sample results (first 3):`);
-      allStrings.slice(0, 3).forEach((str, index) => {
-        console.log(`   ${index + 1}. Key: "${str.key}"`);
-        console.log(`      StringId: ${str.stringId}`);
-        console.log(`      Authorized: ${str.authorized}`);
-        console.log(`      Created: ${str.createdDate}`);
-      });
-    }
-    
-    return allStrings;
-  }
 
   /**
    * Get strings by translation status focusing on AWAITING_AUTHORIZATION (pending)

@@ -44,17 +44,17 @@ export const addTaggingTools = (server: McpServer, client: SmartlingClient) => {
     {
       projectId: z.string().describe('The project ID'),
       fileUri: z.string().describe('The file URI containing the strings'),
-      stringUids: z.array(z.string()).describe('Array of string UIDs to tag'),
+      stringHashcodes: z.array(z.string()).describe('Array of string hashcodes to tag'),
       tags: z.array(z.string()).describe('Array of tags to add to the strings'),
     },
-    async ({ projectId, fileUri, stringUids, tags }) => {
+    async ({ projectId, fileUri, stringHashcodes, tags }) => {
       try {
-        await client.addStringTags(projectId, fileUri, stringUids, tags);
+        await client.addStringTags(projectId, fileUri, stringHashcodes, tags);
         return createToolResponse({
           success: true,
-          message: `Successfully added ${tags.length} tag(s) to ${stringUids.length} string(s)`,
+          message: `Successfully added ${tags.length} tag(s) to ${stringHashcodes.length} string(s)`,
           tags,
-          stringUids,
+          stringHashcodes,
           fileUri
         }, false, 'smartling-add-string-tags');
       } catch (error) {
@@ -70,17 +70,17 @@ export const addTaggingTools = (server: McpServer, client: SmartlingClient) => {
     {
       projectId: z.string().describe('The project ID'),
       fileUri: z.string().describe('The file URI containing the strings'),
-      stringUids: z.array(z.string()).describe('Array of string UIDs to remove tags from'),
+      stringHashcodes: z.array(z.string()).describe('Array of string hashcodes to remove tags from'),
       tags: z.array(z.string()).describe('Array of tags to remove from the strings'),
             },
-    async ({ projectId, fileUri, stringUids, tags }) => {
+    async ({ projectId, fileUri, stringHashcodes, tags }) => {
       try {
-        await client.removeStringTags(projectId, fileUri, stringUids, tags);
+        await client.removeStringTags(projectId, fileUri, stringHashcodes, tags);
         return createToolResponse({
           success: true,
-          message: `Successfully removed ${tags.length} tag(s) from ${stringUids.length} string(s)`,
+          message: `Successfully removed ${tags.length} tag(s) from ${stringHashcodes.length} string(s)`,
           tags,
-          stringUids,
+          stringHashcodes,
           fileUri
         }, false, 'smartling-remove-string-tags');
       } catch (error) {

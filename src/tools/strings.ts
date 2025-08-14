@@ -394,38 +394,7 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
     }
   );
 
-  server.tool(
-    'smartling_get_all_source_strings_by_authorization',
-    'Get ALL source strings from project and filter by authorization status (authorized: false)',
-    {
-      projectId: z.string().describe('The project ID'),
-      onlyUnauthorized: z.boolean().default(true).describe('Filter only unauthorized strings (authorized: false)'),
-    },
-    async ({ projectId, onlyUnauthorized }) => {
-      try {
-        const result = await client.getAllSourceStringsFilteredByAuthorization(
-          projectId, 
-          onlyUnauthorized
-        );
-        
-        return createToolResponse({
-          projectId,
-          onlyUnauthorized,
-          totalFound: result.length,
-          strings: result.map(str => ({
-            key: str.key,
-            stringId: str.stringId,
-            authorized: str.authorized,
-            createdDate: str.createdDate,
-            fileUri: str.fileUri
-          }))
-        }, false, 'smartling-source-strings-by-auth');
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return createToolResponse(`Error getting source strings by authorization: ${errorMessage}`, true, 'smartling-source-strings-by-auth');
-      }
-    }
-  );
+
 
   server.tool(
     'smartling_get_strings_by_translation_status',
