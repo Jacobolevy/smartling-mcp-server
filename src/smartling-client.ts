@@ -269,6 +269,39 @@ export class SmartlingClient {
     }
   }
 
+  async searchStringsAdvanced(
+    projectId: string,
+    params: {
+      searchText?: string;
+      localeId?: string;
+      fileUri?: string;
+      translationStatus?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'EXCLUDED';
+      limit?: number;
+      offset?: number;
+      includeTimestamps?: boolean;
+    }
+  ): Promise<any> {
+    await this.authenticate();
+    const query: any = {};
+    if (params.searchText) query.q = params.searchText;
+    if (params.localeId) query.localeId = params.localeId;
+    if (params.fileUri) query.fileUri = params.fileUri;
+    if (params.translationStatus) query.translationStatus = params.translationStatus;
+    if (params.limit !== undefined) query.limit = params.limit;
+    if (params.offset !== undefined) query.offset = params.offset;
+    if (params.includeTimestamps !== undefined) query.includeTimestamps = params.includeTimestamps;
+
+    try {
+      const response = await this.api.get(
+        `/strings-api/v2/projects/${projectId}/strings/search`,
+        { params: query }
+      );
+      return response.data.response?.data || { items: [], totalCount: 0 };
+    } catch (error: any) {
+      throw new Error(`Failed to run advanced string search: ${error.message}`);
+    }
+  }
+
   // ================== PROJECT FILES API ==================
   async getProjectFiles(projectId: string): Promise<any> {
     try {
@@ -291,22 +324,65 @@ export class SmartlingClient {
       includeInactive?: boolean;
     } = {}
   ): Promise<any> {
-    try {
     await this.authenticate();
-      const params: any = {
-        fileUri: fileUri,
-        offset: options.offset || 0,
-        limit: options.limit || 500, // Default limit like Apps Script
-        includeInactive: options.includeInactive !== undefined ? options.includeInactive : true // Default to true
-      };
 
+    const encodeFileUri = (raw: string): string => {
+      return raw
+        .split('/')
+        .map(segment => encodeURIComponent(segment))
+        .join('/');
+    };
+
+    const validateFileInProject = async (): Promise<boolean> => {
+      try {
+        const files = await this.getProjectFiles(projectId);
+        const list = Array.isArray(files.items) ? files.items : [];
+        return list.some((f: any) => f.fileUri === fileUri);
+      } catch {
+        return true; // If validation fails, do not block the request
+      }
+    };
+
+    const safeUri = encodeFileUri(fileUri);
+    let currentLimit = options.limit && options.limit > 0 ? options.limit : 500;
+    const paramsBase: any = {
+      fileUri: safeUri,
+      includeInactive: options.includeInactive !== undefined ? options.includeInactive : true
+    };
+
+    // Validate membership
+    const inProject = await validateFileInProject();
+    if (!inProject) {
+      const err = new Error('Invalid fileUri or not found in project');
+      (err as any).statusCode = 400;
+      throw err;
+    }
+
+    const makeRequest = async (offset: number, limit: number): Promise<any> => {
+      const params = { ...paramsBase, offset, limit };
       const response = await this.api.get(
         `/strings-api/v2/projects/${projectId}/source-strings`,
         { params }
       );
       return response.data.response?.data || { items: [] };
+    };
+
+    try {
+      return await makeRequest(options.offset || 0, currentLimit);
     } catch (error: any) {
-      throw new Error(`Failed to get file source strings: ${error.message}`);
+      // Retry strategy: if 400, reduce the limit and retry once
+      const status = error?.response?.status;
+      if (status === 400 && currentLimit > 250) {
+        try {
+          currentLimit = 250;
+          return await makeRequest(options.offset || 0, currentLimit);
+        } catch (e2: any) {
+          const msg = e2?.response?.data?.response?.errors?.[0]?.message || e2.message;
+          throw new Error(`Failed to get file source strings (after retry): ${msg}`);
+        }
+      }
+      const msg = error?.response?.data?.response?.errors?.[0]?.message || error.message;
+      throw new Error(`Failed to get file source strings: ${msg}`);
     }
   }
 
@@ -320,71 +396,80 @@ export class SmartlingClient {
       const filesResponse = await this.api.get(
         `/files-api/v2/projects/${projectId}/files/list`
       );
-      
       const files = filesResponse.data.response?.data?.items || [];
-      
-      let allResults: any[] = [];
-      let totalFound = 0;
-      
-      // Search through ALL files unless maxFiles is explicitly specified
+
       const maxFilesToSearch = options.maxFiles || files.length;
       const filesToSearch = files.slice(0, maxFilesToSearch);
-      
-      for (const file of filesToSearch) {
+
+      const perFileLimit = options.limit || 500;
+      const includeTimestamps = options.includeTimestamps;
+
+      const concurrency = Math.max(1, parseInt(process.env.SMARTLING_CONCURRENCY || '5'));
+      let active = 0;
+      const queue: Array<() => Promise<void>> = [];
+      const run = async (fn: () => Promise<void>) => {
+        if (active >= concurrency) {
+          await new Promise<void>(resolve => queue.push(async () => { await fn(); resolve(); }));
+          return;
+        }
+        active++;
         try {
-          const params: any = {
-            fileUri: file.fileUri,
-            limit: options.limit || 100
-          };
-          
-          if (searchText) {
-            params.q = searchText;
-          }
-          
-          if (options.includeTimestamps) {
-            params.includeTimestamps = options.includeTimestamps;
-          }
-          
-      const response = await this.api.get(
-            `/strings-api/v2/projects/${projectId}/source-strings`,
-            { params }
-          );
-          
-          const results = response.data.response?.data?.items || [];
-          
-          if (results.length > 0) {
-            // Filter results if searchText provided
-            let filteredResults = results;
-            if (searchText) {
-              filteredResults = results.filter((item: any) => {
-                const text = (item.stringText || item.parsedStringText || '').toLowerCase();
-                return text.includes(searchText.toLowerCase());
-              });
-            }
-            
-            if (filteredResults.length > 0) {
-              // Add file info to each result
-              filteredResults.forEach((item: any) => {
+          await fn();
+        } finally {
+          active--;
+          const next = queue.shift();
+          if (next) await run(next);
+        }
+      };
+
+      const results: any[] = [];
+      let totalFound = 0;
+
+      const tasks: Promise<void>[] = [];
+      for (const file of filesToSearch) {
+        tasks.push(run(async () => {
+          let offset = 0;
+          while (true) {
+            const params: any = {
+              fileUri: file.fileUri,
+              limit: perFileLimit,
+              offset
+            };
+            if (searchText) params.q = searchText;
+            if (includeTimestamps !== undefined) params.includeTimestamps = includeTimestamps;
+
+            try {
+              const response = await this.api.get(
+                `/strings-api/v2/projects/${projectId}/source-strings`,
+                { params }
+              );
+              const items = response.data.response?.data?.items || [];
+              if (items.length === 0) break;
+
+              for (const item of items) {
                 item.fileUri = file.fileUri;
                 item.fileName = file.fileName || file.fileUri;
-              });
-              
-              allResults = allResults.concat(filteredResults);
-              totalFound += filteredResults.length;
+              }
+              results.push(...items);
+              totalFound += items.length;
+
+              if (items.length < perFileLimit) break;
+              offset += items.length;
+            } catch (e) {
+              break; // skip problematic file
             }
           }
-        } catch (fileError: any) {
-          // Skip files that error out
-        }
+        }));
       }
-      
+
+      await Promise.all(tasks);
+
       return {
-        items: allResults,
+        items: results,
         totalCount: totalFound,
         filesSearched: filesToSearch.length,
         totalFiles: files.length
       };
-      
     } catch (error: any) {
       throw new Error(`Failed to search across all files: ${error.message}`);
     }
@@ -433,6 +518,64 @@ export class SmartlingClient {
     } catch (error: any) {
       throw new Error(`Failed to get string translations: ${error.message}`);
     }
+  }
+
+  async getStringTranslationsBatch(
+    projectId: string,
+    hashcodes: string[],
+    targetLocales: string[] = [],
+    batchSize: number = parseInt(process.env.SMARTLING_BATCH_SIZE || '300')
+  ): Promise<Record<string, Record<string, { status: string }>>> {
+    await this.authenticate();
+
+    const concurrency = Math.max(1, parseInt(process.env.SMARTLING_CONCURRENCY || '5'));
+    const chunks: string[][] = [];
+    for (let i = 0; i < hashcodes.length; i += batchSize) {
+      chunks.push(hashcodes.slice(i, i + batchSize));
+    }
+
+    const results: Record<string, Record<string, { status: string }>> = {};
+
+    let active = 0;
+    const queue: Array<() => Promise<void>> = [];
+
+    const run = async (fn: () => Promise<void>) => {
+      if (active >= concurrency) {
+        await new Promise<void>(resolve => queue.push(async () => { await fn(); resolve(); }));
+        return;
+      }
+      active++;
+      try {
+        await fn();
+      } finally {
+        active--;
+        const next = queue.shift();
+        if (next) {
+          await run(next);
+        }
+      }
+    };
+
+    const schedule = async (fn: () => Promise<void>) => run(fn);
+
+    const tasks: Promise<void>[] = [];
+    for (const chunk of chunks) {
+      tasks.push(schedule(async () => {
+        const reqs = chunk.map(async h => {
+          try {
+            const res = await this.getStringTranslations(projectId, h);
+            const byLocale = res?.itemsByLocale || res?.translationsByLocale || {};
+            results[h] = byLocale;
+          } catch (e: any) {
+            results[h] = {};
+          }
+        });
+        await Promise.all(reqs);
+      }));
+    }
+
+    await Promise.all(tasks);
+    return results;
   }
 
   // Backward compatibility function - maps to getStringTranslations for legacy code

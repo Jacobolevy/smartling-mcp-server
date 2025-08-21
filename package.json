@@ -29,6 +29,7 @@
     "serve": "node dist/http-server.js",
     "start:streaming": "node dist/streaming-server.js",
     "test": "vitest",
+    "compute:awaiting": "tsx -e \"import('./src/services/awaitingAuthorization.ts').then(async m=>{ const projectId = process.env.npm_config_projectId || process.env.PROJECT_ID; const locales = (process.env.npm_config_locales||'').split(',').filter(Boolean); const files = (process.env.npm_config_files||'').split(',').filter(Boolean); const { SmartlingClient } = await import('./src/smartling-client.ts'); const client = new SmartlingClient({ userIdentifier: process.env.SMARTLING_USER_IDENTIFIER, userSecret: process.env.SMARTLING_USER_SECRET, baseUrl: process.env.SMARTLING_BASE_URL||'https://api.smartling.com', accountId: process.env.SMARTLING_ACCOUNT_ID }); const res = await m.computeAwaitingAuthorization(client, projectId, locales.length?locales:undefined, files.length?files:undefined); console.log(JSON.stringify(res, null, 2)); process.exit(0); }).catch(e=>{ console.error(e); process.exit(1); })\"",
     "test:run": "vitest run",
     "test:mcp": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node dist/index.js",
     "test:enhanced": "echo '{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"tools/list\"}' | node dist/enhanced/enhanced-index.js",

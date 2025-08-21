@@ -13,6 +13,7 @@ import { addQualityTools } from './tools/quality.js';
 import { addTaggingTools } from './tools/tagging.js';
 import { addGlossaryTools } from './tools/glossary.js';
 import { addWebhookTools } from './tools/webhooks.js';
+import { computeAwaitingAuthorization } from './services/awaitingAuthorization.js';
 
 import { 
   createOAuthMiddleware, 
@@ -131,6 +132,32 @@ app.get('/health', (req, res) => {
     oauth_enabled: ENABLE_OAUTH,
     timestamp: new Date().toISOString()
   });
+});
+
+// Awaiting Authorization endpoint
+app.get('/projects/:projectId/awaiting-authorization', requireScopes('smartling:read'), async (req, res) => {
+  const projectId = req.params.projectId;
+  const localesParam = (req.query.locales as string | undefined) || '';
+  const filesParam = (req.query.files as string | undefined) || '';
+  const targetLocales = localesParam ? localesParam.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+  const fileUris = filesParam ? filesParam.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+
+  try {
+    const result = await computeAwaitingAuthorization(smartlingClient, projectId, targetLocales, fileUris);
+    res.json({
+      totalAwaiting: result.totalAwaiting,
+      breakdown: result.breakdown,
+      meta: {
+        ...result.meta,
+        generatedAt: new Date().toISOString()
+      }
+    });
+  } catch (error: any) {
+    const status = error?.statusCode || 500;
+    res.status(status).json({
+      error: error?.message || 'Failed to compute awaiting authorization'
+    });
+  }
 });
 
 // MCP endpoints with scope validation

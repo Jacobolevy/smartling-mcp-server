@@ -204,7 +204,7 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
       fileUri: z.string().optional().describe('Optional: specific file URI to search in'),
       fileUris: z.array(z.string()).optional().describe('Optional: specific file URIs to search in'),
       tags: z.array(z.string()).optional().describe('Optional: filter by tags'),
-      translationStatus: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'EXCLUDED']).optional().describe('Optional: filter by translation status'),
+      translationStatus: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'EXCLUDED', 'AWAITING_AUTHORIZATION']).optional().describe('Optional: filter by translation status (AWAITING_AUTHORIZATION is synthetic, computed by MCP)'),
       includeTimestamps: z.boolean().optional().describe('Include timestamp information'),
       limit: z.number().optional().describe('Maximum number of results to return'),
       offset: z.number().optional().describe('Number of results to skip (for pagination)'),
@@ -222,6 +222,24 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
         if (maxFiles) searchOptions.maxFiles = maxFiles;
 
         let results = await client.searchStrings(projectId, searchText, searchOptions);
+
+        // Synthetic AWAITING_AUTHORIZATION filter: compute via backend service when requested
+        if (translationStatus === 'AWAITING_AUTHORIZATION') {
+          // Narrowing by fileUris if provided
+          const filesParam = fileUris && fileUris.length > 0 ? fileUris : (fileUri ? [fileUri] : undefined);
+          const targetLocales = localeId ? [localeId] : undefined;
+          const svc = await import('../services/awaitingAuthorization.js');
+          const { computeAwaitingAuthorization } = svc;
+          const agg = await computeAwaitingAuthorization(client, projectId, targetLocales, filesParam);
+          // Build items as minimal objects with hashcode and fileUri when available is not trivial without deep fetch;
+          // return aggregated counts as items placeholder
+          results = {
+            items: Object.entries(agg.breakdown).map(([file, count]) => ({ fileUri: file, awaitingCount: count })),
+            totalCount: agg.totalAwaiting,
+            filesSearched: agg.meta.filesCount,
+            totalFiles: agg.meta.filesCount
+          } as any;
+        }
 
         // If tags filter is provided, also get strings by tags and intersect
         if (tags && tags.length > 0) {
@@ -283,6 +301,9 @@ export const addStringTools = (server: McpServer, client: SmartlingClient) => {
 
         // Get project information to determine target locales
         const projects = await client.getProjects();
+        if (!Array.isArray(projects)) {
+          throw new Error('Invalid response shape for getProjects');
+        }
         const project = projects.find(p => p.projectId === projectId);
         
         if (!project) {

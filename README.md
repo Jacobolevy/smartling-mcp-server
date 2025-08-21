@@ -64,6 +64,39 @@ Ask Claude Desktop or Cursor:
 - **Webhooks**: Set up notifications for translation events
 - **Reports**: Generate progress and analytics reports
 
+### New synthetic status and endpoints
+
+- Synthetic translation status: `AWAITING_AUTHORIZATION` computed by backend. Available via advanced MCP search and HTTP endpoint.
+- Robust file source retrieval: URI encoding by segments, pagination with retries.
+- Project-wide aggregated search when no `fileUri` is provided with limited concurrency.
+- Batching for string translations.
+
+HTTP endpoint:
+
+`GET /projects/:projectId/awaiting-authorization?locales=es-ES,fr-FR&files=wix-premium/messages/file1.properties`
+
+Example response:
+
+```
+{
+  "totalAwaiting": 123,
+  "breakdown": {
+    "wix-premium/messages/file1.properties": 45,
+    "wix-premium/messages/file2.properties": 78
+  },
+  "meta": {
+    "projectId": "demo-project-1",
+    "locales": ["es-ES", "fr-FR"],
+    "filesCount": 2,
+    "generatedAt": "2025-01-01T00:00:00Z"
+  }
+}
+```
+
+Env flags:
+- `SMARTLING_CONCURRENCY` (default 5)
+- `SMARTLING_BATCH_SIZE` (default 300)
+
 ### Chat Integration
 For internal chat platforms, see:
 - **[Internal Platform Client](docs/internal-platform-client.js)** - Node.js backend integration
